@@ -133,11 +133,15 @@ class DebugController extends Controller
             } else {
                 return response()->json([
                     'status' => 'error', 
-                    'message' => "L'envoi d'email a échoué. Vérifiez vos réglages SMTP (Host, Port, User, Password) sur Render."
+                    'message' => "L'envoi d'email a échoué. Vérifiez vos réglages SMTP sur Render."
                 ], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'Erreur technique : ' . $e->getMessage(),
+                'trace' => substr($e->getTraceAsString(), 0, 500) // Pour plus de détails
+            ], 500);
         }
     }
 }
