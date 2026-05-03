@@ -15,6 +15,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    // Health check pour Render
+    Route::get('/health', function () {
+        return response()->json(['status' => 'ok', 'message' => 'Service is healthy'], 200);
+    });
+
+    // Dummy login route to prevent 500 errors on unauthenticated API calls
+    Route::get('/login', function () {
+        return response()->json(['error' => 'Unauthenticated'], 401);
+    })->name('login');
+
     // Auth Routes
     Route::post('/auth/request-otp', [OtpController::class, 'requestOtp']);
     Route::post('/auth/verify-otp', [OtpController::class, 'verifyOtp']);
