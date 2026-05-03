@@ -38,17 +38,40 @@ class SmsService
     }
 
     /**
-     * Envoie un Email simple
+     * Envoie un Email via Infobip API
      */
     public function sendEmail($email, $message)
     {
-        try {
-            \Illuminate\Support\Facades\Mail::raw($message, function ($mail) use ($email) {
-                $mail->to($email)->subject('Notification TontineChain');
-            });
+        if (!$this->apiKey || $this->apiKey === 'your-infobip-key') {
+            Log::info("Email Mock pour $email : $message");
             return true;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => "App {$this->apiKey}",
+            ])->asMultipart()->post("{$this->baseUrl}/email/3/send", [
+                [
+                    'name'     => 'from',
+                    'contents' => env('MAIL_FROM_ADDRESS', 'no-reply@tontinechain.com')
+                ],
+                [
+                    'name'     => 'to',
+                    'contents' => $email
+                ],
+                [
+                    'name'     => 'subject',
+                    'contents' => 'Notification TontineChain'
+                ],
+                [
+                    'name'     => 'text',
+                    'contents' => $message
+                ]
+            ]);
+
+            return $response->successful();
         } catch (\Exception $e) {
-            Log::error("Erreur envoi Email : " . $e->getMessage());
+            Log::error("Erreur Email Infobip : " . $e->getMessage());
             return false;
         }
     }

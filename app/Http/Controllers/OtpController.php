@@ -61,11 +61,9 @@ class OtpController extends Controller
 
         // Envoi par Email UNIQUEMENT pour économiser les crédits WhatsApp/SMS
         if ($request->has('email')) {
-            try {
-                \Illuminate\Support\Facades\Mail::to($request->email)->send(new \App\Mail\OtpMail($code));
-            } catch (\Exception $e) {
-                Log::error("Erreur envoi Email OTP : " . $e->getMessage());
-                return response()->json(['error' => "Erreur lors de l'envoi de l'email"], 500);
+            $success = $this->sms->sendEmail($request->email, "Votre code de vérification TontineChain est : $code");
+            if (!$success) {
+                return response()->json(['error' => "Erreur lors de l'envoi de l'email via Infobip"], 500);
             }
         } else {
             return response()->json(['error' => "L'email est requis pour recevoir votre code de connexion."], 422);

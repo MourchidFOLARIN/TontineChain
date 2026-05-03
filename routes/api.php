@@ -30,6 +30,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/debug/infobip', [\App\Http\Controllers\DebugController::class, 'testInfobip']);
     Route::get('/debug/blockchain', [\App\Http\Controllers\DebugController::class, 'testBlockchain']);
     Route::get('/debug/telegram', [\App\Http\Controllers\DebugController::class, 'testTelegram']);
+    Route::get('/debug/email', [\App\Http\Controllers\DebugController::class, 'testEmail']);
 
     // Auth Routes
     Route::post('/auth/request-otp', [OtpController::class, 'requestOtp']);

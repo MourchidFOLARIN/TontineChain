@@ -110,4 +110,30 @@ class DebugController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Test l'envoi d'Email via Infobip
+     */
+    public function testEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        try {
+            $sms = new \App\Services\SmsService();
+            $success = $sms->sendEmail($request->email, "TontineChain : Test d'envoi d'email via Infobip réussi ! 📧");
+
+            if ($success) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'L\'email de test a été envoyé à ' . $request->email
+                ]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => "L'envoi d'email a échoué. Vérifiez votre configuration Infobip."], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }
