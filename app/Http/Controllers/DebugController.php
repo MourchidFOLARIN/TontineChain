@@ -122,15 +122,19 @@ class DebugController extends Controller
 
         try {
             $sms = new \App\Services\SmsService();
-            $success = $sms->sendEmail($request->email, "TontineChain : Test d'envoi d'email via Infobip réussi ! 📧");
+            $success = $sms->sendEmail($request->email, "TontineChain : Test d'envoi d'email réussi ! 📧");
 
             if ($success) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'L\'email de test a été envoyé à ' . $request->email
+                    'message' => 'L\'email de test a été envoyé à ' . $request->email,
+                    'note' => 'Si vous ne recevez rien, vérifiez que MAIL_MAILER=smtp et non log.'
                 ]);
             } else {
-                return response()->json(['status' => 'error', 'message' => "L'envoi d'email a échoué. Vérifiez votre configuration Infobip."], 500);
+                return response()->json([
+                    'status' => 'error', 
+                    'message' => "L'envoi d'email a échoué. Vérifiez vos réglages SMTP (Host, Port, User, Password) sur Render."
+                ], 500);
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
