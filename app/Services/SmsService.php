@@ -23,8 +23,9 @@ class SmsService
      */
     public function notify($to, $message)
     {
-        $this->sendSms($to, $message);
-        $this->sendWhatsApp($to, $message);
+        $normalizedTo = $this->normalizePhone($to);
+        $this->sendSms($normalizedTo, $message);
+        $this->sendWhatsApp($normalizedTo, $message);
     }
 
     /**
@@ -74,21 +75,11 @@ class SmsService
                 'Authorization' => "App {$this->apiKey}",
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ])->post("{$this->baseUrl}/whatsapp/1/message/template", [
-                'messages' => [
-                    [
-                        'from' => env('WHATSAPP_SENDER_NUMBER', '447860088970'),
-                        'to' => $this->cleanPhoneNumber($to),
-                        'content' => [
-                            'templateName' => 'test_whatsapp_template_en',
-                            'templateData' => [
-                                'body' => [
-                                    'placeholders' => ['Membre TontineChain']
-                                ]
-                            ],
-                            'language' => 'en'
-                        ]
-                    ]
+            ])->post("{$this->baseUrl}/whatsapp/1/message/text", [
+                'from' => env('WHATSAPP_SENDER_NUMBER', '447860088970'),
+                'to' => $this->cleanPhoneNumber($to),
+                'content' => [
+                    'text' => $message
                 ]
             ]);
 
@@ -99,9 +90,23 @@ class SmsService
         }
     }
 
+    public function normalizePhone($phone)
+    {
+        // Nettoyage des espaces et caractères spéciaux
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        
+        // Si c'est un numéro local Bénin (8 chiffres) commençant par 0, on ajoute +229
+        if (strlen($phone) === 10 && str_starts_with($phone, '0')) {
+            return '+229' . substr($phone, 1);
+        }
+
+        // Si ça ne commence pas par +, on ajoute +
+        return '+' . ltrim($phone, '+');
+    }
+
     private function cleanPhoneNumber($phone)
     {
         // Infobip préfère le format international sans le +
-        return str_replace('+', '', $phone);
+        return ltrim($this->normalizePhone($phone), '+');
     }
 }

@@ -46,12 +46,13 @@ class DebugController extends Controller
 
         try {
             $sms = new \App\Services\SmsService();
-            $success = $sms->sendSms($request->phone, "TontineChain : Test de connexion réussi ! 🚀");
+            $phone = $sms->normalizePhone($request->phone);
+            $success = $sms->sendSms($phone, "TontineChain : Test de connexion réussi ! 🚀");
 
             if ($success) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Le SMS de test a été envoyé à ' . $request->phone,
+                    'message' => 'Le SMS de test a été envoyé à ' . $phone,
                     'note' => 'Vérifiez vos logs si vous ne recevez rien (si la clé est encore en mode mock).'
                 ]);
             } else {

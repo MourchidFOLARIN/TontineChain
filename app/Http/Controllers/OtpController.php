@@ -41,7 +41,7 @@ class OtpController extends Controller
             'phone' => 'required|string|regex:/^\+?[0-9]{10,15}$/',
         ]);
 
-        $phone = $request->phone;
+        $phone = $this->sms->normalizePhone($request->phone);
 
         // Invalidate previous OTPs
         Otp::where('phone', $phone)->where('is_used', false)->update(['is_used' => true]);
@@ -91,7 +91,7 @@ class OtpController extends Controller
             'code' => 'required|string|size:6',
         ]);
 
-        $phone = $request->phone;
+        $phone = $this->sms->normalizePhone($request->phone);
         $code = $request->code;
         $codeHash = hash('sha256', $code);
 
