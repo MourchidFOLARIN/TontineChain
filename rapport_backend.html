@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport Backend TontineChain</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #16a085;
+        }
+        .header-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .links {
+            background: #fdfefe;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+        .print-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+        .print-btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn no-print" onclick="window.print()">🖨️ Cliquer ici pour Enregistrer en PDF</button>
+
+    <h1>Rapport de Déploiement : Architecture Backend TontineChain</h1>
+
+    <div class="header-info">
+        <strong>Projet :</strong> TontineChain (Hackathon MIABE 2026)<br>
+        <strong>Date :</strong> 3 Mai 2026<br>
+        <strong>Statut :</strong> Déployé en Production
+    </div>
+
+    <h2>1. Présentation de l'Architecture</h2>
+    <p>Le backend de <strong>TontineChain</strong> est une API RESTful robuste et sécurisée construite avec <strong>Laravel 13</strong> (PHP 8.2). Il a été conçu spécifiquement pour gérer les flux complexes d'une tontine numérisée intégrant des services financiers (Mobile Money) et une vérification par technologie Blockchain.</p>
+
+    <h3>1.1 Infrastructure & Hébergement</h3>
+    <p>L'infrastructure a été pensée pour être "Production-Ready" et hautement disponible :</p>
+    <ul>
+        <li><strong>Hébergeur :</strong> Render (Cloud Platform).</li>
+        <li><strong>Conteneurisation :</strong> Docker avec environnement Apache optimisé (gestion stricte du DocumentRoot et des permissions du conteneur).</li>
+        <li><strong>Base de Données :</strong> PostgreSQL 16 managé par Render, garantissant la persistance et l'intégrité des transactions.</li>
+        <li><strong>Déploiement Continu (CI/CD) :</strong> Synchronisation automatique avec GitHub via un pipeline défini par le fichier <code>render.yaml</code>. Une routine d'automatisation gère l'exécution des migrations à chaque déploiement.</li>
+    </ul>
+
+    <h3>1.2 Intégrations Tiers (Services Externes)</h3>
+    <p>Le backend sert de chef d'orchestre entre plusieurs technologies :</p>
+    <ul>
+        <li><strong>Passerelle de Paiement FedaPay :</strong> Intégration pour la collecte des cotisations et la redistribution des fonds (Payouts) via Mobile Money. Gestion asynchrone sécurisée via Webhooks.</li>
+        <li><strong>Communication Infobip :</strong> Notification multi-canal (SMS & WhatsApp) pour l'authentification (OTP), les rappels d'échéances et la confirmation des transactions.</li>
+        <li><strong>Contrat Intelligent Polygon (Blockchain) :</strong> Preuve d'immuabilité pour les transactions, les paiements et le score de confiance.</li>
+    </ul>
+
+    <h2>2. Sécurité & Authentification</h2>
+    <p>L'approche sécuritaire a été placée au centre du développement :</p>
+    <ul>
+        <li><strong>Passwordless Auth :</strong> Remplacement des mots de passe traditionnels par une authentification par <strong>OTP</strong> (One Time Password) envoyée par SMS/WhatsApp.</li>
+        <li><strong>Tokens Sanctum :</strong> Gestion des sessions via Laravel Sanctum. Toutes les routes sensibles sont protégées par le middleware <code>auth:sanctum</code>.</li>
+        <li><strong>Gestion des Erreurs :</strong> Configuration stricte garantissant des retours JSON propres (401, 403) empêchant l'exposition des erreurs système.</li>
+        <li><strong>Protection des Webhooks :</strong> Validation cryptographique des signatures FedaPay pour prévenir les requêtes frauduleuses.</li>
+    </ul>
+
+    <h2>3. Modélisation Métier & Fonctionnalités Clés</h2>
+    <p>L'API englobe toutes les règles de gestion d'une tontine moderne :</p>
+    <ul>
+        <li><strong>Gestion des Utilisateurs & Profils :</strong> Calcul algorithmique d'un "Score de Confiance" basé sur l'historique financier et les éventuels incidents.</li>
+        <li><strong>Gestion des Groupes de Tontine :</strong> Création, invitation, adhésion, statistiques financières temps-réel et suivi des cycles.</li>
+        <li><strong>Cotisations et Payouts :</strong> Versement des fonds et automatisation algorithmique des ramassages.</li>
+        <li><strong>Gouvernance (Enchères & Votes) :</strong> Implémentation d'un système de permutation de positions (Votes) et d'un système d'enchères inversées.</li>
+        <li><strong>Pénalités (Incidents) :</strong> Système automatique de gestion des retards et amendes.</li>
+    </ul>
+
+    <h2>4. Documentation & Liens Utiles</h2>
+    <p>Toutes les routes de l'API (soit <strong>30 endpoints distincts</strong>) ont été rigoureusement décrites à l'aide d'attributs PHP 8 pour la génération automatique de la documentation Swagger.</p>
+
+    <div class="links">
+        <p><strong>🌐 URL de Base de l'API :</strong><br>
+        <a href="https://tonnine-benin-backend.onrender.com/api/v1" target="_blank">https://tonnine-benin-backend.onrender.com/api/v1</a></p>
+
+        <p><strong>📖 Documentation Swagger Interactive :</strong><br>
+        <a href="https://tonnine-benin-backend.onrender.com/api/documentation" target="_blank">https://tonnine-benin-backend.onrender.com/api/documentation</a></p>
+
+        <p><strong>✅ Test de Santé (Health Check) :</strong><br>
+        <a href="https://tonnine-benin-backend.onrender.com/api/v1/health" target="_blank">https://tonnine-benin-backend.onrender.com/api/v1/health</a></p>
+    </div>
+
+</body>
+</html>

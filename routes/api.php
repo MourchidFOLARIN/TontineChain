@@ -25,6 +25,12 @@ Route::prefix('v1')->group(function () {
         return response()->json(['error' => 'Unauthenticated'], 401);
     })->name('login');
 
+    // Debug & Connection Tests
+    Route::get('/debug/fedapay', [\App\Http\Controllers\DebugController::class, 'testFedapay']);
+    Route::get('/debug/infobip', [\App\Http\Controllers\DebugController::class, 'testInfobip']);
+    Route::get('/debug/blockchain', [\App\Http\Controllers\DebugController::class, 'testBlockchain']);
+    Route::get('/debug/telegram', [\App\Http\Controllers\DebugController::class, 'testTelegram']);
+
     // Auth Routes
     Route::post('/auth/request-otp', [OtpController::class, 'requestOtp']);
     Route::post('/auth/verify-otp', [OtpController::class, 'verifyOtp']);

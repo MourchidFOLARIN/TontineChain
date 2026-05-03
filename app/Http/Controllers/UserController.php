@@ -145,6 +145,39 @@ class UserController extends Controller
     }
 
     #[OA\Get(
+        path: "/api/v1/users/me/certificate",
+        summary: "Générer mon Certificat de Fiabilité Financière",
+        tags: ["Utilisateurs"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Données du certificat")
+        ]
+    )]
+    public function certificate(Request $request)
+    {
+        $user = $request->user();
+        $totalCotise = $user->contributions()->where('status', 'confirmed')->count();
+        $lateIncidents = \App\Models\Incident::where('user_id', $user->id)->count();
+
+        return response()->json([
+            'title' => 'Certificat de Crédit TontineChain',
+            'user' => [
+                'name' => $user->full_name,
+                'npi_hash' => $user->npi_hash,
+                'profession' => $user->profession,
+            ],
+            'performance' => [
+                'score_confiance' => $user->score_confiance,
+                'total_contributions_validated' => $totalCotise,
+                'incident_rate' => $totalCotise > 0 ? round(($lateIncidents / $totalCotise) * 100, 2) : 0,
+                'reliability_label' => $user->score_confiance >= 85 ? 'Excellente' : ($user->score_confiance >= 60 ? 'Bonne' : 'À surveiller'),
+            ],
+            'verification_link' => env('APP_URL') . "/verify/cert/" . $user->id,
+            'timestamp' => now()->toDateTimeString(),
+        ]);
+    }
+
+    #[OA\Get(
         path: "/api/v1/users/me/balance",
         summary: "Solde et statistiques financières de l'utilisateur",
         tags: ["Utilisateurs"],

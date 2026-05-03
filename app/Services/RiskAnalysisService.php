@@ -28,7 +28,30 @@ class RiskAnalysisService
         }
 
         $avgTrustScore = $totalScore / $members->count();
+        
+        // Calcul de la volatilité du groupe (Écart-type)
+        $variance = 0;
+        foreach ($members as $member) {
+            $variance += pow($member->user->score_confiance - $avgTrustScore, 2);
+        }
+        $stdDev = sqrt($variance / $members->count());
+
         $riskScore = 100 - $avgTrustScore;
+
+        // Facteur : Hétérogénéité (Si l'écart-type est fort, le risque augmente)
+        if ($stdDev > 15) {
+            $riskScore += 10;
+            $factors[] = "Forte disparité des scores de confiance au sein du groupe.";
+        }
+
+        // Facteur : Ratio Payout/Cotisation
+        $totalCotise = $group->contributions()->where('status', 'confirmed')->sum('amount_fcfa');
+        $totalPayout = $group->payouts()->sum('total_amount_fcfa');
+        
+        if ($totalPayout > $totalCotise && $totalCotise > 0) {
+            $riskScore += 15;
+            $factors[] = "Le groupe a distribué plus qu'il n'a collecté (Risque de trésorerie).";
+        }
 
         // Facteur : KYC non vérifié
         if ($unverifiedCount > 0) {

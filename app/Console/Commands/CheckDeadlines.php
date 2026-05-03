@@ -57,7 +57,23 @@ class CheckDeadlines extends Command
             $user = User::find($contrib->user_id);
             $user->increment('score_confiance', $scoreImpact);
 
-            // 4. Notify User
+            // 4. Garantie Automatique (Si retard > 5 jours et assurance active)
+            if ($lateDays >= 5 && $contrib->group->insurance_percent > 0) {
+                $group = $contrib->group;
+                if ($group->insurance_fund >= $contrib->amount_fcfa) {
+                    $group->decrement('insurance_fund', $contrib->amount_fcfa);
+                    $contrib->update(['status' => 'covered_by_insurance']);
+                    
+                    $this->notifications->notify(
+                        $group->creator_id,
+                        'insurance_activated',
+                        "Alerte : Le fonds de garantie a couvert la cotisation de {$user->full_name} pour éviter l'arrêt du cycle."
+                    );
+                    Log::info("Insurance fund used for user {$user->id} in group {$group->id}");
+                }
+            }
+
+            // 5. Notify User
             $this->notifications->notify(
                 $user->id,
                 'late_warning',

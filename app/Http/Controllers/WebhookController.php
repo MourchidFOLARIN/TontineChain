@@ -18,11 +18,13 @@ class WebhookController extends Controller
 {
     protected $blockchain;
     protected $sms;
+    protected $telegram;
 
-    public function __construct(BlockchainService $blockchain, SmsService $sms)
+    public function __construct(BlockchainService $blockchain, SmsService $sms, TelegramService $telegram)
     {
         $this->blockchain = $blockchain;
         $this->sms = $sms;
+        $this->telegram = $telegram;
     }
 
     #[OA\Post(
@@ -94,6 +96,9 @@ class WebhookController extends Controller
 
             // Envoi SMS + WhatsApp de confirmation
             $this->sms->notify($user->phone, "Paiement de {$contribution->amount_fcfa} FCFA confirmé pour le groupe {$group->name}. Merci !");
+
+            // Notification Telegram (Transparence de groupe)
+            $this->telegram->sendPaymentAlert($user->full_name, $contribution->amount_fcfa, $group->name);
 
             $this->checkAndReleasePayout($group, $contribution->cycle_number);
 
@@ -175,7 +180,30 @@ class WebhookController extends Controller
                 
                 $group->update(['next_due_date' => $nextDate]);
             } else {
+                // === FIN DE LA TONTINE ===
                 $group->update(['status' => 'completed']);
+
+                // 1. Redistribution du reliquat du fonds de garantie (Cashback)
+                if ($group->insurance_fund > 0) {
+                    $members = $group->members()->where('status', 'active')->get();
+                    $refundPerMember = $group->insurance_fund / $members->count();
+                    
+                    foreach ($members as $member) {
+                        // En mode réel, on enverrait un virement FedaPay ici
+                        $this->sms->notify($member->user->phone, "Tontine {$group->name} terminée ! Vous recevez un remboursement d'assurance de " . (int)$refundPerMember . " FCFA.");
+                    }
+                    $group->update(['insurance_fund' => 0]);
+                }
+
+                // 2. Bonus de Score Final pour les bons élèves
+                $goodMembers = $group->members()->where('status', 'active')->get();
+                foreach ($goodMembers as $member) {
+                    $lateCount = $group->contributions()->where('user_id', $member->user_id)->where('is_late', true)->count();
+                    if ($lateCount === 0) {
+                        $member->user->increment('score_confiance', 25); // Bonus "Perfect Cycle"
+                        $this->sms->notify($member->user->phone, "Bravo ! Bonus de +25 points de confiance pour votre assiduité parfaite.");
+                    }
+                }
             }
 
             Log::info("Payout released for Group {$group->id}, Cycle {$cycleNumber}.");
