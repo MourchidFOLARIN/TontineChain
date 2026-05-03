@@ -38,40 +38,18 @@ class SmsService
     }
 
     /**
-     * Envoie un Email via Infobip API
+     * Envoie un Email via le système de mail de Laravel (SMTP)
+     * Plus flexible pour envoyer à n'importe quelle adresse.
      */
     public function sendEmail($email, $message)
     {
-        if (!$this->apiKey || $this->apiKey === 'your-infobip-key') {
-            Log::info("Email Mock pour $email : $message");
-            return true;
-        }
-
         try {
-            $response = Http::withHeaders([
-                'Authorization' => "App {$this->apiKey}",
-            ])->asMultipart()->post("{$this->baseUrl}/email/3/send", [
-                [
-                    'name'     => 'from',
-                    'contents' => env('MAIL_FROM_ADDRESS', 'no-reply@tontinechain.com')
-                ],
-                [
-                    'name'     => 'to',
-                    'contents' => $email
-                ],
-                [
-                    'name'     => 'subject',
-                    'contents' => 'Notification TontineChain'
-                ],
-                [
-                    'name'     => 'text',
-                    'contents' => $message
-                ]
-            ]);
-
-            return $response->successful();
+            \Illuminate\Support\Facades\Mail::raw($message, function ($mail) use ($email) {
+                $mail->to($email)->subject('Notification TontineChain');
+            });
+            return true;
         } catch (\Exception $e) {
-            Log::error("Erreur Email Infobip : " . $e->getMessage());
+            Log::error("Erreur envoi Email Laravel : " . $e->getMessage());
             return false;
         }
     }
