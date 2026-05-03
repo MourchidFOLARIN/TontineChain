@@ -4,9 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\TontineNotification;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class TontineNotificationController extends Controller
 {
+    #[OA\Get(
+        path: "/api/v1/notifications",
+        summary: "Lister toutes les notifications",
+        security: [["sanctum" => []]],
+        tags: ["Notifications"],
+        responses: [
+            new OA\Response(response: 200, description: "Liste des notifications de l'utilisateur")
+        ]
+    )]
     public function index(Request $request)
     {
         $user = $request->user();
@@ -17,6 +27,19 @@ class TontineNotificationController extends Controller
         return response()->json($notifications);
     }
 
+    #[OA\Patch(
+        path: "/api/v1/notifications/{notification}/read",
+        summary: "Marquer une notification comme lue",
+        security: [["sanctum" => []]],
+        tags: ["Notifications"],
+        parameters: [
+            new OA\PathParameter(name: "notification", required: true, description: "ID de la notification", schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Notification mise à jour avec succès"),
+            new OA\Response(response: 403, description: "Non autorisé")
+        ]
+    )]
     public function markRead(Request $request, TontineNotification $notification)
     {
         if ($notification->user_id !== $request->user()->id) {

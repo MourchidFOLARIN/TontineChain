@@ -300,6 +300,58 @@
                 }
             }
         },
+        "/api/v1/incidents": {
+            "get": {
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Lister les incidents (retards, amendes)",
+                "operationId": "8efda3ca532d5c4cd81590f2fb61ef24",
+                "responses": {
+                    "200": {
+                        "description": "Liste des incidents de l'utilisateur"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/incidents/{incident}": {
+            "get": {
+                "tags": [
+                    "Incidents"
+                ],
+                "summary": "Détails d'un incident spécifique",
+                "operationId": "67539457efa048e7038808859f499d6a",
+                "parameters": [
+                    {
+                        "name": "incident",
+                        "in": "path",
+                        "description": "ID de l'incident",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de l'incident"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/request-otp": {
             "post": {
                 "tags": [
@@ -368,6 +420,110 @@
                         "description": "OTP invalide ou expiré"
                     }
                 }
+            }
+        },
+        "/api/v1/payouts": {
+            "get": {
+                "tags": [
+                    "Payouts"
+                ],
+                "summary": "Lister les paiements reçus (ramassages)",
+                "operationId": "03d2e7a08e16ae8df39967151be97615",
+                "responses": {
+                    "200": {
+                        "description": "Liste des paiements du membre"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/payouts/{payout}": {
+            "get": {
+                "tags": [
+                    "Payouts"
+                ],
+                "summary": "Détails d'un paiement spécifique",
+                "operationId": "0b53fa1a5ff258ead22b70bafd7ff811",
+                "parameters": [
+                    {
+                        "name": "payout",
+                        "in": "path",
+                        "description": "ID du paiement",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du paiement"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Lister toutes les notifications",
+                "operationId": "dc19df1fda64be7f7b1af5e50facf3b4",
+                "responses": {
+                    "200": {
+                        "description": "Liste des notifications de l'utilisateur"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/notifications/{notification}/read": {
+            "patch": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Marquer une notification comme lue",
+                "operationId": "2ed76e050dfbef00ef7a5c5ded21d2b1",
+                "parameters": [
+                    {
+                        "name": "notification",
+                        "in": "path",
+                        "description": "ID de la notification",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification mise à jour avec succès"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/v1/users/me": {
@@ -546,6 +702,42 @@
                     }
                 ]
             }
+        },
+        "/api/v1/webhooks/fedapay": {
+            "post": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Webhook de réception des événements FedaPay",
+                "operationId": "2934c4a574c1c72d99ce9eb2094f3790",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "event": {
+                                        "type": "string",
+                                        "example": "transaction.approved"
+                                    },
+                                    "entity": {
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Webhook traité avec succès"
+                    },
+                    "401": {
+                        "description": "Signature invalide ou tentative frauduleuse"
+                    }
+                }
+            }
         }
     },
     "tags": [
@@ -562,8 +754,20 @@
             "description": "Groupes"
         },
         {
+            "name": "Incidents",
+            "description": "Incidents"
+        },
+        {
             "name": "Authentification",
             "description": "Authentification"
+        },
+        {
+            "name": "Payouts",
+            "description": "Payouts"
+        },
+        {
+            "name": "Notifications",
+            "description": "Notifications"
         },
         {
             "name": "Utilisateurs",
@@ -572,6 +776,10 @@
         {
             "name": "Gouvernance",
             "description": "Gouvernance"
+        },
+        {
+            "name": "Webhooks",
+            "description": "Webhooks"
         }
     ]
 }

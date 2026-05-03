@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use OpenApi\Attributes as OA;
 
 class WebhookController extends Controller
 {
@@ -24,6 +25,24 @@ class WebhookController extends Controller
         $this->sms = $sms;
     }
 
+    #[OA\Post(
+        path: "/api/v1/webhooks/fedapay",
+        summary: "Webhook de réception des événements FedaPay",
+        tags: ["Webhooks"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "event", type: "string", example: "transaction.approved"),
+                    new OA\Property(property: "entity", type: "object")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Webhook traité avec succès"),
+            new OA\Response(response: 401, description: "Signature invalide ou tentative frauduleuse")
+        ]
+    )]
     public function handleFedapay(Request $request)
     {
         // === SÉCURITÉ WEBHOOK (POINT 2) ===
