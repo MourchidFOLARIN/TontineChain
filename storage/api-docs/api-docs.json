@@ -1,0 +1,577 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TontineChain API",
+        "description": "Documentation de l'API TontineChain pour le Hackathon MIABE 2026.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Serveur Local"
+        }
+    ],
+    "paths": {
+        "/api/v1/groups/{group}/bid": {
+            "post": {
+                "tags": [
+                    "Enchères"
+                ],
+                "summary": "Soumettre une offre d'enchère pour le tour actuel",
+                "operationId": "da93214fe7b1e371b03ccb3f2acd89f4",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "discount_amount": {
+                                        "description": "Montant que vous êtes prêt à laisser au groupe",
+                                        "type": "number",
+                                        "example": 5000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Offre enregistrée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/groups/{group}/bids": {
+            "get": {
+                "tags": [
+                    "Enchères"
+                ],
+                "summary": "Voir les offres du cycle actuel",
+                "operationId": "33c1f7164d2d0713963ede4e33939558",
+                "responses": {
+                    "200": {
+                        "description": "Liste des offres"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/contributions/pending": {
+            "get": {
+                "tags": [
+                    "Cotisations"
+                ],
+                "summary": "Mes cotisations en attente",
+                "operationId": "5ea4484def1de08b71c8b81c8b7c4692",
+                "responses": {
+                    "200": {
+                        "description": "Liste des cotisations"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/contributions/{contribution}/pay": {
+            "post": {
+                "tags": [
+                    "Cotisations"
+                ],
+                "summary": "Initier le paiement d'une cotisation",
+                "operationId": "962acccd533922f22bcbc22dc864063e",
+                "parameters": [
+                    {
+                        "name": "contribution",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lien de paiement généré"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/groups": {
+            "get": {
+                "tags": [
+                    "Groupes"
+                ],
+                "summary": "Lister mes groupes",
+                "operationId": "8731199f9d1e321702524c8df8c5834c",
+                "responses": {
+                    "200": {
+                        "description": "Liste des groupes"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Groupes"
+                ],
+                "summary": "Créer une nouvelle tontine",
+                "operationId": "0dbd5970197eb93f2a1ed934c341aeab",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Tontine Famille"
+                                    },
+                                    "contribution_amount": {
+                                        "type": "number",
+                                        "example": 10000
+                                    },
+                                    "max_members": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "frequency": {
+                                        "type": "string",
+                                        "enum": [
+                                            "weekly",
+                                            "biweekly",
+                                            "monthly"
+                                        ]
+                                    },
+                                    "payout_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "sequential",
+                                            "random",
+                                            "bidding"
+                                        ]
+                                    },
+                                    "insurance_opt_in": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Groupe créé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/groups/{group}": {
+            "get": {
+                "tags": [
+                    "Groupes"
+                ],
+                "summary": "Détails d'un groupe",
+                "operationId": "cc64455d914e608b0b7f53d3b73b59bb",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du groupe"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/groups/{group}/start": {
+            "post": {
+                "tags": [
+                    "Groupes"
+                ],
+                "summary": "Démarrer la tontine",
+                "operationId": "4716379a3472bb4db88043afb5f609dd",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tontine démarrée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/groups/{group}/invite": {
+            "post": {
+                "tags": [
+                    "Groupes"
+                ],
+                "summary": "Inviter un membre",
+                "operationId": "5a69ca01630f7b36a7e1f59f01f9694c",
+                "responses": {
+                    "200": {
+                        "description": "Invitation envoyée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/groups/{group}/join": {
+            "post": {
+                "tags": [
+                    "Groupes"
+                ],
+                "summary": "Rejoindre un groupe",
+                "operationId": "7826704c54abae8ee5e90de70f85485e",
+                "responses": {
+                    "200": {
+                        "description": "Rejoint avec succès"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/request-otp": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Demander un code OTP",
+                "operationId": "275813ee4f62117e605edb8f54041bec",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+22997000000"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP envoyé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify-otp": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Vérifier le code OTP et se connecter",
+                "operationId": "b7c25e4d2023723fa2aff2720bc096fe",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+22997000000"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie, retourne le token"
+                    },
+                    "401": {
+                        "description": "OTP invalide ou expiré"
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Mon profil",
+                "operationId": "8e07524fa2b36a2839cffe06bf98e185",
+                "responses": {
+                    "200": {
+                        "description": "Détails du profil"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Mettre à jour mon profil (Nom, Prénom, Profession, NIP)",
+                "operationId": "d25e8a05d2d7b1b8016c9bbe48c16c6b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "Jean"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Houenou"
+                                    },
+                                    "profession": {
+                                        "type": "string",
+                                        "example": "Commerçant"
+                                    },
+                                    "npi": {
+                                        "type": "string",
+                                        "example": "1234567890123"
+                                    },
+                                    "preferred_language": {
+                                        "type": "string",
+                                        "example": "fon"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/me/score": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Mon score de confiance et incidents",
+                "operationId": "0a8e6f8749672d72e3a0e584b0e48ba5",
+                "responses": {
+                    "200": {
+                        "description": "Score et historique"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/groups/{group}/propose-swap": {
+            "post": {
+                "tags": [
+                    "Gouvernance"
+                ],
+                "summary": "Proposer un échange de position de ramassage",
+                "operationId": "b6cc298b1f01ce67fa76accc296aede8",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "target_user_id": {
+                                        "description": "ID de l'utilisateur avec qui échanger",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Proposition créée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/votes/{vote}/cast": {
+            "post": {
+                "tags": [
+                    "Gouvernance"
+                ],
+                "summary": "Voter pour une proposition",
+                "operationId": "6ff598e5e94ab20117f4111a00b99129",
+                "parameters": [
+                    {
+                        "name": "vote",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "choice": {
+                                        "description": "true = Pour, false = Contre",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Vote enregistré"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Enchères",
+            "description": "Enchères"
+        },
+        {
+            "name": "Cotisations",
+            "description": "Cotisations"
+        },
+        {
+            "name": "Groupes",
+            "description": "Groupes"
+        },
+        {
+            "name": "Authentification",
+            "description": "Authentification"
+        },
+        {
+            "name": "Utilisateurs",
+            "description": "Utilisateurs"
+        },
+        {
+            "name": "Gouvernance",
+            "description": "Gouvernance"
+        }
+    ]
+}

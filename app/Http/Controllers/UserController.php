@@ -1,0 +1,181 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Incident;
+use OpenApi\Attributes as OA;
+
+class UserController extends Controller
+{
+    #[OA\Get(
+        path: "/api/v1/users/me",
+        summary: "Mon profil",
+        tags: ["Utilisateurs"],
+        security: [["sanctum" => []]]
+    )]
+    #[OA\Response(response: 200, description: "Détails du profil")]
+    public function me(Request $request)
+    {
+        $user = $request->user();
+        $user->loadCount(['memberships', 'payouts']);
+
+        // Set locale for translations
+        app()->setLocale($user->preferred_language ?? 'fr');
+
+        $response = $user->toArray();
+        $response['greetings'] = [
+            'text' => __('messages.welcome'),
+            'audio_url' => __('messages.audio_guide_url'),
+        ];
+
+        return response()->json($response);
+    }
+
+    #[OA\Patch(
+        path: "/api/v1/users/me",
+        summary: "Mettre à jour mon profil (Nom, Prénom, Profession, NIP)",
+        tags: ["Utilisateurs"],
+        security: [["sanctum" => []]]
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "first_name", type: "string", example: "Jean"),
+                new OA\Property(property: "last_name", type: "string", example: "Houenou"),
+                new OA\Property(property: "profession", type: "string", example: "Commerçant"),
+                new OA\Property(property: "npi", type: "string", example: "1234567890123"),
+                new OA\Property(property: "preferred_language", type: "string", example: "fon")
+            ]
+        )
+    )]
+    #[OA\Response(response: 200, description: "Profil mis à jour")]
+    public function update(Request $request)
+    {
+        $user = $request->user();
+        
+        $validated = $request->validate([
+            'first_name' => 'sometimes|string|max:100',
+            'last_name' => 'sometimes|string|max:100',
+            'profession' => 'sometimes|string|max:150',
+            'npi' => 'sometimes|string|size:13',
+            'preferred_language' => 'sometimes|string|in:fr,fon,yor',
+        ]);
+
+        if (isset($validated['npi'])) {
+            $npiHash = hash('sha256', $validated['npi']);
+            
+            // Vérifier si le NIP est déjà utilisé par un AUTRE utilisateur
+            $exists = \App\Models\User::where('npi_hash', $npiHash)
+                ->where('id', '!=', $user->id)
+                ->exists();
+
+            if ($exists) {
+                return response()->json(['error' => 'Ce NIP est déjà enregistré par un autre utilisateur.'], 422);
+            }
+
+            $validated['npi_hash'] = $npiHash;
+            unset($validated['npi']);
+        }
+
+        if (isset($validated['first_name']) && isset($validated['last_name'])) {
+            $validated['full_name'] = $validated['first_name'] . ' ' . $validated['last_name'];
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Profil mis à jour avec succès',
+            'user' => $user
+        ]);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/users/me/score",
+        summary: "Mon score de confiance et incidents",
+        tags: ["Utilisateurs"],
+        security: [["sanctum" => []]]
+    )]
+    #[OA\Response(response: 200, description: "Score et historique")]
+    public function score(Request $request)
+    {
+        $user = $request->user();
+        $incidents = Incident::where('user_id', $user->id)->orderBy('occurred_at', 'desc')->get();
+
+        return response()->json([
+            'score_confiance' => $user->score_confiance,
+            'incidents' => $incidents
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/users/me/payouts",
+     *     summary="Mon historique de gains (Payouts)",
+     *     tags: {"Utilisateurs"},
+     *     security: [["sanctum" => []]],
+     *     @OA\Response(response=200, description="Liste des gains")
+     * )
+     */
+    public function payouts(Request $request)
+    {
+        $user = $request->user();
+        $payouts = $user->payouts()->with('group')->orderBy('completed_at', 'desc')->get();
+
+        return response()->json($payouts);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/users/leaderboard",
+     *     summary="Top 10 des membres les plus fiables",
+     *     tags: {"Utilisateurs"},
+     *     @OA\Response(response=200, description="Classement")
+     * )
+     */
+    public function leaderboard()
+    {
+        $topUsers = \App\Models\User::where('is_active', true)
+            ->orderBy('score_confiance', 'desc')
+            ->limit(10)
+            ->get(['id', 'full_name', 'score_confiance']);
+
+        return response()->json($topUsers);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/users/me/balance",
+     *     summary="Solde et statistiques financières de l'utilisateur",
+     *     tags: {"Utilisateurs"},
+     *     security: [["sanctum" => []]],
+     *     @OA\Response(response=200, description="Détails financiers")
+     * )
+     */
+    public function balance(Request $request)
+    {
+        $user = $request->user();
+        
+        // Total déjà versé par l'utilisateur (confirmé)
+        $totalCotise = $user->contributions()->where('status', 'confirmed')->sum('amount_fcfa');
+        
+        // Total déjà reçu par l'utilisateur (Payouts terminés)
+        $totalRecu = $user->payouts()->where('status', 'completed')->sum('total_amount_fcfa');
+        
+        // Calcul du montant attendu pour les tontines en cours
+        $expectedPayouts = \App\Models\Group::whereHas('members', function($q) use ($user) {
+            $q->where('user_id', $user->id)->where('has_received', false)->where('status', 'active');
+        })->get()->sum(function($group) {
+            return $group->contribution_amount * $group->max_members;
+        });
+
+        return response()->json([
+            'total_cotise_fcfa' => (int) $totalCotise,
+            'total_recu_fcfa' => (int) $totalRecu,
+            'expected_payouts_fcfa' => (int) $expectedPayouts,
+            'currency' => 'XOF',
+            'trust_score' => $user->score_confiance
+        ]);
+    }
+}
