@@ -703,6 +703,57 @@
                 ]
             }
         },
+        "/api/v1/votes": {
+            "get": {
+                "tags": [
+                    "Gouvernance"
+                ],
+                "summary": "Lister les votes de l'utilisateur",
+                "operationId": "83bcedf5caec2032e59f61ee576fd8e0",
+                "responses": {
+                    "200": {
+                        "description": "Liste des votes (créés ou reçus)"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/votes/{vote}": {
+            "get": {
+                "tags": [
+                    "Gouvernance"
+                ],
+                "summary": "Détails d'un vote",
+                "operationId": "6f1f90162ac52c97a1345a723970e249",
+                "parameters": [
+                    {
+                        "name": "vote",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du vote et du groupe associé"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/webhooks/fedapay": {
             "post": {
                 "tags": [

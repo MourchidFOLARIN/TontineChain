@@ -118,6 +118,15 @@ class VoteController extends Controller
         });
     }
 
+    #[OA\Get(
+        path: "/api/v1/votes",
+        summary: "Lister les votes de l'utilisateur",
+        tags: ["Gouvernance"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Liste des votes (créés ou reçus)")
+        ]
+    )]
     public function index(Request $request)
     {
         $user = $request->user();
@@ -131,6 +140,19 @@ class VoteController extends Controller
         return response()->json($votes);
     }
 
+    #[OA\Get(
+        path: "/api/v1/votes/{vote}",
+        summary: "Détails d'un vote",
+        tags: ["Gouvernance"],
+        security: [["sanctum" => []]],
+        parameters: [
+            new OA\Parameter(name: "vote", in: "path", required: true, schema: new OA\Schema(type: "string"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Détails du vote et du groupe associé"),
+            new OA\Response(response: 403, description: "Non autorisé")
+        ]
+    )]
     public function show(Request $request, Vote $vote)
     {
         $user = $request->user();
