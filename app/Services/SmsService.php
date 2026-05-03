@@ -24,8 +24,8 @@ class SmsService
     public function notify($to, $message)
     {
         $normalizedTo = $this->normalizePhone($to);
-        $this->sendSms($normalizedTo, $message);
-        $this->sendWhatsApp($normalizedTo, $message);
+        // $this->sendSms($normalizedTo, $message); // Désactivé pour économiser les crédits (limite 15)
+        $this->sendWhatsApp($normalizedTo, $message); // Activé (limite 100)
     }
 
     /**
