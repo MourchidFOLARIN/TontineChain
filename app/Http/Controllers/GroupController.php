@@ -257,16 +257,18 @@ class GroupController extends Controller
         return response()->json(['message' => 'Bienvenue dans le groupe !']);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/groups/{group}/stats",
-     *     summary="Statistiques & Analyse de Risque IA",
-     *     tags: {"Groupes"},
-     *     security: [["sanctum" => []]],
-     *     @OA\Parameter(name="group", in="path", required=true, @OA\Schema(type="string")),
-     *     @OA\Response(response=200, description="Stats et prédiction de risque")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/groups/{group}/stats",
+        summary: "Statistiques & Analyse de Risque IA",
+        tags: ["Groupes"],
+        security: [["sanctum" => []]],
+        parameters: [
+            new OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Stats et prédiction de risque")
+        ]
+    )]
     public function stats(Group $group)
     {
         $totalCollected = $group->contributions()->where('status', 'confirmed')->sum('amount_fcfa');

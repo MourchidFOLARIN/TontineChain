@@ -300,6 +300,35 @@
                 }
             }
         },
+        "/api/v1/groups/{group}/stats": {
+            "get": {
+                "tags": [
+                    "Groupes"
+                ],
+                "summary": "Statistiques & Analyse de Risque IA",
+                "operationId": "3e7d5fc393168a14146671e8fc31e1ad",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Stats et prédiction de risque"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/incidents": {
             "get": {
                 "tags": [
@@ -604,6 +633,58 @@
                 "responses": {
                     "200": {
                         "description": "Score et historique"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/me/payouts": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Mon historique de gains (Payouts)",
+                "operationId": "63d480ce3eec86109d316f8faa95b164",
+                "responses": {
+                    "200": {
+                        "description": "Liste des gains"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/leaderboard": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Top 10 des membres les plus fiables",
+                "operationId": "b0f828acd27093d49baa505507822af0",
+                "responses": {
+                    "200": {
+                        "description": "Classement"
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/balance": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Solde et statistiques financières de l'utilisateur",
+                "operationId": "7eccb4d663ce2fd348daf28aa2c2fc92",
+                "responses": {
+                    "200": {
+                        "description": "Détails financiers"
                     }
                 },
                 "security": [

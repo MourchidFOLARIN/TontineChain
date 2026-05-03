@@ -109,15 +109,15 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/users/me/payouts",
-     *     summary="Mon historique de gains (Payouts)",
-     *     tags: {"Utilisateurs"},
-     *     security: [["sanctum" => []]],
-     *     @OA\Response(response=200, description="Liste des gains")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/users/me/payouts",
+        summary: "Mon historique de gains (Payouts)",
+        tags: ["Utilisateurs"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Liste des gains")
+        ]
+    )]
     public function payouts(Request $request)
     {
         $user = $request->user();
@@ -126,14 +126,14 @@ class UserController extends Controller
         return response()->json($payouts);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/users/leaderboard",
-     *     summary="Top 10 des membres les plus fiables",
-     *     tags: {"Utilisateurs"},
-     *     @OA\Response(response=200, description="Classement")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/users/leaderboard",
+        summary: "Top 10 des membres les plus fiables",
+        tags: ["Utilisateurs"],
+        responses: [
+            new OA\Response(response: 200, description: "Classement")
+        ]
+    )]
     public function leaderboard()
     {
         $topUsers = \App\Models\User::where('is_active', true)
@@ -144,15 +144,15 @@ class UserController extends Controller
         return response()->json($topUsers);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/v1/users/me/balance",
-     *     summary="Solde et statistiques financières de l'utilisateur",
-     *     tags: {"Utilisateurs"},
-     *     security: [["sanctum" => []]],
-     *     @OA\Response(response=200, description="Détails financiers")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/users/me/balance",
+        summary: "Solde et statistiques financières de l'utilisateur",
+        tags: ["Utilisateurs"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Détails financiers")
+        ]
+    )]
     public function balance(Request $request)
     {
         $user = $request->user();
