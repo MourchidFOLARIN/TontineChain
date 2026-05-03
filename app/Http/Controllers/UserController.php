@@ -44,6 +44,7 @@ class UserController extends Controller
             properties: [
                 new OA\Property(property: "first_name", type: "string", example: "Jean"),
                 new OA\Property(property: "last_name", type: "string", example: "Houenou"),
+                new OA\Property(property: "email", type: "string", example: "jean@example.com"),
                 new OA\Property(property: "profession", type: "string", example: "Commerçant"),
                 new OA\Property(property: "npi", type: "string", example: "1234567890123"),
                 new OA\Property(property: "preferred_language", type: "string", example: "fon")
@@ -58,6 +59,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'first_name' => 'sometimes|string|max:100',
             'last_name' => 'sometimes|string|max:100',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'profession' => 'sometimes|string|max:150',
             'npi' => 'sometimes|string|size:13',
             'preferred_language' => 'sometimes|string|in:fr,fon,yor',

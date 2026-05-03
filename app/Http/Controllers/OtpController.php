@@ -39,7 +39,7 @@ class OtpController extends Controller
     {
         $request->validate([
             'phone' => 'required|string|regex:/^\+?[0-9]{10,15}$/',
-            'email' => 'sometimes|email',
+            'email' => 'required|email',
         ]);
 
         $phone = $this->sms->normalizePhone($request->phone);
@@ -59,17 +59,16 @@ class OtpController extends Controller
             'purpose' => 'login'
         ]);
 
-        // Envoi SMS + WhatsApp réel via Infobip
-        $message = "Votre code TontineChain est : $code. Ne le partagez pas.";
-        $this->sms->notify($phone, $message);
-
-        // Envoi par Email si fourni
+        // Envoi par Email UNIQUEMENT pour économiser les crédits WhatsApp/SMS
         if ($request->has('email')) {
             try {
                 \Illuminate\Support\Facades\Mail::to($request->email)->send(new \App\Mail\OtpMail($code));
             } catch (\Exception $e) {
                 Log::error("Erreur envoi Email OTP : " . $e->getMessage());
+                return response()->json(['error' => "Erreur lors de l'envoi de l'email"], 500);
             }
+        } else {
+            return response()->json(['error' => "L'email est requis pour recevoir votre code de connexion."], 422);
         }
 
         // Toujours garder un log pour le dev
@@ -136,6 +135,7 @@ class OtpController extends Controller
             
             $user = User::create([
                 'phone' => $phone,
+                'email' => $request->email ?? null,
                 'full_name' => 'Membre',
                 'wallet_address' => $walletAddress,
                 'score_confiance' => 100,

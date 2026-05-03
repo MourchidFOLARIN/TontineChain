@@ -19,13 +19,38 @@ class SmsService
     }
 
     /**
-     * Envoie une notification par SMS ET WhatsApp
+     * Envoie une notification par SMS, WhatsApp ET Email
      */
-    public function notify($to, $message)
+    public function notify($to, $message, $email = null)
     {
         $normalizedTo = $this->normalizePhone($to);
-        // $this->sendSms($normalizedTo, $message); // Désactivé pour économiser les crédits (limite 15)
-        $this->sendWhatsApp($normalizedTo, $message); // Activé (limite 100)
+        
+        // 1. WhatsApp (100 gratuits)
+        $this->sendWhatsApp($normalizedTo, $message);
+
+        // 2. SMS (15 gratuits - Activé pour les notifications critiques)
+        $this->sendSms($normalizedTo, $message);
+
+        // 3. Email (Illimité selon SMTP)
+        if ($email) {
+            $this->sendEmail($email, $message);
+        }
+    }
+
+    /**
+     * Envoie un Email simple
+     */
+    public function sendEmail($email, $message)
+    {
+        try {
+            \Illuminate\Support\Facades\Mail::raw($message, function ($mail) use ($email) {
+                $mail->to($email)->subject('Notification TontineChain');
+            });
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Erreur envoi Email : " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
