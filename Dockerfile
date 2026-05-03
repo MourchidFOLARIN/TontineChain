@@ -26,9 +26,13 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Installer les dépendances Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Donner les permissions aux dossiers de stockage
+# Créer les dossiers de cache manquants et donner les permissions
+RUN mkdir -p /var/www/html/storage/framework/views \
+    /var/www/html/storage/framework/sessions \
+    /var/www/html/storage/framework/cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
 
 # Modifier le DocumentRoot d'Apache pour pointer vers /public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
