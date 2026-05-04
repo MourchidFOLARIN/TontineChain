@@ -70,18 +70,4 @@ services:
       - key: TONTINE_FACTORY_ADDRESS
         value: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
 
-  # Le Frontend React (Static Site)
-  - type: web
-    name: tontine-chain-frontend
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm install --legacy-peer-deps && npm run build
-    staticPublishPath: ./dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_BASE_URL
-        value: https://tonnine-benin-backend.onrender.com/api/v1
 
