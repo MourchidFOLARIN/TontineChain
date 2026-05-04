@@ -39,40 +39,32 @@ class OtpController extends Controller
     {
         $request->validate([
             'phone' => 'required|string|regex:/^\+?[0-9]{10,15}$/',
-            'email' => 'required|email',
+            'email' => 'sometimes|email',
         ]);
 
         $phone = $this->sms->normalizePhone($request->phone);
+        $code = rand(1000, 9999);
 
-        // Invalidate previous OTPs
-        Otp::where('phone', $phone)->where('is_used', false)->update(['is_used' => true]);
-
-        // Generate 6-digit code
-        $code = (string) rand(100000, 999999);
-        $codeHash = hash('sha256', $code);
-
-        // Store OTP
+        // On stocke l'OTP
         Otp::create([
             'phone' => $phone,
-            'code_hash' => $codeHash,
-            'expires_at' => Carbon::now()->addMinutes(5),
+            'code_hash' => hash('sha256', $code),
+            'expires_at' => \Carbon\Carbon::now()->addMinutes(5),
             'purpose' => 'login'
         ]);
 
-        // Envoi par Email UNIQUEMENT (via Infobip API / HTTP pour éviter les blocages Render)
-        if ($request->has('email')) {
-            $success = $this->sms->sendEmail($request->email, "Votre code de vérification TontineChain est : $code");
-            if (!$success) {
-                return response()->json(['error' => "Erreur lors de l'envoi de l'email via l'API Infobip. Vérifiez vos crédits."], 500);
-            }
-        } else {
-            return response()->json(['error' => "L'email est requis pour recevoir votre code de connexion."], 422);
-        }
+        // Envoi SMS + WhatsApp réel via Infobip
+        $message = "Votre code TontineChain est : $code. Ne le partagez pas.";
+        $this->sms->notify($phone, $message, $request->email);
 
         // Toujours garder un log pour le dev
         Log::info("OTP for $phone: $code");
-        
-        return response()->json(['message' => 'OTP envoyé', 'phone' => $phone]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Le code OTP a été envoyé par WhatsApp/SMS.',
+            'phone' => $phone // On renvoie le numéro normalisé pour le front
+        ]);
     }
 
     #[OA\Post(
