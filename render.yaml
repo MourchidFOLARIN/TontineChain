@@ -1,3 +1,9 @@
+# La Base de Données PostgreSQL
+databases:
+  - name: tonnine-db
+    plan: free
+    region: frankfurt
+
 services:
   # Le Backend Laravel
   - type: web
@@ -37,9 +43,43 @@ services:
           property: password
       - key: LOG_CHANNEL
         value: errorlog
+      - key: APP_URL
+        value: https://tonnine-benin-backend.onrender.com
+      
+      # === FEDAPAY ===
+      - key: FEDAPAY_API_KEY
+        value: sk_sandbox_wyJZtZjU5uyd9KbFqjyPbksj
+      - key: FEDAPAY_WEBHOOK_SECRET
+        value: your-fedapay-webhook-secret
+      - key: FEDAPAY_ENV
+        value: sandbox
 
-# La Base de Données PostgreSQL
-databases:
-  - name: tonnine-db
+      # === INFOBIP ===
+      - key: INFOBIP_API_KEY
+        value: 2b97febce9e8a0353a21fb91f74e07bd-9ad39504-b83e-455c-adb9-f5e319af1392
+      - key: INFOBIP_BASE_URL
+        value: https://d85xdg.api.infobip.com
+      - key: WHATSAPP_SENDER_NUMBER
+        value: "447860088970"
+
+      # === BLOCKCHAIN ===
+      - key: POLYGON_RPC_URL
+        value: https://polygon-mainnet.infura.io/v3/6e201afd04aa4ae7a4d6eda9a2488250
+      - key: RELAYER_PRIVATE_KEY
+        value: 0x4f3e2d1c6b5a9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b
+      - key: TONTINE_FACTORY_ADDRESS
+        value: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
+
+  # Le Frontend React (Static Site)
+  - type: web
+    name: tontine-chain-frontend
+    env: static
     plan: free
     region: frankfurt
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://tonnine-benin-backend.onrender.com/api/v1
+

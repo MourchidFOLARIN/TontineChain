@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f39c12;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f1c40f;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0b1120;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a2540;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Shield background -->
+  <path d="M60 8 L100 22 L100 58 C100 82 82 100 60 112 C38 100 20 82 20 58 L20 22 Z"
+    fill="url(#goldGrad)" filter="url(#glow)" />
+
+  <!-- Shield inner dark -->
+  <path d="M60 18 L92 30 L92 58 C92 77 76 93 60 103 C44 93 28 77 28 58 L28 30 Z"
+    fill="url(#darkGrad)" />
+
+  <!-- Chain links (blockchain symbol) -->
+  <rect x="42" y="46" width="14" height="9" rx="4.5" fill="none" stroke="url(#goldGrad)" stroke-width="2.5"/>
+  <rect x="64" y="46" width="14" height="9" rx="4.5" fill="none" stroke="url(#goldGrad)" stroke-width="2.5"/>
+  <line x1="56" y1="50.5" x2="64" y2="50.5" stroke="url(#goldGrad)" stroke-width="2.5"/>
+
+  <!-- TC letters -->
+  <text x="60" y="76" font-family="Georgia, serif" font-size="16" font-weight="900" text-anchor="middle" fill="url(#goldGrad)" letter-spacing="1">TC</text>
+
+  <!-- Stars for decoration -->
+  <circle cx="60" cy="35" r="2.5" fill="url(#goldGrad)" opacity="0.8"/>
+  <circle cx="50" cy="38" r="1.5" fill="#f39c12" opacity="0.5"/>
+  <circle cx="70" cy="38" r="1.5" fill="#f39c12" opacity="0.5"/>
+</svg>

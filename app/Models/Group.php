@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 
 class Group extends Model
 {
+    use \Illuminate\Database\Eloquent\Concerns\HasUuids;
+
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
@@ -31,16 +33,6 @@ class Group extends Model
         'insurance_fund',
         'insurance_percent',
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            if (empty($model->id)) {
-                $model->id = (string) Str::uuid();
-            }
-        });
-    }
 
     public function creator()
     {

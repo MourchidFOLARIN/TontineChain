@@ -1,129 +1,95 @@
-# 🔗 TontineChain Backend - Laravel Edition
-**Inclusion Financière & DeFi au Bénin | Hackathon MIABE 2026 - Domaine D02**
+# 🔗 TontineChain API - Core Backend
+**Inclusion Financière, IA & Blockchain au Bénin | Hackathon MIABE 2026 - Domaine D02**
 
 ![TontineChain Architecture](tontinechain_architecture_premium_1777719060614.png)
 
-TontineChain est une plateforme blockchain de gestion de tontines rotatives automatisée. Ce backend Laravel orchestre les interactions entre les utilisateurs, le réseau Polygon PoS, et les services de paiement Mobile Money (FedaPay).
+TontineChain Backend est le moteur central d'orchestration de la plateforme. Il gère l'authentification sécurisée, l'analyse prédictive des risques, l'interfaçage avec la blockchain Polygon et l'intégration des passerelles de paiement locales.
 
 ---
 
-## 🚀 Stack Technique
+## 🏛️ Architecture Technique
+
+Le backend est construit sur une architecture **Service-Oriented** (SOA) au-dessus de Laravel 12, garantissant une séparation stricte des préoccupations et une extensibilité maximale.
+
+### 1. Couche de Services (Core Logic)
+- **`RiskAnalysisService`** : Moteur d'IA (ML-based) qui évalue le score de confiance des membres et prédit les risques de défaut de paiement avant chaque cycle.
+- **`BlockchainService`** : Gère les interactions avec les Smart Contracts sur **Polygon PoS**. Utilise des transactions signées via un relayer pour offrir une expérience sans frais de gaz (Gasless) aux utilisateurs.
+- **`PaymentService`** : Intégration de l'API **FedaPay** pour la gestion des flux Mobile Money (MTN, Moov).
+- **`NotificationService`** : Orchestre les alertes multi-canaux (SMS & WhatsApp via **Infobip**) pour les OTP et les rappels de cotisation.
+
+### 2. Couche de Persistance
+- **SQL** : SQLite (Développement) / PostgreSQL (Production) pour les données structurées.
+- **Blockchain** : Stockage immuable des preuves de paiement et des états des cycles de tontine.
+
+### 3. Sécurité & Authentification
+- **Sanctum** : Gestion des tokens API pour le frontend.
+- **OTP Login** : Authentification à deux facteurs native via SMS/WhatsApp pour une sécurité adaptée au contexte local.
+
+---
+
+## 🛠️ Stack Technologique
+
 - **Framework** : Laravel 12 (PHP 8.2+)
-- **Base de données** : PostgreSQL / SQLite
-- **Blockchain** : Solidity (Smart Contracts), Polygon PoS (Gasless EIP-2771)
-- **Paiements** : FedaPay (MTN / Moov Money)
-- **Notifications** : SMS (Infobip), In-App
-- **API Docs** : [Swagger UI](http://localhost:8000/api/documentation)
-- **Tests** : PHPUnit / Pest
+- **Smart Contracts** : Solidity (Déployés sur Polygon)
+- **Paiements** : FedaPay SDK
+- **Communications** : Infobip API (WhatsApp Business & SMS)
+- **Documentation** : Swagger / L5-Swagger
 
 ---
 
-## 📊 Architecture & UML
+## 🚀 Installation & Configuration
 
-### 1. Diagramme de Cas d'Utilisation
-```mermaid
-useCaseDiagram
-    actor Member as "Membre"
-    actor Creator as "Créateur"
-    actor FedaPay as "FedaPay API"
-    actor Poly as "Polygon Network"
+### Pré-requis
+- PHP 8.2+
+- Composer
+- SQLite (ou un serveur PostgreSQL)
 
-    package "TontineChain" {
-        usecase UC1 as "Authentification OTP"
-        usecase UC2 as "Créer Tontine"
-        usecase UC3 as "Inviter/Rejoindre"
-        usecase UC4 as "Cotiser (MoMo)"
-        usecase UC5 as "Libérer Cagnotte"
-    }
+### Étapes d'installation
 
-    Member --> UC1
-    Member --> UC3
-    Member --> UC4
-    Creator --> UC2
-    UC4 --> FedaPay
-    UC4 --> Poly
-    UC5 --> Poly
-```
+1. **Cloner le projet** :
+   ```bash
+   git clone [url-du-repo]
+   cd TonnineBenin
+   ```
 
-### 2. Modèle de Données (Class Diagram)
-```mermaid
-classDiagram
-    User "1" -- "*" Group : possède
-    User "1" -- "*" GroupMember : est membre
-    Group "1" -- "*" Contribution : contient
-    Group "1" -- "*" Payout : génère
-    
-    class User {
-        +UUID id
-        +String phone
-        +String wallet_address
-        +Integer score_confiance
-    }
-    class Group {
-        +UUID id
-        +Decimal contribution_amount
-        +String contract_address
-        +enum status
-    }
-    class Contribution {
-        +Integer cycle_number
-        +Decimal amount_fcfa
-        +enum status
-    }
-```
-
-### 3. Cycle de Vie (State Diagram)
-```mermaid
-stateDiagram-v2
-    [*] --> Pending
-    Pending --> Active : Start (Deploy Contract)
-    Active --> Processing : Cotisation reçue
-    Processing --> Active : Record on Blockchain
-    Active --> Payout : Cycle complet
-    Payout --> Active : Cycle suivant
-    Active --> Completed : Tous cycles terminés
-```
-
----
-
-## 🛠️ Installation & Setup
-
-1. **Clonage & Dépendances** :
+2. **Installer les dépendances** :
    ```bash
    composer install
    ```
 
-2. **Configuration** :
-   Copiez le fichier `.env.example` vers `.env` et configurez vos clés :
+3. **Configuration de l'environnement** :
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
+   *Note : Configurez vos clés Infobip, FedaPay et vos credentials Polygon dans le `.env`.*
 
-3. **Base de données** :
+4. **Migration et Seed** (Base de données) :
    ```bash
-   php artisan migrate
+   php artisan migrate --seed
    ```
 
-4. **Lancement** :
+5. **Lancer le serveur de développement** :
    ```bash
-   php artisan serve
-   ```
-
-5. **Tests** :
-   ```bash
-   php artisan test
+   php artisan serve --port=8000
    ```
 
 ---
 
-## 🤖 Fonctionnalités Intelligentes
-- **Score de Confiance** : Calculé automatiquement en fonction de la ponctualité des paiements.
-- **Relayeur Gasless** : Les utilisateurs ne paient pas de frais de gaz sur Polygon.
-- **Automatisation** : Des jobs planifiés gèrent les rappels et les sanctions chaque matin.
+## 📖 Documentation API
+La documentation complète des endpoints (Swagger) est accessible une fois le serveur lancé à l'adresse suivante :
+`http://localhost:8000/api/documentation`
+
+---
+
+## 🤖 Analyse IA & Blockchain
+Le système intègre nativement :
+- **Proof of Payout** : Chaque ramassage est vérifié par un contrat intelligent.
+- **Dynamic Trust Scoring** : Un algorithme qui ajuste le score de confiance des utilisateurs en temps réel selon leur comportement transactionnel.
 
 ---
 
 ## 📄 Licence
-Hackathon MIABE 2026 - Domaine D02.
+Projet développé dans le cadre du **Hackathon MIABE 2026**.
+Domaine : D02 - Inclusion Financière.
 Made with ❤️ by Antigravity AI.

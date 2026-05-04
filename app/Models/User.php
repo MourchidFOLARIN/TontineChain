@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, \Illuminate\Database\Eloquent\Concerns\HasUuids;
 
     protected $primaryKey = 'id';
     public $incrementing = false;
@@ -60,16 +60,6 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'score_confiance' => 'integer',
         ];
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            if (empty($model->id)) {
-                $model->id = (string) Str::uuid();
-            }
-        });
     }
 
     public function groups()

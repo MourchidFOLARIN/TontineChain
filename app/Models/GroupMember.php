@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 
 class GroupMember extends Model
 {
+    use \Illuminate\Database\Eloquent\Concerns\HasUuids;
+
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
@@ -28,16 +30,6 @@ class GroupMember extends Model
     ];
 
     public $timestamps = false; // As per migration joined_at is used
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            if (empty($model->id)) {
-                $model->id = (string) Str::uuid();
-            }
-        });
-    }
 
     public function group()
     {
