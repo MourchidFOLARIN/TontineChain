@@ -2,7 +2,8 @@
 **Inclusion Financière, IA & Blockchain au Bénin | Hackathon MIABE 2026**
 
 ## 🌐 Liens de Déploiement (Render)
-- **Application Complète (Frontend + Backend)** : [https://tonnine-benin-backend.onrender.com](https://tonnine-benin-backend.onrender.com)
+- **Frontend (Live)** : [https://tontine-chain-frontend.onrender.com](https://tontine-chain-frontend.onrender.com)
+- **Backend (API)** : [https://tonnine-benin-backend.onrender.com](https://tonnine-benin-backend.onrender.com)
 - **Documentation API** : [https://tonnine-benin-backend.onrender.com/api/documentation](https://tonnine-benin-backend.onrender.com/api/documentation)
 
 ---
