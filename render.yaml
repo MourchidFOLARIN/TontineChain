@@ -78,7 +78,7 @@ services:
     region: frankfurt
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_BASE_URL
         value: https://tonnine-benin-backend.onrender.com/api/v1
