@@ -41,12 +41,44 @@ class SmsService
      * Envoie un Email via le système de mail de Laravel (SMTP)
      * Plus flexible pour envoyer à n'importe quelle adresse.
      */
+    /**
+     * Envoie un Email via Infobip API (HTTP)
+     * Utilise le port 443, donc n'est pas bloqué par Render.
+     */
     public function sendEmail($email, $message)
     {
-        \Illuminate\Support\Facades\Mail::raw($message, function ($mail) use ($email) {
-            $mail->to($email)->subject('Notification TontineChain');
-        });
-        return true;
+        if (!$this->apiKey || $this->apiKey === 'your-infobip-key') {
+            Log::info("Email Mock pour $email : $message");
+            return true;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => "App {$this->apiKey}",
+            ])->asMultipart()->post("{$this->baseUrl}/email/3/send", [
+                [
+                    'name'     => 'from',
+                    'contents' => env('MAIL_FROM_ADDRESS', 'mourchidolawale@gmail.com')
+                ],
+                [
+                    'name'     => 'to',
+                    'contents' => $email
+                ],
+                [
+                    'name'     => 'subject',
+                    'contents' => 'Notification TontineChain'
+                ],
+                [
+                    'name'     => 'text',
+                    'contents' => $message
+                ]
+            ]);
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::error("Erreur Email Infobip : " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
