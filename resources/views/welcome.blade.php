@@ -95,7 +95,7 @@
         <!-- Navigation -->
         <nav class="relative z-10 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
             <div class="flex items-center gap-3">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-12 w-auto logo-glow">
+                <img src="{{ asset('images/logo.jpeg') }}" alt="Logo" class="h-12 w-auto logo-glow">
                 <span class="text-xl font-bold tracking-tighter gold-text-gradient hidden md:block">TONTINECHAIN</span>
             </div>
             
@@ -200,7 +200,7 @@
         <footer class="relative z-10 py-12 px-8 border-t border-white/5 text-center">
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto">
+                    <img src="{{ asset('images/logo.jpeg') }}" alt="Logo" class="h-8 w-auto">
                     <span class="font-bold gold-text-gradient">TontineChain</span>
                 </div>
                 <div class="text-gray-500 text-sm">
