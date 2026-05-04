@@ -43,15 +43,10 @@ class SmsService
      */
     public function sendEmail($email, $message)
     {
-        try {
-            \Illuminate\Support\Facades\Mail::raw($message, function ($mail) use ($email) {
-                $mail->to($email)->subject('Notification TontineChain');
-            });
-            return true;
-        } catch (\Exception $e) {
-            Log::error("Erreur envoi Email Laravel : " . $e->getMessage());
-            return false;
-        }
+        \Illuminate\Support\Facades\Mail::raw($message, function ($mail) use ($email) {
+            $mail->to($email)->subject('Notification TontineChain');
+        });
+        return true;
     }
 
     /**
