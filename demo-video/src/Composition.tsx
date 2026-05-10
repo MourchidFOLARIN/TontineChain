@@ -29,16 +29,17 @@ export const MyComposition: React.FC = () => {
       {frame < 70 && (
         <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', opacity: interpolate(frame, [50, 70], [1, 0])}}>
           <Img 
-            src={staticFile('logo.jpeg')} 
+            src={staticFile('logo_official.png')} 
             style={{
-              width: 300, 
-              height: 300, 
+              width: 320, 
+              height: 320, 
               borderRadius: '50%', 
               transform: `scale(${logoScale})`,
-              boxShadow: '0 0 50px rgba(16, 185, 129, 0.4)'
+              boxShadow: '0 0 60px rgba(212, 175, 55, 0.4)',
+              border: '4px solid #d4af37'
             }} 
           />
-          <h1 style={{marginTop: 40, fontSize: 80, fontFamily: 'Playfair Display', color: '#d4af37'}}>TontineChain</h1>
+          <h1 style={{marginTop: 40, fontSize: 80, fontFamily: 'Playfair Display', color: '#d4af37', fontWeight: 'bold'}}>TontineChain</h1>
         </AbsoluteFill>
       )}
 
@@ -76,12 +77,13 @@ export const MyComposition: React.FC = () => {
       {frame >= 360 && (
         <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', opacity: interpolate(frame, [360, 380], [0, 1])}}>
           <Img 
-            src={staticFile('logo.jpeg')} 
+            src={staticFile('logo_official.png')} 
             style={{
               width: 200, 
               height: 200, 
               borderRadius: '50%', 
-              boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)'
+              boxShadow: '0 0 30px rgba(212, 175, 55, 0.3)',
+              border: '2px solid #d4af37'
             }} 
           />
           <h2 style={{marginTop: 40, fontSize: 60, textAlign: 'center'}}>Prêt à rejoindre l'élite ?</h2>

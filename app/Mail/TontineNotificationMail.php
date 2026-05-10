@@ -26,7 +26,7 @@ class TontineNotificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "[TontineChain] " . $this->title,
+            subject: "[TontiGo] " . $this->title,
         );
     }
 

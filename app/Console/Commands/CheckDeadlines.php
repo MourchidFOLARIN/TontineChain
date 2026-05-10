@@ -79,7 +79,7 @@ class CheckDeadlines extends Command
                 Mail::to($user->email)
                     ->locale($user->preferred_language ?? 'fr')
                     ->queue(new TontineNotificationMail(
-                        "ALERTE RETARD - TontineChain",
+                        "ALERTE RETARD - TontiGo",
                         __('messages.late_payment') . " ($lateDays jours)"
                     ));
             }

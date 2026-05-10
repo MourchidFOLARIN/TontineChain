@@ -22,14 +22,14 @@ class PaymentService
 
         try {
             $transaction = Transaction::create([
-                'description' => "Cotisation TontineChain - Cycle {$contribution->cycle_number}",
+                'description' => "Cotisation TontiGo - Cycle {$contribution->cycle_number}",
                 'amount' => (int) $contribution->amount_fcfa,
                 'currency' => ['iso' => 'XOF'],
                 'callback_url' => env('APP_URL') . '/api/v1/webhooks/fedapay',
                 'customer' => [
                     'firstname' => $user->first_name ?: 'Membre',
-                    'lastname' => $user->last_name ?: 'Tontine',
-                    'email' => $user->email ?: 'user_'.$user->id.'@tontinechain.bj',
+                    'lastname' => $user->last_name ?: 'TontiGo',
+                    'email' => $user->email ?: 'user_'.$user->id.'@tontigo.app',
                     'phone_number' => [
                         'number' => $user->phone,
                         'country' => 'BJ'

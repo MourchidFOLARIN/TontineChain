@@ -15,7 +15,7 @@ class SmsService
     {
         $this->apiKey = env('INFOBIP_API_KEY');
         $this->baseUrl = env('INFOBIP_BASE_URL', 'https://api.infobip.com');
-        $this->from = env('SMS_SENDER_NAME', 'TontineChain');
+        $this->from = env('SMS_SENDER_NAME', 'TontiGo');
     }
 
     /**
@@ -66,7 +66,7 @@ class SmsService
                 ],
                 [
                     'name'     => 'subject',
-                    'contents' => 'Notification TontineChain'
+                    'contents' => 'Notification TontiGo'
                 ],
                 [
                     'name'     => 'text',

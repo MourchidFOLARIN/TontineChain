@@ -26,8 +26,8 @@ const Sidebar = ({ currentView, onNavigate, onLogout, theme, toggleTheme, mobile
         {/* Logo */}
         <div style={{ padding: '24px 20px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img src={logoOfficial} alt="TontineChain" style={{ width: 44, height: 44, borderRadius: '50%', border: '2px solid var(--tontine-gold)' }} />
-            <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 800, fontSize: 18, color: 'white' }}>TontineChain</span>
+            <img src={logoOfficial} alt="TontiGo" style={{ width: 44, height: 44, borderRadius: '50%', border: '2px solid var(--tontigo-orange)' }} />
+            <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 800, fontSize: 18, color: 'var(--tontigo-blue)' }}>TontiGo</span>
           </div>
           <button onClick={onCloseMobile} className="md:hidden" style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
             <X size={20} />

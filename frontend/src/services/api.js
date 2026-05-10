@@ -17,7 +17,6 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   
-  // Toujours envoyer la langue préférée au backend
   if (user.preferred_language) {
     config.params = { ...config.params, locale: user.preferred_language };
   }
@@ -32,7 +31,10 @@ export const verifyOtp = (email, code) => api.post('/auth/verify-otp', { email, 
 // --- User ---
 export const getMe = () => api.get('/users/me');
 export const updateProfile = (data) => api.post('/user/profile', data);
+export const updateMe = updateProfile; // Alias pour compatibilité
 export const getMyScore = () => api.get('/users/me/score');
+export const getMyBalance = () => api.get('/users/me/balance');
+export const getLeaderboard = () => api.get('/leaderboard');
 
 // --- AI (YAO) ---
 export const chatWithYao = (message) => api.post('/ai/chat', { message });
@@ -44,6 +46,9 @@ export const getGroupDetails = (groupId) => api.get(`/groups/${groupId}`);
 export const inviteToGroup = (groupId, data) => api.post(`/groups/${groupId}/invite`, data);
 export const joinGroup = (groupId, data) => api.post(`/groups/${groupId}/join`, data);
 export const startGroup = (groupId) => api.post(`/groups/${groupId}/start`);
+
+// --- Votes ---
+export const castVote = (groupId, data) => api.post(`/groups/${groupId}/vote`, data);
 
 // --- Contributions ---
 export const getPendingContributions = () => api.get('/contributions/pending');

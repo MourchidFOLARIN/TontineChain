@@ -3,34 +3,36 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body style="background-color: #000000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff; margin: 0; padding: 0;">
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #000000;">
+<body style="background-color: #F8FAFC; font-family: 'Inter', Helvetica, Arial, sans-serif; color: #0F172A; margin: 0; padding: 0;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F8FAFC;">
         <tr>
-            <td align="center" style="padding: 60px 20px;">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; background-color: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 16px;">
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                     
                     <!-- HEADER -->
                     <tr>
                         <td align="center" style="padding: 40px 40px 20px 40px;">
-                            <h1 style="color: #d4af37; font-size: 24px; margin: 0; letter-spacing: 4px; font-weight: 300; text-transform: uppercase;">TontineChain</h1>
-                            <div style="height: 1px; width: 30px; background-color: #d4af37; margin: 20px auto;"></div>
+                            <h1 style="color: #FF8C00; font-size: 28px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">Tonti<span style="color: #1E293B;">Go</span></h1>
+                            <p style="color: #475569; font-size: 14px; margin-top: 5px; font-weight: 500;">Finance Inclusive & Blockchain</p>
                         </td>
                     </tr>
 
                     <!-- CONTENT -->
                     <tr>
                         <td style="padding: 0 40px 40px 40px; text-align: center;">
-                            <h2 style="font-size: 18px; font-weight: 400; color: #ffffff; margin-bottom: 20px;">Votre Contrat est Prêt.</h2>
+                            <div style="height: 1px; width: 40px; background-color: #FF8C00; margin: 0 auto 30px auto;"></div>
+                            <h2 style="font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Votre Contrat est Prêt</h2>
                             
-                            <p style="font-size: 14px; color: #888888; line-height: 1.8; margin-bottom: 30px; text-align: justify;">
-                                Félicitations. Vous faites désormais partie intégrante du cercle d'excellence <strong>{{ $groupName }}</strong>. 
+                            <p style="font-size: 15px; color: #475569; line-height: 1.8; margin-bottom: 30px; text-align: justify;">
+                                Félicitations ! Vous faites désormais partie intégrante du cercle <strong>{{ $groupName }}</strong> sur <strong>TontiGo</strong>. 
                                 <br><br>
-                                Votre engagement a été scellé sur la Blockchain. Vous trouverez ci-joint votre contrat de confiance au format PDF, détaillant vos droits, vos obligations et le calendrier de vos ramassages.
+                                Votre engagement a été scellé en toute transparence. Vous trouverez ci-joint votre contrat de confiance au format PDF, détaillant vos droits, vos obligations et le calendrier de vos ramassages.
                             </p>
 
-                            <div style="background-color: #111; border-radius: 8px; padding: 20px; margin-bottom: 30px; border: 1px solid #222;">
-                                <p style="font-size: 12px; color: #10b981; margin: 0;">
+                            <div style="background-color: #FFF4E5; border-radius: 12px; padding: 20px; margin-bottom: 30px; border: 1px solid #FF8C00;">
+                                <p style="font-size: 13px; color: #FF8C00; font-weight: 600; margin: 0;">
                                     📎 Document officiel joint à cet email.
                                 </p>
                             </div>
@@ -39,9 +41,9 @@
 
                     <!-- FOOTER -->
                     <tr>
-                        <td align="center" style="padding: 0 40px 40px 40px; border-top: 1px solid #1a1a1a; padding-top: 20px;">
-                            <p style="font-size: 10px; color: #333333; text-transform: uppercase; letter-spacing: 2px;">
-                                Excellence • Sécurité • Inclusion
+                        <td align="center" style="padding: 0 40px 40px 40px;">
+                            <p style="font-size: 12px; color: #94A3B8; font-weight: 500;">
+                                &copy; {{ date('Y') }} TontiGo • Excellence & Inclusion
                             </p>
                         </td>
                     </tr>

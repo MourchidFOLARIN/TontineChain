@@ -85,7 +85,7 @@ class AiController extends Controller
             }
         }
         elseif ($isTech) {
-            $response = "TontineChain utilise la Blockchain Polygon pour garantir que personne ne peut voler l'argent du groupe. Chaque transaction est publique et vérifiable. C'est la transparence totale !";
+            $response = "TontiGo utilise la Blockchain Polygon pour garantir que personne ne peut voler l'argent du groupe. Chaque transaction est publique et vérifiable. C'est la transparence totale !";
         }
         else {
             $response = "Je n'ai pas bien saisi, mais je peux t'aider sur : ton bilan financier (akwé/owo), tes prochaines dates (hwenu/igba), ton score de confiance (jiɖe) ou le fonctionnement de la blockchain.";

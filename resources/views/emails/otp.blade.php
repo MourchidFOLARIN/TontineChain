@@ -3,50 +3,54 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body style="background-color: #000000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff; margin: 0; padding: 0;">
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #000000;">
+<body style="background-color: #F8FAFC; font-family: 'Inter', Helvetica, Arial, sans-serif; color: #0F172A; margin: 0; padding: 0;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F8FAFC;">
         <tr>
-            <td align="center" style="padding: 60px 20px;">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 450px; background-color: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 16px;">
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 450px; background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                     
                     <!-- LOGO / HEADER -->
                     <tr>
                         <td align="center" style="padding: 40px 40px 20px 40px;">
-                            <h1 style="color: #d4af37; font-size: 24px; margin: 0; letter-spacing: 4px; font-weight: 300; text-transform: uppercase;">TontineChain</h1>
-                            <div style="height: 1px; width: 30px; background-color: #d4af37; margin: 20px auto;"></div>
+                            <h1 style="color: #FF8C00; font-size: 28px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">Tonti<span style="color: #1E293B;">Go</span></h1>
+                            <p style="color: #475569; font-size: 14px; margin-top: 5px; font-weight: 500;">Finance Inclusive & Blockchain</p>
                         </td>
                     </tr>
 
                     <!-- CONTENT -->
                     <tr>
                         <td style="padding: 0 40px 40px 40px; text-align: center;">
-                            <h2 style="font-size: 18px; font-weight: 400; color: #ffffff; margin-bottom: 10px;">Bienvenue.</h2>
-                            <p style="font-size: 14px; color: #888888; line-height: 1.6; margin-bottom: 30px;">
-                                Voici votre confirmation pour accéder à votre espace sécurisé.
+                            <div style="height: 1px; width: 40px; background-color: #FF8C00; margin: 0 auto 30px auto;"></div>
+                            <h2 style="font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Vérification de sécurité</h2>
+                            <p style="font-size: 15px; color: #475569; line-height: 1.6; margin-bottom: 30px;">
+                                Pour finaliser votre connexion à <strong>TontiGo</strong>, veuillez utiliser le code de confirmation suivant :
                             </p>
 
                             <!-- CODE BOX -->
-                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #111111; border-radius: 8px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FFF4E5; border: 2px dashed #FF8C00; border-radius: 16px;">
                                 <tr>
-                                    <td align="center" style="padding: 30px;">
-                                        <span style="font-size: 36px; font-weight: bold; color: #10b981; letter-spacing: 8px;">{{ $code }}</span>
+                                    <td align="center" style="padding: 25px;">
+                                        <span style="font-size: 42px; font-weight: 800; color: #FF8C00; letter-spacing: 10px; font-family: monospace;">{{ $code }}</span>
                                     </td>
                                 </tr>
                             </table>
 
-                            <!-- SECURITY MESSAGE (TEXTE EXACT) -->
-                            <p style="font-size: 12px; color: #555555; line-height: 1.8; margin-top: 30px; text-align: justify; border-top: 1px solid #1a1a1a; padding-top: 20px;">
-                                <strong style="color: #aa2222;">IMPORTANT :</strong> Ce code est strictement confidentiel. Aucun agent de TontineChain ne vous demandera jamais ce code. Ne le partagez avec personne, pas même vos proches.
-                            </p>
+                            <!-- SECURITY MESSAGE -->
+                            <div style="margin-top: 35px; padding: 20px; background-color: #F1F5F9; border-radius: 12px; text-align: left;">
+                                <p style="font-size: 13px; color: #475569; line-height: 1.6; margin: 0;">
+                                    <strong style="color: #EF4444;">Sécurité :</strong> Ne partagez jamais ce code. L'équipe TontiGo ne vous le demandera jamais par téléphone ou message.
+                                </p>
+                            </div>
                         </td>
                     </tr>
 
                     <!-- FOOTER -->
                     <tr>
                         <td align="center" style="padding: 0 40px 40px 40px;">
-                            <p style="font-size: 10px; color: #333333; text-transform: uppercase; letter-spacing: 2px;">
-                                Excellence • Sécurité • Inclusion
+                            <p style="font-size: 12px; color: #94A3B8; font-weight: 500;">
+                                &copy; {{ date('Y') }} TontiGo • Excellence & Inclusion
                             </p>
                         </td>
                     </tr>

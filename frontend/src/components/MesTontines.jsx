@@ -1,122 +1,90 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Users, TrendingUp, ShieldCheck, Clock, ChevronRight, Plus, Search } from 'lucide-react';
+import { ArrowLeft, Users, ShieldCheck, ChevronRight, Plus, Search } from 'lucide-react';
 
 const MesTontines = ({ groups, onSelectGroup, onNewGroup, onBack }) => {
-  const getProgressColor = (pct) => {
-    if (pct >= 75) return 'text-green-400';
-    if (pct >= 40) return 'text-tontine-orange';
-    return 'text-blue-400';
-  };
-
-  const getProgressBg = (pct) => {
-    if (pct >= 75) return 'bg-green-400';
-    if (pct >= 40) return 'bg-tontine-orange';
-    return 'bg-blue-400';
-  };
-
   return (
-    <div className="flex flex-col h-full bg-tontine-darker min-h-screen">
+    <div className="bg-slate-50 min-h-screen">
       {/* Header */}
-      <div className="p-4 md:p-6 glass-panel flex items-center justify-between border-b border-white/5 sticky top-0 z-30">
+      <div className="p-6 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white">
+          <button onClick={onBack} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
             <ArrowLeft size={22} />
           </button>
           <div>
-            <h2 className="text-xl md:text-2xl font-bold font-playfair">Mes Tontines</h2>
-            <p className="text-[10px] md:text-xs text-gray-500 uppercase font-black tracking-widest">
+            <h2 className="text-xl font-bold text-slate-800">Mes Tontines</h2>
+            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest leading-none mt-1">
               {groups.length} Groupe{groups.length > 1 ? 's' : ''} Actif{groups.length > 1 ? 's' : ''}
             </p>
           </div>
         </div>
-        <button onClick={onNewGroup} className="btn-primary p-3 md:px-6 md:py-3 rounded-2xl flex items-center gap-2 text-xs md:text-sm">
-          <Plus size={18} /> <span className="hidden sm:inline">Créer</span>
+        <button onClick={onNewGroup} className="w-10 h-10 bg-orange-50 text-tontigo-orange rounded-full flex items-center justify-center shadow-sm">
+          <Plus size={20} strokeWidth={3} />
         </button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full">
+      <div className="p-6 max-w-lg mx-auto">
         
-        {/* Search Bar (Static for UI) */}
+        {/* Search Bar */}
         <div className="relative mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
           <input 
             type="text" 
             placeholder="Rechercher une tontine..." 
-            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 outline-none focus:ring-2 focus:ring-tontine-orange transition-all text-sm"
+            className="tontigo-input pl-12"
           />
         </div>
 
         {groups.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 text-center">
-            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/5">
-              <Users size={40} className="text-gray-600" />
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+              <Users size={32} className="text-slate-300" />
             </div>
-            <h3 className="text-xl font-bold mb-2">Aucune tontine trouvée</h3>
-            <p className="text-sm text-gray-500 mb-8 max-w-xs">
-              Vous n'avez pas encore rejoint de tontine. Commencez par en créer une ou rejoignez un groupe.
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Aucune tontine</h3>
+            <p className="text-sm text-slate-400 mb-8 max-w-[200px] mx-auto leading-relaxed">
+              Vous n'avez pas encore rejoint de tontine pour le moment.
             </p>
-            <button onClick={onNewGroup} className="btn-primary px-8 py-4 rounded-2xl font-bold shadow-xl shadow-tontine-orange/20">
+            <button onClick={onNewGroup} className="btn-tontigo w-full justify-center">
               Démarrer Maintenant
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="space-y-4">
             {groups.map((group, i) => {
               const pct = Math.round((group.current_cycle / group.members) * 100);
-              const colorClass = getProgressColor(pct);
-              const bgClass = getProgressBg(pct);
               
               return (
                 <motion.div
                   key={group.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.05 }}
                   onClick={() => onSelectGroup(group)}
-                  className="glass-panel p-6 rounded-3xl hover:border-tontine-orange/30 transition-all cursor-pointer group flex flex-col justify-between"
+                  className="tontigo-card p-5 cursor-pointer flex items-center gap-4"
                 >
-                  <div>
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform ${colorClass}`}>
-                          <Users size={24} />
-                        </div>
-                        <div className="min-w-0 pr-4">
-                          <h3 className="font-bold text-base md:text-lg truncate group-hover:text-tontine-orange transition-colors">{group.name}</h3>
-                          <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{group.cycle}</span>
-                        </div>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <div className="text-lg font-black text-white">{group.amount.toLocaleString()} <span className="text-xs text-tontine-gold">F</span></div>
-                        <p className="text-[10px] text-gray-600 font-bold">{group.members} MEMBRES</p>
-                      </div>
+                  <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 flex-shrink-0 font-bold text-xl">
+                    {group.name[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                       <h3 className="font-bold text-slate-800 truncate mb-1">{group.name}</h3>
+                       <span className="text-[11px] font-black text-slate-800">{group.amount.toLocaleString()} F</span>
                     </div>
-
-                    <div className="space-y-3 mb-8">
-                      <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter">
-                        <span className="text-gray-500">Collecte Cycle {group.current_cycle}/{group.members}</span>
-                        <span className={colorClass}>{pct}%</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${bgClass}`} 
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[9px] font-bold text-tontigo-orange bg-orange-50 px-2 py-0.5 rounded uppercase">{group.cycle}</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{group.members} Membres</span>
+                    </div>
+                    
+                    {/* Progress */}
+                    <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-tontigo-orange" 
+                        style={{ width: `${pct || 10}%` }}
+                      />
                     </div>
                   </div>
-
-                  <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
-                      <ShieldCheck size={14} className="text-green-500" />
-                      <span>Immuable</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs font-bold text-tontine-orange opacity-0 group-hover:opacity-100 transition-opacity">
-                      Gérer <ChevronRight size={14} />
-                    </div>
-                  </div>
+                  <ChevronRight size={18} className="text-slate-200" />
                 </motion.div>
               );
             })}
@@ -124,8 +92,7 @@ const MesTontines = ({ groups, onSelectGroup, onNewGroup, onBack }) => {
         )}
       </div>
 
-      {/* Footer Space for Bottom Nav */}
-      <div className="h-20 md:hidden" />
+      <div className="h-24" />
     </div>
   );
 };
