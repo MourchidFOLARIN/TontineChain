@@ -43,7 +43,7 @@ export const translations = {
     otp_label: "Xixa e ná ɖe mɛ",
     verify: "Kpɔ́n d'ewu",
   },
-  yoruba: {
+  yor: {
     welcome: "Ẹ n lẹ",
     trust_score: "Ipele igbẹkẹle",
     balance_paid: "Owo ti o ti san",

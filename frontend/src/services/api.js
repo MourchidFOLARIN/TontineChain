@@ -8,12 +8,20 @@ const api = axios.create({
   },
 });
 
-// Interceptor pour le token
+// Interceptor pour le token et la langue
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('tontine_token');
+  const user = JSON.parse(localStorage.getItem('tontine_user') || '{}');
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Toujours envoyer la langue préférée au backend
+  if (user.preferred_language) {
+    config.params = { ...config.params, locale: user.preferred_language };
+  }
+  
   return config;
 });
 

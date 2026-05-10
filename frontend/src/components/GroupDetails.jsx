@@ -14,7 +14,7 @@ import {
   ArrowRightLeft,
   ShieldCheck
 } from 'lucide-react';
-import { getGroupStats, submitBid, proposeSwap, castVote } from '../services/api';
+import { getGroupStats, submitBid, proposeSwap, castVote, startGroup, initiatePayment } from '../services/api';
 
 const GroupDetails = ({ group, onBack, user }) => {
   const [activeTab, setActiveTab] = useState('membres'); // membres, encheres, votes
@@ -59,10 +59,33 @@ const GroupDetails = ({ group, onBack, user }) => {
     setLoadingAction(true);
     try {
       await castVote(voteId, { type });
-      alert("Vote enregistré !");
     } catch (err) {
       console.error(err);
-      alert("Vote enregistré (Démo)");
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const handleStartTontine = async () => {
+    setLoadingAction(true);
+    try {
+      await startGroup(group.id);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const handlePay = async (contributionId) => {
+    setLoadingAction(true);
+    try {
+      const res = await initiatePayment(contributionId);
+      if (res.data && res.data.url) {
+        window.open(res.data.url, '_blank');
+      }
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoadingAction(false);
     }
@@ -90,6 +113,15 @@ const GroupDetails = ({ group, onBack, user }) => {
           </div>
           <p className="text-xs text-tontine-orange">Cycle {group?.current_cycle}/{group?.members}</p>
         </div>
+        {group?.status === 'pending' && user?.id === group?.creator_id && (
+          <button 
+            onClick={handleStartTontine}
+            disabled={loadingAction}
+            className="bg-tontine-orange text-tontine-darker font-bold px-4 py-2 rounded-lg text-sm shadow-lg shadow-tontine-orange/20"
+          >
+            {loadingAction ? <Loader2 className="w-4 h-4 animate-spin" /> : "Démarrer"}
+          </button>
+        )}
       </nav>
 
       <main className="max-w-4xl mx-auto px-4 py-6 relative z-10">
@@ -223,10 +255,22 @@ const GroupDetails = ({ group, onBack, user }) => {
                       <p className="text-xs text-gray-400">{m.payout_date}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    {m.status === 'paid' && <span className="inline-flex items-center gap-1 text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full mb-1"><CheckCircle2 className="w-3 h-3"/> Payé</span>}
-                    {m.status === 'pending' && <span className="inline-flex items-center gap-1 text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full mb-1"><Clock className="w-3 h-3"/> En attente</span>}
-                    {m.status === 'late' && <span className="inline-flex items-center gap-1 text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded-full mb-1">Retard</span>}
+                  <div className="text-right flex flex-col items-end gap-1">
+                    {m.status === 'paid' && <span className="inline-flex items-center gap-1 text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"><CheckCircle2 className="w-3 h-3"/> Payé</span>}
+                    {m.status === 'pending' && (
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="inline-flex items-center gap-1 text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full"><Clock className="w-3 h-3"/> En attente</span>
+                        {m.isMe && (
+                          <button 
+                            onClick={() => handlePay(1)} // ID temporaire pour démo
+                            className="bg-tontine-gold text-black font-bold px-3 py-1 rounded text-[10px] hover:scale-105 transition-transform"
+                          >
+                            Payer
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {m.status === 'late' && <span className="inline-flex items-center gap-1 text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded-full">Retard</span>}
                     
                     {m.has_taken && (
                       <div className="mt-1">

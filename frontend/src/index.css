@@ -98,22 +98,69 @@ body {
 
 .main-content {
   margin-left: 260px;
-  min-height: 100vh;
+  min-height: calc(100vh - 70px);
   padding: 24px;
-  transition: margin-left 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
+    width: 80%;
+    max-width: 300px;
   }
   .sidebar.open {
     transform: translateX(0);
   }
   .main-content {
     margin-left: 0;
+    padding: 16px;
+    padding-top: 80px;
+    padding-bottom: 90px;
   }
 }
+
+/* ========= BOTTOM NAV (Mobile) ========= */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: var(--sidebar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.bottom-nav-item.active {
+  color: #f39c12;
+}
+
+.bottom-nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
 
 /* ========= CARDS ========= */
 .card {
@@ -304,10 +351,32 @@ body {
 
 /* ========= STAT CARD ========= */
 .stat-value {
-  font-size: 1.75rem;
+  font-size: clamp(1.5rem, 5vw, 1.75rem);
   font-weight: 800;
   background: linear-gradient(135deg, #f39c12, #f1c40f);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ========= UTILITIES ========= */
+.text-fluid-h1 {
+  font-size: clamp(2rem, 8vw, 3.5rem);
+}
+
+.text-fluid-h2 {
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+}
+
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 480px) {
+  .responsive-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -4,12 +4,15 @@ import { ArrowRight, ShieldCheck, Phone, CheckCircle2, Loader2 } from 'lucide-re
 import api from '../services/api';
 import AudioButton from './AudioButton';
 
+import logoOfficial from '../assets/logo_official.png';
+
 const Login = ({ onLoginSuccess }) => {
   const [step, setStep] = useState('phone'); // 'phone' | 'otp'
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [locale, setLocale] = useState('fr');
 
   const handleRequestOtp = async (e) => {
     e.preventDefault();
@@ -21,10 +24,7 @@ const Login = ({ onLoginSuccess }) => {
     setLoading(true);
     setError('');
     try {
-      // In production, uncomment the API call. For UI testing, simulate delay.
-      await api.post('/auth/request-otp', { phone });
-      
-      // Simulate API success
+      await api.post('/auth/request-otp', { phone, locale });
       setStep('otp');
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de la demande OTP.');
@@ -54,17 +54,13 @@ const Login = ({ onLoginSuccess }) => {
     setError('');
     try {
       const response = await api.post('/auth/verify-otp', { phone, code });
-      const { token, user } = response.data;
+      const { access_token, user } = response.data;
       
-      localStorage.setItem('tontine_token', token);
+      localStorage.setItem('tontine_token', access_token);
       onLoginSuccess(user);
     } catch (err) {
       console.error("Erreur OTP:", err);
-      // Fallback démo
-      const token = "dummy_token_123";
-      const user = { first_name: "Mourchid", last_name: "F.", score_confiance: 95 };
-      localStorage.setItem('tontine_token', token);
-      onLoginSuccess(user);
+      setError(err.response?.data?.error || 'Code incorrect ou expiré.');
     } finally {
       setLoading(false);
     }
@@ -90,12 +86,25 @@ const Login = ({ onLoginSuccess }) => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-            className="w-16 h-16 bg-gradient-to-tr from-tontine-orange to-tontine-gold rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-tontine-orange/30 mb-6"
+            className="w-24 h-24 mx-auto mb-6 relative"
           >
-            <ShieldCheck className="w-8 h-8 text-tontine-darker" />
+            <div className="absolute inset-0 bg-tontine-orange/20 rounded-full blur-xl animate-pulse" />
+            <img src={logoOfficial} alt="Logo" className="w-full h-full rounded-full border-2 border-tontine-gold shadow-2xl relative z-10" />
           </motion.div>
           <h1 className="text-3xl font-playfair font-bold text-white mb-2">TontineChain</h1>
-          <p className="text-gray-400 text-sm font-inter">Accès sécurisé sans mot de passe</p>
+          <p className="text-gray-400 text-sm font-inter mb-6">Accès sécurisé sans mot de passe</p>
+          
+          <div className="flex justify-center gap-4 mb-2">
+            {['fr', 'yor', 'fon'].map((l) => (
+              <button 
+                key={l}
+                onClick={() => setLocale(l)}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${locale === l ? 'bg-tontine-orange text-tontine-darker shadow-lg shadow-tontine-orange/20' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
+              >
+                {l === 'yor' ? 'Yoruba' : l === 'fon' ? 'Fongbe' : 'Français'}
+              </button>
+            ))}
+          </div>
         </div>
 
         <AnimatePresence mode="wait">

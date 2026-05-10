@@ -22,7 +22,7 @@ class OtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Votre code TontineChain',
+            subject: __('messages.otp_message'),
         );
     }
 

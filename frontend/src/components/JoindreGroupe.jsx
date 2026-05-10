@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Search, UserPlus, ShieldCheck, Users, Clock, ChevronRight, Check, Loader2 } from 'lucide-react';
+import { joinGroup } from '../services/api';
 
 const DEMO_GROUPS = [
   { id: 10, code: 'MIABE-26', name: "Tontine MIABE 2026", amount: 75000, cycle: "Mensuel", members: 12, current_cycle: 2, leader: "Dr. Koffi A.", description: "Groupe officiel du Hackathon MIABE 2026", open: true },
@@ -39,11 +40,17 @@ const JoindreGroupe = ({ onBack, onJoin }) => {
     if (!found) { setError(`Aucun groupe trouvé avec le code "${code}". Vérifiez et réessayez.`); return; }
     if (!found.open) { setError('Ce groupe n\'accepte plus de nouveaux membres.'); return; }
     setJoining('code');
-    await new Promise(r => setTimeout(r, 1200));
-    setJoining(null);
-    setJoined(prev => [...prev, found.id]);
-    onJoin(code.trim());
-    setCode('');
+    try {
+      // On utilise l'API pour rejoindre par code
+      const response = await joinGroup(code.trim(), {});
+      setJoined(prev => [...prev, code.trim()]);
+      onJoin(code.trim());
+      setCode('');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Une erreur est survenue lors de l\'adhésion.');
+    } finally {
+      setJoining(null);
+    }
   };
 
   return (

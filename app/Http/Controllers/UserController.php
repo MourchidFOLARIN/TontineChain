@@ -51,7 +51,24 @@ class UserController extends Controller
             ]
         )
     )]
-    #[OA\Response(response: 200, description: "Profil mis à jour")]
+    #[OA\Response(
+        response: 200, 
+        description: "Profil mis à jour",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "message", type: "string"),
+                new OA\Property(property: "user", type: "object"),
+                new OA\Property(
+                    property: "demo_notice", 
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "is_simulation", type: "boolean"),
+                        new OA\Property(property: "message", type: "string")
+                    ]
+                )
+            ]
+        )
+    )]
     public function update(Request $request)
     {
         $user = $request->user();
@@ -89,7 +106,11 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Profil mis à jour avec succès',
-            'user' => $user
+            'user' => $user,
+            'demo_notice' => [
+                'is_simulation' => true,
+                'message' => "MODÈLE DE SIMULATION : Le NIP a été vérifié auprès des services de l'ANIP. Votre identité est maintenant certifiée sur la blockchain."
+            ]
         ]);
     }
 
@@ -152,7 +173,25 @@ class UserController extends Controller
         tags: ["Utilisateurs"],
         security: [["sanctum" => []]],
         responses: [
-            new OA\Response(response: 200, description: "Données du certificat")
+            new OA\Response(
+                response: 200, 
+                description: "Données du certificat",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "title", type: "string"),
+                        new OA\Property(property: "user", type: "object"),
+                        new OA\Property(property: "performance", type: "object"),
+                        new OA\Property(
+                            property: "demo_notice", 
+                            type: "object",
+                            properties: [
+                                new OA\Property(property: "is_simulation", type: "boolean"),
+                                new OA\Property(property: "message", type: "string")
+                            ]
+                        )
+                    ]
+                )
+            )
         ]
     )]
     public function certificate(Request $request)
@@ -176,6 +215,10 @@ class UserController extends Controller
             ],
             'verification_link' => env('APP_URL') . "/verify/cert/" . $user->id,
             'timestamp' => now()->toDateTimeString(),
+            'demo_notice' => [
+                'is_simulation' => true,
+                'message' => "MODÈLE DE SIMULATION : Ce certificat est généré dynamiquement et peut être présenté à des institutions partenaires pour obtenir des micro-crédits basés sur votre fiabilité dans TontineChain."
+            ]
         ]);
     }
 

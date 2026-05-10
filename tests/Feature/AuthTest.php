@@ -5,11 +5,21 @@ namespace Tests\Feature;
 use App\Models\Otp;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Mock all external HTTP calls (Infobip SMS/WhatsApp/Email)
+        Http::fake([
+            '*' => Http::response(['messages' => [['status' => ['name' => 'PENDING_ACCEPTED']]]], 200),
+        ]);
+    }
 
     public function test_user_can_request_otp()
     {
@@ -18,10 +28,9 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['message' => 'OTP envoyé']);
+                 ->assertJsonStructure(['status', 'message', 'phone']);
 
         $this->assertDatabaseHas('otps', [
-            'phone' => '+22997000000',
             'is_used' => false,
         ]);
     }

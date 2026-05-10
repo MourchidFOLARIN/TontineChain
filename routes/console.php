@@ -11,3 +11,4 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('tontine:check-deadlines')->dailyAt('08:00');
 Schedule::command('tontine:send-reminders')->dailyAt('09:00');
+Schedule::command('tontine:close-bids')->hourly();

@@ -14,7 +14,23 @@ class IncidentController extends Controller
         security: [["sanctum" => []]],
         tags: ["Incidents"],
         responses: [
-            new OA\Response(response: 200, description: "Liste des incidents de l'utilisateur")
+            new OA\Response(
+                response: 200, 
+                description: "Liste des incidents",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "incidents", type: "array", items: new OA\Items(type: "object")),
+                        new OA\Property(
+                            property: "demo_notice", 
+                            type: "object",
+                            properties: [
+                                new OA\Property(property: "is_simulation", type: "boolean"),
+                                new OA\Property(property: "message", type: "string")
+                            ]
+                        )
+                    ]
+                )
+            )
         ]
     )]
     public function index(Request $request)
@@ -24,7 +40,13 @@ class IncidentController extends Controller
             ->orderBy('occurred_at', 'desc')
             ->get();
 
-        return response()->json($incidents);
+        return response()->json([
+            'incidents' => $incidents,
+            'demo_notice' => [
+                'is_simulation' => true,
+                'message' => "MODÈLE DE SIMULATION : Chaque retard impacte votre score de confiance en temps réel. Des alertes automatiques sont envoyées au membre et au créateur du groupe."
+            ]
+        ]);
     }
 
     #[OA\Get(

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Eye, Zap, Bot, MessageCircle, Link2, ChevronDown, ChevronRight, AlertTriangle, BookOpen, Users, ArrowRight, Menu, X, Fingerprint, Phone, Smartphone, CreditCard, TrendingUp, Lock, Wifi, Brain } from 'lucide-react';
-import logoSvg from '../assets/logo.svg';
+import logoOfficial from '../assets/logo_official.png';
 
 const LandingPage = ({ onNavigateLogin, theme, toggleTheme }) => {
   const [openFaq, setOpenFaq] = useState(null);
@@ -27,10 +27,10 @@ const LandingPage = ({ onNavigateLogin, theme, toggleTheme }) => {
     <div style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       {/* ===== NAVBAR ===== */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, background: 'var(--sidebar-bg)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--border-color)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src={logoSvg} alt="TontineChain Logo" style={{ width: 40, height: 40, filter: 'drop-shadow(0 2px 8px rgba(243,156,18,0.4))' }} />
-            <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 20 }}>TontineChain</span>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 80 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img src={logoOfficial} alt="TontineChain Logo" style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid var(--tontine-gold)', filter: 'drop-shadow(0 2px 10px rgba(243,156,18,0.3))' }} />
+            <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 800, fontSize: 22 }}>TontineChain</span>
           </div>
 
           {/* Desktop nav */}
@@ -327,8 +327,8 @@ const LandingPage = ({ onNavigateLogin, theme, toggleTheme }) => {
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32, marginBottom: 32 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <img src={logoSvg} alt="TontineChain Logo" style={{ width: 36, height: 36 }} />
-              <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 16 }}>TontineChain</span>
+              <img src={logoOfficial} alt="TontineChain Logo" style={{ width: 44, height: 44, borderRadius: '50%', border: '1px solid var(--tontine-gold)' }} />
+              <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 800, fontSize: 18 }}>TontineChain</span>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6 }}>Sécurisez vos tontines avec la blockchain Polygon.</p>
           </div>

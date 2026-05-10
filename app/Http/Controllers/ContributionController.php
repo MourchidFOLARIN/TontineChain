@@ -42,7 +42,25 @@ class ContributionController extends Controller
         security: [["sanctum" => []]]
     )]
     #[OA\Parameter(name: "contribution", in: "path", required: true, schema: new OA\Schema(type: "string"))]
-    #[OA\Response(response: 200, description: "Lien de paiement généré")]
+    #[OA\Response(
+        response: 200, 
+        description: "Lien de paiement généré",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "id", type: "integer"),
+                new OA\Property(property: "reference", type: "string"),
+                new OA\Property(property: "url", type: "string"),
+                new OA\Property(
+                    property: "demo_notice", 
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "is_simulation", type: "boolean"),
+                        new OA\Property(property: "message", type: "string")
+                    ]
+                )
+            ]
+        )
+    )]
     public function initiate(Request $request, Contribution $contribution)
     {
         $user = $request->user();
@@ -57,6 +75,10 @@ class ContributionController extends Controller
 
         try {
             $paymentData = $this->payment->initiatePayment($contribution, $user);
+            $paymentData['demo_notice'] = [
+                'is_simulation' => true,
+                'message' => "MODÈLE DE SIMULATION : Le lien de paiement FedaPay a été généré (Réf: " . ($paymentData['reference'] ?? 'REF_DEMO') . "). En production, l'utilisateur est redirigé vers MTN/Moov Money pour valider le débit de " . number_format($contribution->amount_fcfa, 0, ',', ' ') . " FCFA."
+            ];
             return response()->json($paymentData);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

@@ -59,6 +59,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/groups/{group}/join', [GroupController::class, 'join']);
         Route::post('/groups/{group}/start', [GroupController::class, 'start']);
         Route::get('/groups/{group}/stats', [GroupController::class, 'stats']);
+        Route::get('/groups/{group}/contract', [GroupController::class, 'downloadContract']);
         Route::post('/groups/{group}/propose-swap', [VoteController::class, 'proposeSwap']);
         Route::post('/groups/{group}/bid', [BiddingController::class, 'submitBid']);
         Route::get('/groups/{group}/bids', [BiddingController::class, 'index']);

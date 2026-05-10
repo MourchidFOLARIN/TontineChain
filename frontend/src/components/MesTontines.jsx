@@ -1,132 +1,131 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Users, TrendingUp, ShieldCheck, Clock, ChevronRight, Plus } from 'lucide-react';
+import { ArrowLeft, Users, TrendingUp, ShieldCheck, Clock, ChevronRight, Plus, Search } from 'lucide-react';
 
 const MesTontines = ({ groups, onSelectGroup, onNewGroup, onBack }) => {
   const getProgressColor = (pct) => {
-    if (pct >= 75) return '#10b981';
-    if (pct >= 40) return '#f39c12';
-    return '#3b82f6';
+    if (pct >= 75) return 'text-green-400';
+    if (pct >= 40) return 'text-tontine-orange';
+    return 'text-blue-400';
+  };
+
+  const getProgressBg = (pct) => {
+    if (pct >= 75) return 'bg-green-400';
+    if (pct >= 40) return 'bg-tontine-orange';
+    return 'bg-blue-400';
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+    <div className="flex flex-col h-full bg-tontine-darker min-h-screen">
       {/* Header */}
-      <div style={{
-        padding: '20px 24px',
-        borderBottom: '1px solid var(--border-color)',
-        background: 'var(--bg-secondary)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex' }}>
+      <div className="p-4 md:p-6 glass-panel flex items-center justify-between border-b border-white/5 sticky top-0 z-30">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white">
             <ArrowLeft size={22} />
           </button>
           <div>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, fontFamily: 'Playfair Display, serif' }}>Mes Tontines</h2>
-            <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)' }}>{groups.length} groupe{groups.length > 1 ? 's' : ''} actif{groups.length > 1 ? 's' : ''}</p>
+            <h2 className="text-xl md:text-2xl font-bold font-playfair">Mes Tontines</h2>
+            <p className="text-[10px] md:text-xs text-gray-500 uppercase font-black tracking-widest">
+              {groups.length} Groupe{groups.length > 1 ? 's' : ''} Actif{groups.length > 1 ? 's' : ''}
+            </p>
           </div>
         </div>
-        <button onClick={onNewGroup} className="btn-primary" style={{ padding: '10px 18px', fontSize: 13 }}>
-          <Plus size={16} /> Créer
+        <button onClick={onNewGroup} className="btn-primary p-3 md:px-6 md:py-3 rounded-2xl flex items-center gap-2 text-xs md:text-sm">
+          <Plus size={18} /> <span className="hidden sm:inline">Créer</span>
         </button>
       </div>
 
-      {/* Stats Bar */}
-      <div style={{ padding: '16px 24px', display: 'flex', gap: 16, overflowX: 'auto' }} className="hide-scrollbar">
-        {[
-          { label: 'Total épargné', value: `${(groups.reduce((s, g) => s + g.amount, 0)).toLocaleString()} FCFA`, icon: <TrendingUp size={16} color="#10b981" />, color: '#10b981' },
-          { label: 'Groupes actifs', value: groups.length, icon: <Users size={16} color="#3b82f6" />, color: '#3b82f6' },
-          { label: 'Score moyen', value: '95/100', icon: <ShieldCheck size={16} color="#f39c12" />, color: '#f39c12' },
-        ].map((stat, i) => (
-          <div key={i} className="card" style={{ flexShrink: 0, minWidth: 140, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: `${stat.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {stat.icon}
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>{stat.value}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{stat.label}</div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Main Content */}
+      <div className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full">
+        
+        {/* Search Bar (Static for UI) */}
+        <div className="relative mb-8">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+          <input 
+            type="text" 
+            placeholder="Rechercher une tontine..." 
+            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 outline-none focus:ring-2 focus:ring-tontine-orange transition-all text-sm"
+          />
+        </div>
 
-      {/* Groups list */}
-      <div style={{ padding: '8px 24px 40px' }}>
         {groups.length === 0 ? (
-          <div style={{ textAlign: 'center', paddingTop: 80 }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🏦</div>
-            <h3 style={{ fontWeight: 700, marginBottom: 8 }}>Aucune tontine pour le moment</h3>
-            <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>Créez votre première tontine ou rejoignez un groupe existant.</p>
-            <button onClick={onNewGroup} className="btn-primary">Créer une tontine <ChevronRight size={16} /></button>
+          <div className="flex flex-col items-center justify-center pt-20 text-center">
+            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/5">
+              <Users size={40} className="text-gray-600" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Aucune tontine trouvée</h3>
+            <p className="text-sm text-gray-500 mb-8 max-w-xs">
+              Vous n'avez pas encore rejoint de tontine. Commencez par en créer une ou rejoignez un groupe.
+            </p>
+            <button onClick={onNewGroup} className="btn-primary px-8 py-4 rounded-2xl font-bold shadow-xl shadow-tontine-orange/20">
+              Démarrer Maintenant
+            </button>
           </div>
         ) : (
-          groups.map((group, i) => {
-            const pct = Math.round((group.current_cycle / group.members) * 100);
-            const color = getProgressColor(pct);
-            return (
-              <motion.div
-                key={group.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 }}
-                className="card"
-                onClick={() => onSelectGroup(group)}
-                style={{ marginBottom: 14, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 14 }}
-              >
-                {/* Top row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 46, height: 46, borderRadius: 14, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Users size={22} color={color} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {groups.map((group, i) => {
+              const pct = Math.round((group.current_cycle / group.members) * 100);
+              const colorClass = getProgressColor(pct);
+              const bgClass = getProgressBg(pct);
+              
+              return (
+                <motion.div
+                  key={group.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  onClick={() => onSelectGroup(group)}
+                  className="glass-panel p-6 rounded-3xl hover:border-tontine-orange/30 transition-all cursor-pointer group flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform ${colorClass}`}>
+                          <Users size={24} />
+                        </div>
+                        <div className="min-w-0 pr-4">
+                          <h3 className="font-bold text-base md:text-lg truncate group-hover:text-tontine-orange transition-colors">{group.name}</h3>
+                          <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{group.cycle}</span>
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-lg font-black text-white">{group.amount.toLocaleString()} <span className="text-xs text-tontine-gold">F</span></div>
+                        <p className="text-[10px] text-gray-600 font-bold">{group.members} MEMBRES</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>{group.name}</h3>
-                      <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)' }}>
-                        Leader : {group.leader || 'N/A'} • {group.members} membres
-                      </p>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: '#f39c12' }}>
-                      {group.amount.toLocaleString()} <span style={{ fontSize: 11 }}>FCFA</span>
-                    </div>
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, background: `${color}18`, color }}>
-                      {group.cycle}
-                    </span>
-                  </div>
-                </div>
 
-                {/* Progress */}
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 12 }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Cycle {group.current_cycle}/{group.members}</span>
-                    <span style={{ color, fontWeight: 700 }}>{pct}%</span>
+                    <div className="space-y-3 mb-8">
+                      <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter">
+                        <span className="text-gray-500">Collecte Cycle {group.current_cycle}/{group.members}</span>
+                        <span className={colorClass}>{pct}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${bgClass}`} 
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ height: 6, borderRadius: 6, background: 'var(--bg-card-hover)', overflow: 'hidden' }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pct}%` }}
-                      transition={{ duration: 0.8, delay: i * 0.1 }}
-                      style={{ height: '100%', borderRadius: 6, background: `linear-gradient(90deg, ${color}, ${color}bb)` }}
-                    />
-                  </div>
-                </div>
 
-                {/* Code + CTA */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace', background: 'var(--bg-card-hover)', padding: '3px 8px', borderRadius: 6 }}>
-                    #{group.code || group.id}
-                  </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#f39c12', fontSize: 13, fontWeight: 600 }}>
-                    Voir les détails <ChevronRight size={14} />
+                  <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
+                      <ShieldCheck size={14} className="text-green-500" />
+                      <span>Immuable</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs font-bold text-tontine-orange opacity-0 group-hover:opacity-100 transition-opacity">
+                      Gérer <ChevronRight size={14} />
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            );
-          })
+                </motion.div>
+              );
+            })}
+          </div>
         )}
       </div>
+
+      {/* Footer Space for Bottom Nav */}
+      <div className="h-20 md:hidden" />
     </div>
   );
 };

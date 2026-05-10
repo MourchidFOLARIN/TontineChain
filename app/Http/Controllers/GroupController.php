@@ -9,6 +9,9 @@ use App\Services\BlockchainService;
 use App\Services\RiskAnalysisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TontineContractMail;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use OpenApi\Attributes as OA;
 
@@ -124,7 +127,25 @@ class GroupController extends Controller
         security: [["sanctum" => []]]
     )]
     #[OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))]
-    #[OA\Response(response: 200, description: "Tontine démarrée")]
+    #[OA\Response(
+        response: 200, 
+        description: "Tontine démarrée",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "message", type: "string"),
+                new OA\Property(property: "contract_address", type: "string"),
+                new OA\Property(
+                    property: "demo_notice", 
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "is_simulation", type: "boolean"),
+                        new OA\Property(property: "blockchain_tx", type: "string"),
+                        new OA\Property(property: "message", type: "string")
+                    ]
+                )
+            ]
+        )
+    )]
     public function start(Request $request, Group $group)
     {
         $user = $request->user();
@@ -141,7 +162,10 @@ class GroupController extends Controller
             return response()->json(['error' => "Groupe incomplet"], 400);
         }
 
-        return DB::transaction(function () use ($group) {
+        return DB::transaction(function () use ($group, $user) {
+            // Appliquer la langue préférée de l'utilisateur pour l'email
+            app()->setLocale($user->preferred_language ?? 'fr');
+
             $members = $group->members()->where('status', 'active')->get();
 
             if ($group->payout_method === 'random') {
@@ -168,9 +192,25 @@ class GroupController extends Controller
                 'next_due_date' => Carbon::parse($group->start_date),
             ]);
 
+            try {
+                $group->load(['creator', 'members.user']);
+                $pdf = Pdf::loadView('pdf.tontine_contract', ['group' => $group]);
+                $pdfContent = $pdf->output();
+
+                $recipientEmail = $group->creator->email ?? 'mourchidolawale@gmail.com';
+                Mail::to($recipientEmail)->send(new TontineContractMail($group, $pdfContent));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Erreur génération/envoi PDF: " . $e->getMessage());
+            }
+
             return response()->json([
                 'message' => "Tontine démarrée",
-                'contract_address' => $group->contract_address
+                'contract_address' => $group->contract_address,
+                'demo_notice' => [
+                    'is_simulation' => true,
+                    'blockchain_tx' => $group->contract_tx_hash,
+                    'message' => "MODÈLE DE SIMULATION : Le contrat intelligent a été déployé sur Polygon (Tx: " . substr($group->contract_tx_hash, 0, 15) . "...). Le contrat PDF a été généré et envoyé par Email au créateur. En production, chaque membre reçoit une copie certifiée."
+                ]
             ]);
         });
     }
@@ -181,7 +221,24 @@ class GroupController extends Controller
         tags: ["Groupes"],
         security: [["sanctum" => []]]
     )]
-    #[OA\Response(response: 200, description: "Invitation envoyée")]
+    #[OA\Response(
+        response: 200, 
+        description: "Invitation envoyée",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "message", type: "string"),
+                new OA\Property(property: "member_analysis", type: "object"),
+                new OA\Property(
+                    property: "demo_notice", 
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "is_simulation", type: "boolean"),
+                        new OA\Property(property: "message", type: "string")
+                    ]
+                )
+            ]
+        )
+    )]
     public function invite(Request $request, Group $group)
     {
         $request->validate([
@@ -229,6 +286,10 @@ class GroupController extends Controller
                 'score' => $user->score_confiance,
                 'trust_level' => $trustLevel['label'],
                 'trust_message' => $trustLevel['message']
+            ],
+            'demo_notice' => [
+                'is_simulation' => true,
+                'message' => "MODÈLE DE SIMULATION : L'invité va recevoir un SMS/WhatsApp contenant le lien d'adhésion (Ex: https://tontinechain.app/join/" . substr($group->id, 0, 8) . "), accompagné d'un guide vocal en " . ($user->preferred_language ?? 'Yoruba') . " pour expliquer le fonctionnement."
             ]
         ]);
     }
@@ -294,5 +355,30 @@ class GroupController extends Controller
             ],
             'ai_risk_prediction' => $riskAnalysis
         ]);
+    }
+
+    #[OA\Get(
+        path: "/api/v1/groups/{group}/contract",
+        summary: "Télécharger le contrat PDF de la tontine",
+        tags: ["Groupes"],
+        security: [["sanctum" => []]],
+        parameters: [
+            new OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Fichier PDF du contrat"),
+            new OA\Response(response: 404, description: "Contrat non disponible (tontine non démarrée)")
+        ]
+    )]
+    public function downloadContract(Group $group)
+    {
+        if ($group->status === 'pending') {
+            return response()->json(['error' => 'La tontine n\'a pas encore démarré.'], 404);
+        }
+
+        $group->load(['creator', 'members.user']);
+        $pdf = Pdf::loadView('pdf.tontine_contract', ['group' => $group]);
+        
+        return $pdf->download('Contrat_Tontine_'.$group->name.'.pdf');
     }
 }

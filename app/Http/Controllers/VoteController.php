@@ -29,7 +29,24 @@ class VoteController extends Controller
             )
         )
     )]
-    #[OA\Response(response: 201, description: "Proposition créée")]
+    #[OA\Response(
+        response: 201, 
+        description: "Proposition créée",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "id", type: "string"),
+                new OA\Property(property: "status", type: "string"),
+                new OA\Property(
+                    property: "demo_notice", 
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "is_simulation", type: "boolean"),
+                        new OA\Property(property: "message", type: "string")
+                    ]
+                )
+            ]
+        )
+    )]
     public function proposeSwap(Request $request, Group $group)
     {
         $user = $request->user();
@@ -59,6 +76,11 @@ class VoteController extends Controller
             'expires_at' => now()->addHours(24),
         ]);
 
+        $vote->demo_notice = [
+            'is_simulation' => true,
+            'message' => "MODÈLE DE SIMULATION : Une notification de vote a été envoyée à tous les membres du groupe par SMS et WhatsApp. Ils peuvent maintenant voter pour approuver ou rejeter votre demande d'échange."
+        ];
+
         return response()->json($vote, 201);
     }
 
@@ -79,7 +101,24 @@ class VoteController extends Controller
             )
         )
     )]
-    #[OA\Response(response: 200, description: "Vote enregistré")]
+    #[OA\Response(
+        response: 200, 
+        description: "Vote enregistré",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "message", type: "string"),
+                new OA\Property(property: "current_status", type: "string"),
+                new OA\Property(
+                    property: "demo_notice", 
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "is_simulation", type: "boolean"),
+                        new OA\Property(property: "message", type: "string")
+                    ]
+                )
+            ]
+        )
+    )]
     public function castVote(Request $request, Vote $vote)
     {
         $user = $request->user();
@@ -114,7 +153,14 @@ class VoteController extends Controller
                 $vote->update(['status' => 'rejected']);
             }
 
-            return response()->json(['message' => 'Vote enregistré', 'current_status' => $vote->status]);
+            return response()->json([
+                'message' => 'Vote enregistré', 
+                'current_status' => $vote->status,
+                'demo_notice' => [
+                    'is_simulation' => true,
+                    'message' => "MODÈLE DE SIMULATION : Votre vote a été enregistré. Si le quorum est atteint, la nouvelle position de ramassage sera ancrée sur la blockchain."
+                ]
+            ]);
         });
     }
 

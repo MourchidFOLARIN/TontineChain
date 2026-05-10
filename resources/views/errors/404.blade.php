@@ -1,5 +1,6 @@
 @extends('errors::minimal')
 
-@section('title', __('Not Found'))
+@section('title', 'Page Introuvable')
 @section('code', '404')
-@section('message', __('Not Found'))
+@section('icon', '🔍')
+@section('message', 'La ressource que vous recherchez semble avoir disparu dans les méandres de la blockchain.')

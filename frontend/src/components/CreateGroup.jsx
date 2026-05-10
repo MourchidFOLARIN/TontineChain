@@ -3,13 +3,17 @@ import { motion } from 'framer-motion';
 import { Users, Wallet, Calendar, Shield, ArrowLeft, Loader2, Plus } from 'lucide-react';
 import { createGroup } from '../services/api';
 
+import logoOfficial from '../assets/logo_official.png';
+
 const CreateGroup = ({ onBack, onCreate }) => {
   const [formData, setFormData] = useState({
     name: '',
-    amount: 10000,
+    contribution_amount: 10000,
     frequency: 'monthly',
     max_members: 10,
-    insurance_percent: 5
+    payout_method: 'sequential',
+    insurance_opt_in: true,
+    start_date: new Date(Date.now() + 86400000).toISOString().split('T')[0] // Demain par défaut
   });
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +39,10 @@ const CreateGroup = ({ onBack, onCreate }) => {
           <ArrowLeft className="w-5 h-5" /> Retour
         </button>
 
-        <h1 className="text-3xl font-playfair font-bold mb-8">Créer une nouvelle Tontine</h1>
+        <div className="flex items-center gap-4 mb-8">
+          <img src={logoOfficial} alt="Logo" className="w-12 h-12 rounded-full border border-tontine-gold" />
+          <h1 className="text-2xl md:text-3xl font-playfair font-bold">Nouvelle Tontine</h1>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="glass-panel p-6 rounded-2xl space-y-5">
@@ -57,8 +64,8 @@ const CreateGroup = ({ onBack, onCreate }) => {
                 <Wallet className="absolute left-3 top-3.5 w-5 h-5 text-gray-500" />
                 <input
                   type="number"
-                  value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                  value={formData.contribution_amount}
+                  onChange={(e) => setFormData({ ...formData, contribution_amount: e.target.value })}
                   className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-tontine-orange outline-none transition-all font-bold"
                   required
                 />
@@ -95,19 +102,45 @@ const CreateGroup = ({ onBack, onCreate }) => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Caisse de Secours (%)</label>
-              <div className="relative">
-                <Shield className="absolute left-3 top-3.5 w-5 h-5 text-gray-500" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Méthode de Gain</label>
+                <select
+                  value={formData.payout_method}
+                  onChange={(e) => setFormData({ ...formData, payout_method: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-tontine-orange outline-none transition-all appearance-none"
+                >
+                  <option value="sequential">Séquentiel</option>
+                  <option value="random">Aléatoire</option>
+                  <option value="bidding">Enchères</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Date de Début</label>
                 <input
-                  type="number"
-                  value={formData.insurance_percent}
-                  onChange={(e) => setFormData({ ...formData, insurance_percent: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-tontine-orange outline-none transition-all"
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-tontine-orange outline-none transition-all"
                   required
                 />
               </div>
-              <p className="text-[10px] text-gray-500 mt-2">Part prélevée pour les urgences du groupe.</p>
+            </div>
+
+            <div className="flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/5">
+              <div className="flex items-center gap-3">
+                <Shield className="w-5 h-5 text-tontine-orange" />
+                <div>
+                  <p className="text-sm font-bold">Fonds de Garantie (1%)</p>
+                  <p className="text-[10px] text-gray-500">Protection contre les impayés.</p>
+                </div>
+              </div>
+              <input 
+                type="checkbox" 
+                checked={formData.insurance_opt_in}
+                onChange={(e) => setFormData({ ...formData, insurance_opt_in: e.target.checked })}
+                className="w-5 h-5 rounded border-gray-600 bg-gray-700 text-tontine-orange focus:ring-tontine-orange"
+              />
             </div>
           </div>
 

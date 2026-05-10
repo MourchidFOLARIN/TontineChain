@@ -1,6 +1,6 @@
 import React from 'react';
 import { LayoutDashboard, FolderOpen, PlusCircle, UserPlus, CreditCard, MessageCircle, Bot, User, Settings, LogOut, Sun, Moon, ShieldCheck, X } from 'lucide-react';
-import logoSvg from '../assets/logo.svg';
+import logoOfficial from '../assets/logo_official.png';
 
 const Sidebar = ({ currentView, onNavigate, onLogout, theme, toggleTheme, mobileOpen, onCloseMobile }) => {
   const links = [
@@ -24,10 +24,10 @@ const Sidebar = ({ currentView, onNavigate, onLogout, theme, toggleTheme, mobile
       
       <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
         {/* Logo */}
-        <div style={{ padding: '20px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src={logoSvg} alt="TontineChain" style={{ width: 38, height: 38, filter: 'drop-shadow(0 2px 6px rgba(243,156,18,0.35))' }} />
-            <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 17 }}>TontineChain</span>
+        <div style={{ padding: '24px 20px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img src={logoOfficial} alt="TontineChain" style={{ width: 44, height: 44, borderRadius: '50%', border: '2px solid var(--tontine-gold)' }} />
+            <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 800, fontSize: 18, color: 'white' }}>TontineChain</span>
           </div>
           <button onClick={onCloseMobile} className="md:hidden" style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
             <X size={20} />

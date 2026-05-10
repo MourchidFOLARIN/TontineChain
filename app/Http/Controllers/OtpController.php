@@ -29,11 +29,32 @@ class OtpController extends Controller
         required: true,
         content: new OA\JsonContent(
             properties: [
-                new OA\Property(property: "phone", type: "string", example: "+22997000000")
+                new OA\Property(property: "phone", type: "string", example: "+22997000000"),
+                new OA\Property(property: "email", type: "string", example: "user@example.com"),
+                new OA\Property(property: "locale", type: "string", example: "yor", description: "Langue préférée (fr, yor, fon)")
             ]
         )
     )]
-    #[OA\Response(response: 200, description: "OTP envoyé")]
+    #[OA\Response(
+        response: 200, 
+        description: "OTP envoyé",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "status", type: "string"),
+                new OA\Property(property: "message", type: "string"),
+                new OA\Property(property: "phone", type: "string"),
+                new OA\Property(
+                    property: "demo_notice", 
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "is_simulation", type: "boolean"),
+                        new OA\Property(property: "otp_code", type: "integer"),
+                        new OA\Property(property: "message", type: "string")
+                    ]
+                )
+            ]
+        )
+    )]
     #[OA\Response(response: 422, description: "Erreur de validation")]
     public function requestOtp(Request $request)
     {
@@ -42,8 +63,11 @@ class OtpController extends Controller
             'email' => 'sometimes|email',
         ]);
 
+        // Gestion de la langue (fr par défaut, support yor)
+        app()->setLocale($request->input('locale', 'fr'));
+
         $phone = $this->sms->normalizePhone($request->phone);
-        $code = rand(1000, 9999);
+        $code = rand(100000, 999999);
 
         // On stocke l'OTP
         Otp::create([
@@ -53,8 +77,8 @@ class OtpController extends Controller
             'purpose' => 'login'
         ]);
 
-        // Envoi SMS + WhatsApp réel via Infobip
-        $message = "Votre code TontineChain est : $code. Ne le partagez pas.";
+        // Envoi SMS + WhatsApp réel via Infobip (Traduit)
+        $message = __('messages.otp_message') . " $code. " . __('messages.otp_expiry');
         $this->sms->notify($phone, $message, $request->email);
 
         // Toujours garder un log pour le dev
@@ -63,7 +87,12 @@ class OtpController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Le code OTP a été envoyé par WhatsApp/SMS.',
-            'phone' => $phone // On renvoie le numéro normalisé pour le front
+            'phone' => $phone,
+            'demo_notice' => [
+                'is_simulation' => true,
+                'otp_code' => $code,
+                'message' => "MODÈLE DE SIMULATION : Votre code est $code. Dans la version finale, ce message est envoyé instantanément par Email, SMS, WhatsApp et Telegram. Le système est déjà configuré pour ces canaux."
+            ]
         ]);
     }
 
@@ -130,8 +159,14 @@ class OtpController extends Controller
                 'wallet_address' => $walletAddress,
                 'score_confiance' => 100,
                 'kyc_status' => 'none',
+                'preferred_language' => $request->input('locale', 'fr'),
                 'is_active' => true,
             ]);
+        } else {
+            // Mettre à jour la langue si elle est précisée
+            if ($request->has('locale')) {
+                $user->update(['preferred_language' => $request->locale]);
+            }
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

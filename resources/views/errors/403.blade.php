@@ -1,5 +1,6 @@
 @extends('errors::minimal')
 
-@section('title', __('Forbidden'))
+@section('title', 'Accès Refusé')
 @section('code', '403')
-@section('message', __($exception->getMessage() ?: 'Forbidden'))
+@section('icon', '🚫')
+@section('message', 'Vous n\'avez pas les permissions nécessaires pour accéder à cette ressource d\'élite.')

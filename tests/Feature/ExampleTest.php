@@ -2,17 +2,17 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
     /**
-     * A basic test example.
+     * Test que l'API est accessible.
      */
     public function test_the_application_returns_a_successful_response(): void
     {
-        $response = $this->get('/');
+        // On teste l'endpoint API santé au lieu de la page web (qui nécessite Vite)
+        $response = $this->getJson('/api/v1/health');
 
         $response->assertStatus(200);
     }

@@ -26,6 +26,7 @@ class GroupTest extends TestCase
             'contribution_amount' => 5000,
             'max_members' => 5,
             'frequency' => 'monthly',
+            'payout_method' => 'sequential',
             'start_date' => now()->addDays(7)->toIso8601String(),
         ]);
 
@@ -47,6 +48,7 @@ class GroupTest extends TestCase
             'contribution_amount' => 1000,
             'max_members' => 2,
             'frequency' => 'weekly',
+            'payout_method' => 'sequential',
         ]);
 
         // Mock invitation
