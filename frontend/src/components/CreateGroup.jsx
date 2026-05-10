@@ -112,7 +112,6 @@ const CreateGroup = ({ onBack, onCreate }) => {
                 >
                   <option value="sequential">Séquentiel</option>
                   <option value="random">Aléatoire</option>
-                  <option value="bidding">Enchères</option>
                 </select>
               </div>
               <div>

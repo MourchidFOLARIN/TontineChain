@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Send, Sparkles, TrendingUp, CalendarClock, HelpCircle, ArrowLeft, ShieldCheck, Loader2 } from 'lucide-react';
+import api from '../services/api';
 
 const AssistantYAO = ({ onBack, user }) => {
   const [messages, setMessages] = useState([
@@ -21,27 +22,11 @@ const AssistantYAO = ({ onBack, user }) => {
     { icon: <HelpCircle size={16} />, label: "Sécurité Blockchain", query: "Comment fonctionne la sécurité ?" },
   ];
 
-  const aiResponses = {
-    "épargne": `📊 **Analyse de votre profil**\n\nVoici votre bilan actuel :\n• **Score de confiance** : ${user?.score_confiance || 95}/100 ⭐\n• **Statut** : Membre Elite\n• **Fiabilité** : Excellente\n\n💡 Conseil : Votre profil est dans le **Top 5%** des utilisateurs. Continuez ainsi pour débloquer des tontines à capital élevé (jusqu'à 5.000.000 FCFA).`,
-    "échéance": `📅 **Vos prochaines échéances**\n\n• **Tontine Dantokpa** — Demain (50 000 FCFA)\n• **Artisans Bénin** — Dans 5 jours (25 000 FCFA)\n\n⏰ N'oubliez pas que chaque paiement à temps augmente votre score de confiance de +0.5 point.`,
-    "optimiser": `💡 **Conseils Stratégiques**\n\n1. **Règle des 20%** : Ne consacrez pas plus de 20% de vos revenus mensuels aux tontines.\n2. **Diversification** : Combinez une tontine hebdomadaire pour les flux et une mensuelle pour l'épargne projet.\n3. **Assurance** : Activez l'option de secours pour protéger vos cotisations en cas d'imprévu.\n\n📈 Votre score actuel vous permet déjà de parrainer de nouveaux membres.`,
-    "sécurité": `🔗 **Sécurité Blockchain & IA**\n\nSur TontineChain, votre argent est protégé par :\n1. **Smart Contracts** immuables (code sur Polygon).\n2. **Identité Vérifiée** (NPI/KYC).\n3. **IA YAO** (moi-même) qui surveille les comportements suspects.\n\n🛡️ Aucun administrateur ne peut toucher à vos fonds. La distribution est 100% automatique.`,
-  };
-
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const getAiResponse = (query) => {
-    const q = query.toLowerCase();
-    if (q.includes('épargne') || q.includes('analyse')) return aiResponses['épargne'];
-    if (q.includes('échéance') || q.includes('prochaine') || q.includes('quand')) return aiResponses['échéance'];
-    if (q.includes('optimis') || q.includes('conseil') || q.includes('vip')) return aiResponses['optimiser'];
-    if (q.includes('sécurité') || q.includes('fonctionne') || q.includes('blockchain')) return aiResponses['sécurité'];
-    return `Merci pour votre question ! 🤔\n\nJe suis optimisé pour le hackathon MIABE 2026. Je peux vous aider sur la sécurité, vos échéances ou l'optimisation de vos gains.\n\nDites-moi ce qui vous préoccupe !`;
-  };
-
-  const handleSend = (text) => {
+  const handleSend = async (text) => {
     const msg = text || input;
     if (!msg.trim()) return;
 
@@ -49,10 +34,24 @@ const AssistantYAO = ({ onBack, user }) => {
     setInput('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'ai', text: getAiResponse(msg), time: 'Maintenant' }]);
+    try {
+      const response = await api.post('/ai/chat', { message: msg });
+      
+      setMessages(prev => [...prev, { 
+        role: 'ai', 
+        text: response.data.message, 
+        time: 'Maintenant',
+        analysis: response.data.demo_notice?.message 
+      }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { 
+        role: 'ai', 
+        text: "Désolé, j'ai eu un petit souci de connexion à mon cerveau. Pouvez-vous répéter ?", 
+        time: 'Maintenant' 
+      }]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const renderText = (text) => {
@@ -121,6 +120,11 @@ const AssistantYAO = ({ onBack, user }) => {
                 <div className="space-y-1">
                   <div className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user text-sm' : 'chat-bubble-ai text-sm shadow-xl'}`}>
                     {renderText(msg.text)}
+                    {msg.analysis && (
+                      <div className="mt-3 pt-2 border-t border-white/10 italic text-[10px] text-tontine-gold">
+                        ✨ {msg.analysis}
+                      </div>
+                    )}
                   </div>
                   <p className={`text-[8px] text-gray-600 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
                     {msg.time}
@@ -137,7 +141,7 @@ const AssistantYAO = ({ onBack, user }) => {
                   <Loader2 size={16} className="text-tontine-darker animate-spin" />
                 </div>
                 <div className="chat-bubble chat-bubble-ai text-[10px] italic flex items-center gap-2">
-                  YAO analyse votre demande...
+                  YAO analyse vos données en temps réel...
                 </div>
               </div>
             </motion.div>
@@ -167,7 +171,7 @@ const AssistantYAO = ({ onBack, user }) => {
           </button>
         </form>
         <p className="text-center text-[9px] text-gray-600 mt-4 uppercase tracking-widest font-bold">
-          Sécurisé par Intelligence Artificielle & Blockchain 🇧🇯
+          Analyses dynamiques basées sur vos cotisations réelles 🇧🇯
         </p>
       </div>
     </div>

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Otp extends Model
+class Message extends Model
 {
     protected $primaryKey = 'id';
     public $incrementing = false;
@@ -13,18 +13,14 @@ class Otp extends Model
 
     protected $fillable = [
         'id',
-        'phone',
-        'email',
-        'code_hash',
-        'purpose',
-        'is_used',
-        'attempts',
-        'expires_at',
+        'group_id',
+        'user_id',
+        'content',
+        'is_system',
     ];
 
     protected $casts = [
-        'is_used' => 'boolean',
-        'expires_at' => 'datetime',
+        'is_system' => 'boolean',
     ];
 
     protected static function boot()
@@ -35,5 +31,15 @@ class Otp extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
     }
 }

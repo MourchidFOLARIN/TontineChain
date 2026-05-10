@@ -7,6 +7,8 @@ use App\Models\GroupMember;
 use App\Models\Vote;
 use App\Models\VoteRecord;
 use Illuminate\Http\Request;
+use App\Mail\TontineNotificationMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
 
@@ -75,6 +77,22 @@ class VoteController extends Controller
             'status' => 'pending',
             'expires_at' => now()->addHours(24),
         ]);
+
+        // --- ENVOI EMAIL RÉEL À TOUT LE GROUPE ---
+        $targetUser = \App\Models\User::find($targetUserId);
+        foreach ($group->members as $member) {
+            if ($member->user && $member->user->email) {
+                $content = $user->full_name . " a proposé d'échanger sa position de ramassage avec " . ($targetUser->full_name ?? 'un autre membre') . ".\n\n" .
+                           "Votre vote est requis pour valider cet échange.\n" .
+                           "La décision sera ancrée sur la blockchain une fois le quorum atteint.";
+                
+                Mail::to($member->user->email)->queue(new TontineNotificationMail(
+                    "Nouveau Vote : Échange de position dans " . $group->name,
+                    $content,
+                    env('APP_URL') . "/votes"
+                ));
+            }
+        }
 
         $vote->demo_notice = [
             'is_simulation' => true,

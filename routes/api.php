@@ -8,8 +8,9 @@ use App\Http\Controllers\PayoutController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\TontineNotificationController;
 use App\Http\Controllers\VoteController;
-use App\Http\Controllers\BiddingController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\AiController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SwaggerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +44,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/me', [UserController::class, 'me']);
         Route::patch('/users/me', [UserController::class, 'update']);
+        Route::post('/user/profile', [UserController::class, 'profile']);
         Route::get('/users/me/score', [UserController::class, 'score']);
         Route::get('/users/me/payouts', [UserController::class, 'payouts']);
         Route::get('/users/me/balance', [UserController::class, 'balance']);
@@ -59,10 +61,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/groups/{group}/join', [GroupController::class, 'join']);
         Route::post('/groups/{group}/start', [GroupController::class, 'start']);
         Route::get('/groups/{group}/stats', [GroupController::class, 'stats']);
+        Route::get('/groups/{group}/messages', [MessageController::class, 'index']);
+        Route::post('/groups/{group}/messages', [MessageController::class, 'store']);
         Route::get('/groups/{group}/contract', [GroupController::class, 'downloadContract']);
         Route::post('/groups/{group}/propose-swap', [VoteController::class, 'proposeSwap']);
-        Route::post('/groups/{group}/bid', [BiddingController::class, 'submitBid']);
-        Route::get('/groups/{group}/bids', [BiddingController::class, 'index']);
 
         // Contribution Routes
         Route::get('/contributions/pending', [ContributionController::class, 'pending']);
@@ -80,6 +82,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/votes', [VoteController::class, 'index']);
         Route::get('/votes/{vote}', [VoteController::class, 'show']);
         Route::post('/votes/{vote}/cast', [VoteController::class, 'castVote']);
+
+        // AI Assistant (YAO)
+        Route::post('/ai/chat', [AiController::class, 'chat']);
     });
 
     // Webhooks

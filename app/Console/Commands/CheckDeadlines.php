@@ -8,7 +8,9 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use App\Services\NotificationService;
+use App\Mail\TontineNotificationMail;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\MessageController;
 
 class CheckDeadlines extends Command
 {
@@ -17,10 +19,9 @@ class CheckDeadlines extends Command
 
     protected $notifications;
 
-    public function __construct(NotificationService $notifications)
+    public function __construct()
     {
         parent::__construct();
-        $this->notifications = $notifications;
     }
 
     public function handle()
@@ -73,11 +74,20 @@ class CheckDeadlines extends Command
                 }
             }
 
-            // 5. Notify User
-            $this->notifications->notify(
-                $user->id,
-                'late_warning',
-                "TontineChain: Votre cotisation est en retard de $lateDays jour(s). Régularisez pour éviter un malus."
+            // 5. Notification Email + Chat (Social Pressure)
+            if ($user->email) {
+                Mail::to($user->email)
+                    ->locale($user->preferred_language ?? 'fr')
+                    ->queue(new TontineNotificationMail(
+                        "ALERTE RETARD - TontineChain",
+                        __('messages.late_payment') . " ($lateDays jours)"
+                    ));
+            }
+
+            // Message dans le chat du groupe (Transparence)
+            MessageController::sendSystemMessage(
+                $contrib->group_id,
+                "⚠️ Rappel : La cotisation de " . $user->full_name . " est attendue. Le cycle est actuellement bloqué."
             );
 
             Log::warning("Late contribution processed for user {$user->id} in group {$contrib->group_id}");

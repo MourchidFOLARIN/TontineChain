@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\User;
+use App\Models\TontineNotification;
+use App\Mail\TontineNotificationMail;
 use App\Services\BlockchainService;
 use App\Services\RiskAnalysisService;
 use Illuminate\Http\Request;
@@ -203,13 +205,27 @@ class GroupController extends Controller
                 \Illuminate\Support\Facades\Log::error("Erreur génération/envoi PDF: " . $e->getMessage());
             }
 
+            // Notifier tous les membres par Email (Réel)
+            foreach ($group->members as $member) {
+                if ($member->user && $member->user->email) {
+                    $userLocale = $member->user->preferred_language ?? 'fr';
+                    
+                    Mail::to($member->user->email)
+                        ->locale($userLocale)
+                        ->queue(new TontineNotificationMail(
+                            __('messages.contract_subject'),
+                            __('messages.contract_body') . " (Tontine: " . $group->name . ")"
+                        ));
+                }
+            }
+
             return response()->json([
                 'message' => "Tontine démarrée",
                 'contract_address' => $group->contract_address,
                 'demo_notice' => [
                     'is_simulation' => true,
                     'blockchain_tx' => $group->contract_tx_hash,
-                    'message' => "MODÈLE DE SIMULATION : Le contrat intelligent a été déployé sur Polygon (Tx: " . substr($group->contract_tx_hash, 0, 15) . "...). Le contrat PDF a été généré et envoyé par Email au créateur. En production, chaque membre reçoit une copie certifiée."
+                    'message' => "MODÈLE DE SIMULATION : Le contrat intelligent a été déployé sur Polygon (Tx: " . substr($group->contract_tx_hash, 0, 15) . "...). Le contrat PDF a été généré et envoyé par Email au créateur et aux membres. En production, chaque membre reçoit une copie certifiée."
                 ]
             ]);
         });
@@ -243,6 +259,7 @@ class GroupController extends Controller
     {
         $request->validate([
             'phone' => 'required|string|regex:/^\+?[0-9]{8,15}$/',
+            'email' => 'sometimes|email',
         ]);
 
         if ($group->creator_id !== $request->user()->id) {
@@ -262,6 +279,7 @@ class GroupController extends Controller
         if (!$user) {
             $user = User::create([
                 'phone' => $request->phone,
+                'email' => $request->email ?? null,
                 'full_name' => 'Invité',
                 'kyc_status' => 'none',
                 'score_confiance' => 100,
@@ -279,6 +297,46 @@ class GroupController extends Controller
 
         $group->increment('current_members');
 
+        // --- VÉRIFICATION SI LE GROUPE EST AU COMPLET ---
+        if ($group->current_members >= $group->max_members) {
+            $creator = $group->creator;
+            if ($creator) {
+                // 1. Notification In-App
+                TontineNotification::create([
+                    'user_id' => $creator->id,
+                    'type' => 'cycle_started', // On réutilise ce type pour dire que c'est prêt
+                    'message' => "Votre groupe '" . $group->name . "' est maintenant au complet ! Vous pouvez officiellement démarrer la tontine.",
+                    'channel' => 'in_app',
+                ]);
+
+                // 2. Notification Email
+                if ($creator->email) {
+                    $content = "Félicitations ! Votre groupe de tontine '" . $group->name . "' a atteint sa capacité maximale (" . $group->max_members . " membres).\n\n" .
+                               "Tous les membres sont prêts. Vous pouvez maintenant vous connecter pour activer le Smart Contract et démarrer les cotisations.";
+                    
+                    Mail::to($creator->email)->queue(new TontineNotificationMail(
+                        "Votre groupe est au complet : " . $group->name,
+                        $content,
+                        env('APP_URL') . "/groups/" . $group->id
+                    ));
+                }
+            }
+        }
+
+        // --- ENVOI EMAIL RÉEL À L'INVITÉ ---
+        $recipientEmail = $request->email ?? $user->email;
+        if ($recipientEmail) {
+            $invitationLink = env('APP_URL', 'https://tontinechain.bj') . "/join/" . $group->code;
+            
+            Mail::to($recipientEmail)
+                ->locale($user->preferred_language ?? 'fr')
+                ->send(new TontineNotificationMail(
+                    __('messages.welcome'),
+                    __('messages.payment_reminder') . " (Tontine: " . $group->name . ", Code: " . $group->code . ")",
+                    $invitationLink
+                ));
+        }
+
         return response()->json([
             'message' => 'Invitation envoyée',
             'member_analysis' => [
@@ -289,7 +347,7 @@ class GroupController extends Controller
             ],
             'demo_notice' => [
                 'is_simulation' => true,
-                'message' => "MODÈLE DE SIMULATION : L'invité va recevoir un SMS/WhatsApp contenant le lien d'adhésion (Ex: https://tontinechain.app/join/" . substr($group->id, 0, 8) . "), accompagné d'un guide vocal en " . ($user->preferred_language ?? 'Yoruba') . " pour expliquer le fonctionnement."
+                'message' => "MODÈLE DE SIMULATION : L'invitation a été envoyée par Email à $recipientEmail. En production, un SMS/WhatsApp est aussi envoyé avec un guide vocal."
             ]
         ]);
     }
@@ -315,6 +373,13 @@ class GroupController extends Controller
         $membership = GroupMember::where('group_id', $group->id)->where('user_id', $user->id)->where('status', 'invited')->first();
         if (!$membership) return response()->json(['error' => "Invitation non trouvée"], 404);
         $membership->update(['status' => 'active']);
+
+        // Message système dans le chat
+        \App\Http\Controllers\MessageController::sendSystemMessage(
+            $group->id, 
+            "✨ " . $user->full_name . " a officiellement rejoint le cercle. Bienvenue !"
+        );
+
         return response()->json(['message' => 'Bienvenue dans le groupe !']);
     }
 

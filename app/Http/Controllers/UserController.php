@@ -114,6 +114,29 @@ class UserController extends Controller
         ]);
     }
 
+    public function profile(Request $request)
+    {
+        $user = $request->user();
+        
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'phone' => 'required|string|unique:users,phone,' . $user->id,
+        ]);
+
+        $validated['full_name'] = $validated['first_name'] . ' ' . $validated['last_name'];
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Profil complété avec succès',
+            'user' => $user,
+            'demo_notice' => [
+                'is_simulation' => true,
+                'message' => "INSCRIPTION TERMINÉE : Votre compte est maintenant actif. Votre numéro " . $validated['phone'] . " sera utilisé pour vos futurs retraits via FedaPay."
+            ]
+        ]);
+    }
+
     #[OA\Get(
         path: "/api/v1/users/me/score",
         summary: "Mon score de confiance et incidents",

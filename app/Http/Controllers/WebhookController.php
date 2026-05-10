@@ -9,6 +9,8 @@ use App\Models\Payout;
 use App\Services\BlockchainService;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
+use App\Mail\TontineNotificationMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -52,10 +54,10 @@ class WebhookController extends Controller
         $webhookSecret = env('FEDAPAY_WEBHOOK_SECRET');
         $providedSecret = $request->header('X-Fedapay-Signature');
 
-        if ($webhookSecret && $webhookSecret !== 'your-fedapay-webhook-secret') {
+        if ($webhookSecret) {
             if ($providedSecret !== $webhookSecret) {
-                Log::warning("Tentative de Webhook invalide détectée.");
-                return response()->json(['error' => 'Unauthorized'], 401);
+                Log::warning("Tentative de Webhook frauduleuse détectée de l'IP: " . $request->ip());
+                return response()->json(['error' => 'Unauthorized Signature'], 401);
             }
         }
 
@@ -94,8 +96,21 @@ class WebhookController extends Controller
             $group = $contribution->group;
             $user = $contribution->user;
 
-            // Envoi SMS + WhatsApp de confirmation
-            $this->sms->notify($user->phone, "Paiement de {$contribution->amount_fcfa} FCFA confirmé pour le groupe {$group->name}. Merci !");
+            // Envoi Email de confirmation réel
+            if ($user->email) {
+                Mail::to($user->email)
+                    ->locale($user->preferred_language ?? 'fr')
+                    ->send(new TontineNotificationMail(
+                        "Paiement Confirmé : " . $group->name,
+                        __('messages.trust_score') . " (" . number_format($contribution->amount_fcfa, 0, ',', ' ') . " FCFA)"
+                    ));
+            }
+
+            // Message système dans le chat (Social Proof)
+            \App\Http\Controllers\MessageController::sendSystemMessage(
+                $group->id, 
+                "✅ " . $user->full_name . " a versé sa cotisation pour le cycle " . $contribution->cycle_number . ". Fiabilité au top !"
+            );
 
             // Notification Telegram (Transparence de groupe)
             $this->telegram->sendPaymentAlert($user->full_name, $contribution->amount_fcfa, $group->name);
@@ -116,36 +131,14 @@ class WebhookController extends Controller
         if ($confirmedCount >= $group->max_members) {
             $totalCycleAmount = $group->contribution_amount * $group->max_members;
             
-            // Logique Enchères
-            $winningBid = null;
-            $payoutUserId = null;
+            // Logique de sélection du bénéficiaire (Séquentiel ou Aléatoire)
+            $nextBeneficiary = $group->members()
+                ->where('has_received', false)
+                ->orderBy('position', 'asc')
+                ->first();
+            $payoutUserId = $nextBeneficiary->user_id;
 
-            if ($group->payout_method === 'bidding') {
-                $winningBid = $group->bids()
-                    ->where('cycle_number', $cycleNumber)
-                    ->orderByDesc('discount_amount')
-                    ->first();
-                
-                if ($winningBid) {
-                    $winningBid->update(['status' => 'won']);
-                    $payoutUserId = $winningBid->user_id;
-                    
-                    $group->bids()
-                        ->where('cycle_number', $cycleNumber)
-                        ->where('id', '!=', $winningBid->id)
-                        ->update(['status' => 'lost']);
-                }
-            }
-
-            if (!$payoutUserId) {
-                $nextBeneficiary = $group->members()
-                    ->where('has_received', false)
-                    ->orderBy('position', 'asc')
-                    ->first();
-                $payoutUserId = $nextBeneficiary->user_id;
-            }
-
-            $discount = $winningBid ? $winningBid->discount_amount : 0;
+            $discount = 0;
             $insuranceAmount = ($totalCycleAmount * $group->insurance_percent) / 100;
             $payoutAmount = $totalCycleAmount - $insuranceAmount - $discount;
 
@@ -166,9 +159,22 @@ class WebhookController extends Controller
             // Blockchain
             $txHash = $this->blockchain->releasePayout($group->contract_address, $cycleNumber);
             
-            // Notification au bénéficiaire
+            // Notification au bénéficiaire par Email
             $beneficiary = GroupMember::where('group_id', $group->id)->where('user_id', $payoutUserId)->first()->user;
-            $this->sms->notify($beneficiary->phone, "Félicitations ! Votre ramassage de {$payoutAmount} FCFA a été libéré sur votre compte Mobile Money.");
+            if ($beneficiary->email) {
+                Mail::to($beneficiary->email)
+                    ->locale($beneficiary->preferred_language ?? 'fr')
+                    ->send(new TontineNotificationMail(
+                        __('messages.your_turn'),
+                        "Tontine: " . $group->name . " - " . number_format($payoutAmount, 0, ',', ' ') . " FCFA"
+                    ));
+            }
+
+            // Message système dans le chat (Célébration)
+            \App\Http\Controllers\MessageController::sendSystemMessage(
+                $group->id, 
+                "🏆 FÉLICITATIONS ! " . $beneficiary->full_name . " vient de recevoir le pot total pour le cycle " . $cycleNumber . " !"
+            );
 
             // Cycle suivant
             if ($cycleNumber < $group->total_cycles) {
@@ -183,14 +189,26 @@ class WebhookController extends Controller
                 // === FIN DE LA TONTINE ===
                 $group->update(['status' => 'completed']);
 
+                // Suppression de la messagerie après la fin (Confidentialité)
+                $group->messages()->delete();
+                Log::info("Messagerie du groupe {$group->id} nettoyée après clôture.");
+
                 // 1. Redistribution du reliquat du fonds de garantie (Cashback)
                 if ($group->insurance_fund > 0) {
                     $members = $group->members()->where('status', 'active')->get();
                     $refundPerMember = $group->insurance_fund / $members->count();
                     
                     foreach ($members as $member) {
-                        // En mode réel, on enverrait un virement FedaPay ici
-                        $this->sms->notify($member->user->phone, "Tontine {$group->name} terminée ! Vous recevez un remboursement d'assurance de " . (int)$refundPerMember . " FCFA.");
+                        if ($member->user && $member->user->email) {
+                            $content = "La tontine '" . $group->name . "' est maintenant terminée !\n\n" .
+                                       "À l'issue de ce cycle, vous recevez un remboursement du reliquat du fonds de garantie de " . (int)$refundPerMember . " FCFA.\n\n" .
+                                       "Merci de votre fidélité sur TontineChain.";
+                            
+                            Mail::to($member->user->email)->send(new TontineNotificationMail(
+                                "Clôture de Tontine & Remboursement : " . $group->name,
+                                $content
+                            ));
+                        }
                     }
                     $group->update(['insurance_fund' => 0]);
                 }
@@ -201,7 +219,15 @@ class WebhookController extends Controller
                     $lateCount = $group->contributions()->where('user_id', $member->user_id)->where('is_late', true)->count();
                     if ($lateCount === 0) {
                         $member->user->increment('score_confiance', 25); // Bonus "Perfect Cycle"
-                        $this->sms->notify($member->user->phone, "Bravo ! Bonus de +25 points de confiance pour votre assiduité parfaite.");
+                        if ($member->user->email) {
+                            $content = "Bravo ! Vous avez obtenu un bonus de +25 points de score de confiance pour votre assiduité parfaite durant toute la tontine '" . $group->name . "'.\n\n" .
+                                       "Votre profil est désormais plus attractif pour les futurs groupes.";
+                            
+                            Mail::to($member->user->email)->send(new TontineNotificationMail(
+                                "Félicitations : Bonus de Confiance !",
+                                $content
+                            ));
+                        }
                     }
                 }
             }

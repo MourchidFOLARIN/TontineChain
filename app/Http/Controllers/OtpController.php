@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpMail;
 use OpenApi\Attributes as OA;
 
 class OtpController extends Controller
@@ -59,39 +61,39 @@ class OtpController extends Controller
     public function requestOtp(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string|regex:/^\+?[0-9]{10,15}$/',
-            'email' => 'sometimes|email',
+            'email' => 'required|email',
+            'phone' => 'sometimes|string',
+            'locale' => 'sometimes|string|in:fr,yor,fon'
         ]);
 
-        // Gestion de la langue (fr par défaut, support yor)
+        // Gestion de la langue
         app()->setLocale($request->input('locale', 'fr'));
 
-        $phone = $this->sms->normalizePhone($request->phone);
+        $email = $request->email;
         $code = rand(100000, 999999);
 
-        // On stocke l'OTP
+        // On stocke l'OTP lié à l'email
         Otp::create([
-            'phone' => $phone,
+            'email' => $email,
             'code_hash' => hash('sha256', $code),
-            'expires_at' => \Carbon\Carbon::now()->addMinutes(5),
+            'expires_at' => \Carbon\Carbon::now()->addMinutes(15),
             'purpose' => 'login'
         ]);
 
-        // Envoi SMS + WhatsApp réel via Infobip (Traduit)
-        $message = __('messages.otp_message') . " $code. " . __('messages.otp_expiry');
-        $this->sms->notify($phone, $message, $request->email);
+        // --- ENVOI SMTP RÉEL ---
+        Mail::to($email)->send(new OtpMail($code));
 
         // Toujours garder un log pour le dev
-        Log::info("OTP for $phone: $code");
+        Log::info("OTP for $email: $code");
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Le code OTP a été envoyé par WhatsApp/SMS.',
-            'phone' => $phone,
+            'message' => 'Le code OTP a été envoyé à votre adresse email.',
+            'email' => $email,
             'demo_notice' => [
                 'is_simulation' => true,
                 'otp_code' => $code,
-                'message' => "MODÈLE DE SIMULATION : Votre code est $code. Dans la version finale, ce message est envoyé instantanément par Email, SMS, WhatsApp et Telegram. Le système est déjà configuré pour ces canaux."
+                'message' => "SIMULATION : Votre code est $code. Il a été envoyé par Email (SMTP). Pour le Hackathon, nous utilisons SMTP pour prouver l'envoi réel."
             ]
         ]);
     }
@@ -115,15 +117,15 @@ class OtpController extends Controller
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string',
+            'email' => 'required|email',
             'code' => 'required|string|size:6',
         ]);
 
-        $phone = $this->sms->normalizePhone($request->phone);
+        $email = $request->email;
         $code = $request->code;
         $codeHash = hash('sha256', $code);
 
-        $otp = Otp::where('phone', $phone)
+        $otp = Otp::where('email', $email)
             ->where('is_used', false)
             ->where('expires_at', '>', Carbon::now())
             ->orderBy('created_at', 'desc')
@@ -145,16 +147,15 @@ class OtpController extends Controller
         // Mark as used
         $otp->update(['is_used' => true]);
 
-        // Find or create user
-        $user = User::where('phone', $phone)->first();
+        // Find or create user by email
+        $user = User::where('email', $email)->first();
         $isNewUser = !$user;
 
         if (!$user) {
             $walletAddress = '0x' . Str::random(40); 
             
             $user = User::create([
-                'phone' => $phone,
-                'email' => $request->email ?? null,
+                'email' => $email,
                 'full_name' => 'Membre',
                 'wallet_address' => $walletAddress,
                 'score_confiance' => 100,
@@ -169,13 +170,17 @@ class OtpController extends Controller
             }
         }
 
+        $needsProfileCompletion = empty($user->phone) || empty($user->first_name) || $user->full_name === 'Membre';
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
-            'is_new_user' => $isNewUser
+            'is_new_user' => $isNewUser,
+            'needs_profile_completion' => $needsProfileCompletion,
+            'demo_notice' => $needsProfileCompletion ? "NOUVEAU COMPTE: Le profil est incomplet. Le frontend doit maintenant demander les informations personnelles (Nom, Prénom, Téléphone) pour les futurs retraits." : null
         ]);
     }
 }

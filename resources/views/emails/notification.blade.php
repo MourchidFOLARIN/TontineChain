@@ -8,9 +8,9 @@
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #000000;">
         <tr>
             <td align="center" style="padding: 60px 20px;">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 450px; background-color: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 16px;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; background-color: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 16px;">
                     
-                    <!-- LOGO / HEADER -->
+                    <!-- HEADER -->
                     <tr>
                         <td align="center" style="padding: 40px 40px 20px 40px;">
                             <h1 style="color: #d4af37; font-size: 24px; margin: 0; letter-spacing: 4px; font-weight: 300; text-transform: uppercase;">TontineChain</h1>
@@ -21,32 +21,34 @@
                     <!-- CONTENT -->
                     <tr>
                         <td style="padding: 0 40px 40px 40px; text-align: center;">
-                            <h2 style="font-size: 18px; font-weight: 400; color: #ffffff; margin-bottom: 10px;">Bienvenue.</h2>
-                            <p style="font-size: 14px; color: #888888; line-height: 1.6; margin-bottom: 30px;">
-                                Voici votre confirmation pour accéder à votre espace sécurisé.
+                            <h2 style="font-size: 18px; font-weight: 400; color: #ffffff; margin-bottom: 20px;">{{ $title }}</h2>
+                            
+                            <p style="font-size: 14px; color: #888888; line-height: 1.8; margin-bottom: 30px; text-align: left;">
+                                {!! nl2br(e($content)) !!}
                             </p>
 
-                            <!-- CODE BOX -->
-                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #111111; border-radius: 8px;">
+                            @if(isset($actionUrl) && $actionUrl)
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
-                                    <td align="center" style="padding: 30px;">
-                                        <span style="font-size: 36px; font-weight: bold; color: #10b981; letter-spacing: 8px;">{{ $code }}</span>
+                                    <td align="center">
+                                        <a href="{{ $actionUrl }}" style="display: inline-block; background-color: #d4af37; color: #000000; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+                                            Accéder à l'espace
+                                        </a>
                                     </td>
                                 </tr>
                             </table>
-
-                            <!-- SECURITY MESSAGE (TEXTE EXACT) -->
-                            <p style="font-size: 12px; color: #555555; line-height: 1.8; margin-top: 30px; text-align: justify; border-top: 1px solid #1a1a1a; padding-top: 20px;">
-                                <strong style="color: #aa2222;">IMPORTANT :</strong> Ce code est strictement confidentiel. Aucun agent de TontineChain ne vous demandera jamais ce code. Ne le partagez avec personne, pas même vos proches.
-                            </p>
+                            @endif
                         </td>
                     </tr>
 
                     <!-- FOOTER -->
                     <tr>
-                        <td align="center" style="padding: 0 40px 40px 40px;">
+                        <td align="center" style="padding: 0 40px 40px 40px; border-top: 1px solid #1a1a1a; padding-top: 20px;">
                             <p style="font-size: 10px; color: #333333; text-transform: uppercase; letter-spacing: 2px;">
                                 Excellence • Sécurité • Inclusion
+                            </p>
+                            <p style="font-size: 9px; color: #222222; margin-top: 10px;">
+                                Vous recevez cet email car vous êtes membre du cercle d'excellence TontineChain.
                             </p>
                         </td>
                     </tr>
