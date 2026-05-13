@@ -21,20 +21,25 @@ class PaymentService
         Log::info("Initiating FedaPay SDK payment for contribution: {$contribution->id}");
 
         try {
+            $customer = [
+                'firstname' => $user->first_name ?: 'Membre',
+                'lastname' => $user->last_name ?: 'TontiGo',
+                'email' => $user->email ?: 'user_'.$user->id.'@tontigo.app',
+            ];
+
+            if (! empty($user->phone)) {
+                $customer['phone_number'] = [
+                    'number' => $user->phone,
+                    'country' => 'BJ',
+                ];
+            }
+
             $transaction = Transaction::create([
                 'description' => "Cotisation TontiGo - Cycle {$contribution->cycle_number}",
                 'amount' => (int) $contribution->amount_fcfa,
                 'currency' => ['iso' => 'XOF'],
                 'callback_url' => env('APP_URL') . '/api/v1/webhooks/fedapay',
-                'customer' => [
-                    'firstname' => $user->first_name ?: 'Membre',
-                    'lastname' => $user->last_name ?: 'TontiGo',
-                    'email' => $user->email ?: 'user_'.$user->id.'@tontigo.app',
-                    'phone_number' => [
-                        'number' => $user->phone,
-                        'country' => 'BJ'
-                    ]
-                ]
+                'customer' => $customer,
             ]);
 
             $token = $transaction->generateToken();

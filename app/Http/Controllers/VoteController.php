@@ -63,6 +63,27 @@ class VoteController extends Controller
         ]);
 
         $targetUserId = $request->target_user_id;
+        if ($targetUserId === $user->id) {
+            return response()->json(['error' => 'Vous ne pouvez pas échanger votre position avec vous-même'], 422);
+        }
+
+        $creatorMembership = $group->members()
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+
+        $targetMembership = $group->members()
+            ->where('user_id', $targetUserId)
+            ->where('status', 'active')
+            ->first();
+
+        if (! $creatorMembership || ! $targetMembership) {
+            return response()->json(['error' => 'Les deux utilisateurs doivent être membres actifs du groupe'], 403);
+        }
+
+        if ($creatorMembership->has_received || $targetMembership->has_received) {
+            return response()->json(['error' => 'Impossible d’échanger une position déjà servie'], 422);
+        }
 
         // Créer la proposition
         $vote = Vote::create([
@@ -73,7 +94,7 @@ class VoteController extends Controller
                 'user_a' => $user->id,
                 'user_b' => $targetUserId
             ],
-            'required_votes' => ceil($group->max_members / 2) + 1,
+            'required_votes' => floor($group->members()->where('status', 'active')->count() / 2) + 1,
             'status' => 'pending',
             'expires_at' => now()->addHours(24),
         ]);
@@ -145,6 +166,10 @@ class VoteController extends Controller
             return response()->json(['error' => 'Ce vote est clos ou expiré'], 400);
         }
 
+        if (! $vote->group->members()->where('user_id', $user->id)->where('status', 'active')->exists()) {
+            return response()->json(['error' => 'Seuls les membres actifs du groupe peuvent voter'], 403);
+        }
+
         if (VoteRecord::where('vote_id', $vote->id)->where('user_id', $user->id)->exists()) {
             return response()->json(['error' => 'Vous avez déjà voté'], 400);
         }
@@ -163,6 +188,8 @@ class VoteController extends Controller
             } else {
                 $vote->increment('no_votes');
             }
+
+            $vote->refresh();
 
             if ($vote->yes_votes >= $vote->required_votes) {
                 $vote->update(['status' => 'approved']);
@@ -231,6 +258,14 @@ class VoteController extends Controller
     protected function applySwap(Vote $vote)
     {
         $data = $vote->proposal_data;
+        if (is_string($data)) {
+            $data = json_decode($data, true);
+        }
+
+        if (! is_array($data) || ! isset($data['user_a'], $data['user_b'])) {
+            return;
+        }
+
         $memberA = GroupMember::where('group_id', $vote->group_id)->where('user_id', $data['user_a'])->first();
         $memberB = GroupMember::where('group_id', $vote->group_id)->where('user_id', $data['user_b'])->first();
 
@@ -238,8 +273,9 @@ class VoteController extends Controller
             $posA = $memberA->position;
             $posB = $memberB->position;
 
-            $memberA->update(['position' => $posB]);
+            $memberA->update(['position' => -1]);
             $memberB->update(['position' => $posA]);
+            $memberA->update(['position' => $posB]);
             
             // Note: En production, on enverrait aussi une transaction Blockchain pour mettre à jour l'ordre
         }

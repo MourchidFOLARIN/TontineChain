@@ -9,6 +9,7 @@ use App\Models\TontineNotification;
 use App\Mail\TontineNotificationMail;
 use App\Services\BlockchainService;
 use App\Services\RiskAnalysisService;
+use App\Services\TontineCycleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -21,11 +22,13 @@ class GroupController extends Controller
 {
     protected $blockchain;
     protected $riskService;
+    protected $cycles;
 
-    public function __construct(BlockchainService $blockchain, RiskAnalysisService $riskService)
+    public function __construct(BlockchainService $blockchain, RiskAnalysisService $riskService, TontineCycleService $cycles)
     {
         $this->blockchain = $blockchain;
         $this->riskService = $riskService;
+        $this->cycles = $cycles;
     }
 
     #[OA\Get(
@@ -116,8 +119,12 @@ class GroupController extends Controller
     )]
     #[OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))]
     #[OA\Response(response: 200, description: "Détails du groupe")]
-    public function show(Group $group)
+    public function show(Request $request, Group $group)
     {
+        if (! $this->userCanAccessGroup($request->user(), $group)) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
         $group->load(['creator', 'members.user']);
         return response()->json($group);
     }
@@ -160,8 +167,12 @@ class GroupController extends Controller
             return response()->json(['error' => 'Groupe déjà démarré'], 400);
         }
 
-        if ($group->current_members < $group->max_members) {
-            return response()->json(['error' => "Groupe incomplet"], 400);
+        $activeMembersCount = $group->members()->where('status', 'active')->count();
+        if ($activeMembersCount < $group->max_members) {
+            return response()->json([
+                'error' => "Groupe incomplet",
+                'message' => 'Tous les membres invités doivent rejoindre le groupe avant le démarrage.',
+            ], 400);
         }
 
         return DB::transaction(function () use ($group, $user) {
@@ -172,12 +183,22 @@ class GroupController extends Controller
 
             if ($group->payout_method === 'random') {
                 $shuffledMembers = $members->shuffle();
+                foreach ($members as $index => $member) {
+                    $member->update(['position' => -($index + 1)]);
+                }
                 foreach ($shuffledMembers as $index => $member) {
                     $member->update(['position' => $index + 1]);
                 }
             } 
 
-            $memberWallets = $group->members()->with('user')->get()->pluck('user.wallet_address')->toArray();
+            $memberWallets = $group->members()
+                ->where('status', 'active')
+                ->with('user')
+                ->get()
+                ->pluck('user.wallet_address')
+                ->filter()
+                ->values()
+                ->toArray();
 
             $deployment = $this->blockchain->deployTontineContract(
                 $memberWallets,
@@ -193,6 +214,8 @@ class GroupController extends Controller
                 'current_cycle' => 1,
                 'next_due_date' => Carbon::parse($group->start_date),
             ]);
+
+            $this->cycles->ensureContributionsForCycle($group->fresh(), 1, $group->start_date);
 
             try {
                 $group->load(['creator', 'members.user']);
@@ -395,8 +418,12 @@ class GroupController extends Controller
             new OA\Response(response: 200, description: "Stats et prédiction de risque")
         ]
     )]
-    public function stats(Group $group)
+    public function stats(Request $request, Group $group)
     {
+        if (! $this->userCanAccessGroup($request->user(), $group)) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
         $totalCollected = $group->contributions()->where('status', 'confirmed')->sum('amount_fcfa');
         $totalPayouts = $group->payouts()->where('status', 'completed')->sum('total_amount_fcfa');
         $activeMembersCount = $group->members()->where('status', 'active')->count();
@@ -435,8 +462,12 @@ class GroupController extends Controller
             new OA\Response(response: 404, description: "Contrat non disponible (tontine non démarrée)")
         ]
     )]
-    public function downloadContract(Group $group)
+    public function downloadContract(Request $request, Group $group)
     {
+        if (! $this->userCanAccessGroup($request->user(), $group)) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
         if ($group->status === 'pending') {
             return response()->json(['error' => 'La tontine n\'a pas encore démarré.'], 404);
         }
@@ -445,5 +476,11 @@ class GroupController extends Controller
         $pdf = Pdf::loadView('pdf.tontine_contract', ['group' => $group]);
         
         return $pdf->download('Contrat_Tontine_'.$group->name.'.pdf');
+    }
+
+    private function userCanAccessGroup(User $user, Group $group): bool
+    {
+        return $group->creator_id === $user->id
+            || $group->members()->where('user_id', $user->id)->exists();
     }
 }

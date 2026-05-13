@@ -15,8 +15,12 @@ class MessageController extends Controller
         tags: ["Messagerie"],
         security: [["sanctum" => []]]
     )]
-    public function index(Group $group)
+    public function index(Request $request, Group $group)
     {
+        if (! $this->userCanMessageGroup($request, $group)) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
         $messages = $group->messages()
             ->with('user:id,full_name')
             ->orderBy('created_at', 'asc')
@@ -33,6 +37,10 @@ class MessageController extends Controller
     )]
     public function store(Request $request, Group $group)
     {
+        if (! $this->userCanMessageGroup($request, $group)) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
         $request->validate([
             'content' => 'required|string|max:1000',
         ]);
@@ -58,5 +66,14 @@ class MessageController extends Controller
             'content' => $content,
             'is_system' => true,
         ]);
+    }
+
+    private function userCanMessageGroup(Request $request, Group $group): bool
+    {
+        return $group->status === 'active'
+            && $group->members()
+                ->where('user_id', $request->user()->id)
+                ->where('status', 'active')
+                ->exists();
     }
 }

@@ -20,6 +20,7 @@ class Contribution extends Model
         'amount_token',
         'status',
         'mobile_money_ref',
+        'fedapay_transaction_id',
         'mobile_money_provider',
         'blockchain_tx_hash',
         'due_date',

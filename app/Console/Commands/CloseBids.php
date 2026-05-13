@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Bid;
 use App\Models\Group;
-use App\Models\GroupMember;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -12,59 +11,59 @@ use Illuminate\Support\Facades\Log;
 class CloseBids extends Command
 {
     protected $signature = 'tontine:close-bids';
-    protected $description = 'Clôture les enchères pour le cycle actuel et désigne le gagnant';
+    protected $description = 'Close bidding windows and select the winning bid for the current cycle';
 
     public function handle()
     {
-        $this->info('Vérification des enchères en cours...');
+        $this->info('Checking active bidding groups...');
 
         $groups = Group::where('status', 'active')
             ->where('payout_method', 'bidding')
             ->get();
 
         foreach ($groups as $group) {
-            $this->info("Traitement du groupe : {$group->name}");
+            $this->info("Processing group: {$group->name}");
 
-            // Vérifier si un gagnant a déjà été désigné pour ce cycle
-            $hasWinner = GroupMember::where('group_id', $group->id)
-                ->where('has_received', true)
-                ->where('cycle_received', $group->current_cycle)
+            $hasWinner = Bid::where('group_id', $group->id)
+                ->where('cycle_number', $group->current_cycle)
+                ->where('status', 'won')
                 ->exists();
 
             if ($hasWinner) {
-                $this->line("Un gagnant existe déjà pour le cycle {$group->current_cycle}.");
+                $this->line("A winning bid already exists for cycle {$group->current_cycle}.");
                 continue;
             }
 
-            // Trouver la meilleure offre pour ce cycle
             $bestBid = Bid::where('group_id', $group->id)
                 ->where('cycle_number', $group->current_cycle)
+                ->where('status', 'pending')
+                ->whereHas('user.memberships', function ($query) use ($group) {
+                    $query->where('group_id', $group->id)
+                        ->where('status', 'active')
+                        ->where('has_received', false);
+                })
                 ->orderByDesc('discount_amount')
+                ->orderBy('created_at')
                 ->first();
 
-            if (!$bestBid) {
-                $this->warn("Aucune offre trouvée pour le cycle {$group->current_cycle}.");
-                // Optionnel : Sélectionner un membre aléatoire ou reporter ?
-                // Ici on attend des offres.
+            if (! $bestBid) {
+                $this->warn("No eligible bid found for cycle {$group->current_cycle}.");
                 continue;
             }
 
             DB::transaction(function () use ($group, $bestBid) {
-                // Désigner le gagnant
-                GroupMember::where('group_id', $group->id)
-                    ->where('user_id', $bestBid->user_id)
-                    ->update([
-                        'has_received' => true,
-                        'cycle_received' => $group->current_cycle
-                    ]);
+                Bid::where('group_id', $group->id)
+                    ->where('cycle_number', $group->current_cycle)
+                    ->where('status', 'pending')
+                    ->update(['status' => 'lost']);
 
-                // Enregistrer l'enchère comme gagnante (si champ existant, sinon log)
-                Log::info("Gagnant Enchère : Utilisateur {$bestBid->user_id} a gagné le cycle {$group->current_cycle} du groupe {$group->id} avec une remise de {$bestBid->discount_amount} FCFA.");
-                
-                $this->info("Gagnant désigné : Utilisateur {$bestBid->user_id} avec {$bestBid->discount_amount} FCFA.");
+                $bestBid->update(['status' => 'won']);
+
+                Log::info("Winning bid selected: user {$bestBid->user_id}, cycle {$group->current_cycle}, group {$group->id}, discount {$bestBid->discount_amount} FCFA.");
+                $this->info("Winning bid selected: user {$bestBid->user_id}, discount {$bestBid->discount_amount} FCFA.");
             });
         }
 
-        $this->info('Clôture des enchères terminée.');
+        $this->info('Bid closing complete.');
     }
 }

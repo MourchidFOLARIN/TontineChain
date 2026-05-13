@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bid;
 use App\Models\Contribution;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\Payout;
 use App\Services\BlockchainService;
 use App\Services\SmsService;
+use App\Services\TelegramService;
+use App\Services\TontineCycleService;
 use Illuminate\Http\Request;
 use App\Mail\TontineNotificationMail;
 use Illuminate\Support\Facades\Mail;
@@ -21,12 +24,14 @@ class WebhookController extends Controller
     protected $blockchain;
     protected $sms;
     protected $telegram;
+    protected $cycles;
 
-    public function __construct(BlockchainService $blockchain, SmsService $sms, TelegramService $telegram)
+    public function __construct(BlockchainService $blockchain, SmsService $sms, TelegramService $telegram, TontineCycleService $cycles)
     {
         $this->blockchain = $blockchain;
         $this->sms = $sms;
         $this->telegram = $telegram;
+        $this->cycles = $cycles;
     }
 
     #[OA\Post(
@@ -54,7 +59,12 @@ class WebhookController extends Controller
         $webhookSecret = env('FEDAPAY_WEBHOOK_SECRET');
         $providedSecret = $request->header('X-Fedapay-Signature');
 
-        if ($webhookSecret) {
+        if (app()->isProduction() && empty($webhookSecret)) {
+            Log::critical('FEDAPAY_WEBHOOK_SECRET manquant en production : webhook refusé.');
+            return response()->json(['error' => 'Server misconfigured'], 500);
+        }
+
+        if (! empty($webhookSecret)) {
             if ($providedSecret !== $webhookSecret) {
                 Log::warning("Tentative de Webhook frauduleuse détectée de l'IP: " . $request->ip());
                 return response()->json(['error' => 'Unauthorized Signature'], 401);
@@ -67,6 +77,14 @@ class WebhookController extends Controller
         Log::info("Webhook FedaPay received: $event");
 
         if ($event === 'transaction.approved') {
+            if (! is_array($data) || empty($data['id'])) {
+                Log::warning('Webhook FedaPay transaction.approved sans identifiant de transaction.', [
+                    'payload' => $request->all(),
+                ]);
+
+                return response()->json(['error' => 'Invalid webhook payload'], 422);
+            }
+
             return $this->processConfirmedPayment($data);
         }
 
@@ -76,10 +94,11 @@ class WebhookController extends Controller
     protected function processConfirmedPayment($data)
     {
         return DB::transaction(function () use ($data) {
-            $contribution = Contribution::where('fedapay_transaction_id', $data['id'])->first();
+            $transactionId = (string) $data['id'];
+            $contribution = Contribution::where('fedapay_transaction_id', $transactionId)->first();
 
             if (!$contribution) {
-                Log::warning("Transaction {$data['id']} non trouvée.");
+                Log::warning("Transaction {$transactionId} non trouvée.");
                 return response()->json(['status' => 'not_found'], 404);
             }
 
@@ -131,18 +150,61 @@ class WebhookController extends Controller
         if ($confirmedCount >= $group->max_members) {
             $totalCycleAmount = $group->contribution_amount * $group->max_members;
             
-            // Logique de sélection du bénéficiaire (Séquentiel ou Aléatoire)
-            $nextBeneficiary = $group->members()
+            $discount = 0;
+            $nextBeneficiary = null;
+
+            if ($group->payout_method === 'bidding') {
+                $winningBid = Bid::where('group_id', $group->id)
+                    ->where('cycle_number', $cycleNumber)
+                    ->whereIn('status', ['won', 'pending'])
+                    ->whereHas('user.memberships', function ($query) use ($group) {
+                        $query->where('group_id', $group->id)
+                            ->where('status', 'active')
+                            ->where('has_received', false);
+                    })
+                    ->orderByRaw("CASE WHEN status = 'won' THEN 0 ELSE 1 END")
+                    ->orderByDesc('discount_amount')
+                    ->orderBy('created_at')
+                    ->first();
+
+                if ($winningBid) {
+                    $nextBeneficiary = $group->members()
+                        ->where('user_id', $winningBid->user_id)
+                        ->where('status', 'active')
+                        ->where('has_received', false)
+                        ->first();
+
+                    $discount = (float) $winningBid->discount_amount;
+
+                    Bid::where('group_id', $group->id)
+                        ->where('cycle_number', $cycleNumber)
+                        ->update(['status' => 'lost']);
+
+                    $winningBid->update(['status' => 'won']);
+                } else {
+                    Log::warning("Aucune enchere eligible pour le groupe {$group->id}, cycle {$cycleNumber}. Retour au mode sequentiel.");
+                }
+            }
+
+            // Logique de sélection du bénéficiaire (séquentiel, aléatoire via positions, ou enchère)
+            $nextBeneficiary ??= $group->members()
                 ->where('has_received', false)
+                ->where('status', 'active')
                 ->orderBy('position', 'asc')
                 ->first();
+
+            if (! $nextBeneficiary) {
+                Log::error("Payout impossible : aucun bénéficiaire éligible pour le groupe {$group->id}, cycle {$cycleNumber}.");
+                return;
+            }
+
             $payoutUserId = $nextBeneficiary->user_id;
 
-            $discount = 0;
             $insuranceAmount = ($totalCycleAmount * $group->insurance_percent) / 100;
-            $payoutAmount = $totalCycleAmount - $insuranceAmount - $discount;
+            $payoutAmount = max(0, $totalCycleAmount - $insuranceAmount - $discount);
+            $retainedAmount = $insuranceAmount + $discount;
 
-            Payout::create([
+            $payout = Payout::create([
                 'group_id' => $group->id,
                 'beneficiary_id' => $payoutUserId,
                 'cycle_number' => $cycleNumber,
@@ -152,12 +214,20 @@ class WebhookController extends Controller
                 'completed_at' => now(),
             ]);
 
+            if ($retainedAmount > 0) {
+                $group->increment('insurance_fund', $retainedAmount);
+            }
+
             GroupMember::where('group_id', $group->id)
                 ->where('user_id', $payoutUserId)
-                ->update(['has_received' => true]);
+                ->update([
+                    'has_received' => true,
+                    'cycle_received' => $cycleNumber,
+                ]);
 
             // Blockchain
             $txHash = $this->blockchain->releasePayout($group->contract_address, $cycleNumber);
+            $payout->update(['blockchain_tx_hash' => $txHash]);
             
             // Notification au bénéficiaire par Email
             $beneficiary = GroupMember::where('group_id', $group->id)->where('user_id', $payoutUserId)->first()->user;
@@ -179,12 +249,14 @@ class WebhookController extends Controller
             // Cycle suivant
             if ($cycleNumber < $group->total_cycles) {
                 $group->increment('current_cycle');
+                $group->refresh();
                 $nextDate = Carbon::parse($group->next_due_date);
                 if ($group->frequency === 'weekly') $nextDate->addWeek();
                 elseif ($group->frequency === 'biweekly') $nextDate->addWeeks(2);
                 elseif ($group->frequency === 'monthly') $nextDate->addMonth();
                 
                 $group->update(['next_due_date' => $nextDate]);
+                $this->cycles->ensureContributionsForCycle($group->fresh(), $group->current_cycle, $nextDate);
             } else {
                 // === FIN DE LA TONTINE ===
                 $group->update(['status' => 'completed']);

@@ -15,7 +15,7 @@ class PayoutService
 
     public function __construct()
     {
-        $this->apiKey = env('FEDAPAY_SECRET_KEY');
+        $this->apiKey = env('FEDAPAY_SECRET_KEY', env('FEDAPAY_API_KEY'));
         $this->baseUrl = env('FEDAPAY_BASE_URL', 'https://sandbox.fedapay.com/api/v1');
     }
 

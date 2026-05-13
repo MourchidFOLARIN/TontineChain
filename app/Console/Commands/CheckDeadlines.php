@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Mail\TontineNotificationMail;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\MessageController;
+use App\Services\NotificationService;
 
 class CheckDeadlines extends Command
 {
@@ -19,9 +20,10 @@ class CheckDeadlines extends Command
 
     protected $notifications;
 
-    public function __construct()
+    public function __construct(NotificationService $notifications)
     {
         parent::__construct();
+        $this->notifications = $notifications;
     }
 
     public function handle()
@@ -56,6 +58,11 @@ class CheckDeadlines extends Command
 
             // 3. Update User Score
             $user = User::find($contrib->user_id);
+            if (! $user) {
+                Log::warning("Late contribution {$contrib->id} ignored: user not found.");
+                continue;
+            }
+
             $user->increment('score_confiance', $scoreImpact);
 
             // 4. Garantie Automatique (Si retard > 5 jours et assurance active)
@@ -63,7 +70,11 @@ class CheckDeadlines extends Command
                 $group = $contrib->group;
                 if ($group->insurance_fund >= $contrib->amount_fcfa) {
                     $group->decrement('insurance_fund', $contrib->amount_fcfa);
-                    $contrib->update(['status' => 'covered_by_insurance']);
+                    $contrib->update([
+                        'status' => 'confirmed',
+                        'confirmed_at' => now(),
+                        'mobile_money_provider' => 'insurance_fund',
+                    ]);
                     
                     $this->notifications->notify(
                         $group->creator_id,

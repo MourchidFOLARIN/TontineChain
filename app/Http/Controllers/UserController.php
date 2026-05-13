@@ -77,9 +77,11 @@ class UserController extends Controller
             'first_name' => 'sometimes|string|max:100',
             'last_name' => 'sometimes|string|max:100',
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'phone' => 'sometimes|string|max:20|unique:users,phone,' . $user->id,
             'profession' => 'sometimes|string|max:150',
-            'npi' => 'sometimes|string|size:13',
+            'npi' => 'sometimes|string|min:5|max:20',
             'preferred_language' => 'sometimes|string|in:fr,fon,yor',
+            'full_name' => 'sometimes|string|max:200',
         ]);
 
         if (isset($validated['npi'])) {

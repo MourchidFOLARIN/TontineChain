@@ -46,6 +46,9 @@ export const getGroupDetails = (groupId) => api.get(`/groups/${groupId}`);
 export const inviteToGroup = (groupId, data) => api.post(`/groups/${groupId}/invite`, data);
 export const joinGroup = (groupId, data) => api.post(`/groups/${groupId}/join`, data);
 export const startGroup = (groupId) => api.post(`/groups/${groupId}/start`);
+export const getGroupStats = (groupId) => api.get(`/groups/${groupId}/stats`);
+export const submitBid = (groupId, data) => api.post(`/groups/${groupId}/bid`, data);
+export const proposeSwap = (groupId, data) => api.post(`/groups/${groupId}/swap`, data);
 
 // --- Votes ---
 export const castVote = (groupId, data) => api.post(`/groups/${groupId}/vote`, data);

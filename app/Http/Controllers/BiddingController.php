@@ -31,6 +31,14 @@ class BiddingController extends Controller
     {
         $user = $request->user();
 
+        $membership = $group->members()
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+        if (! $membership) {
+            return response()->json(['error' => 'Vous n\'êtes pas membre de ce groupe'], 403);
+        }
+
         if ($group->payout_method !== 'bidding') {
             return response()->json(['error' => "Ce groupe n'utilise pas le mode enchères"], 400);
         }
@@ -43,8 +51,6 @@ class BiddingController extends Controller
             'discount_amount' => 'required|numeric|min:0|max:' . ($group->contribution_amount * $group->max_members / 2),
         ]);
 
-        // Vérifier si le membre a déjà reçu un payout
-        $membership = $group->members()->where('user_id', $user->id)->first();
         if ($membership->has_received) {
             return response()->json(['error' => "Vous avez déjà reçu votre ramassage"], 400);
         }
@@ -71,9 +77,14 @@ class BiddingController extends Controller
         security: [["sanctum" => []]]
     )]
     #[OA\Response(response: 200, description: "Liste des offres")]
-    public function index(Group $group)
+    public function index(Request $request, Group $group)
     {
+        if (! $group->members()->where('user_id', $request->user()->id)->where('status', 'active')->exists()) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
         $bids = $group->bids()->where('cycle_number', $group->current_cycle)->orderByDesc('discount_amount')->get();
+
         return response()->json($bids);
     }
 }

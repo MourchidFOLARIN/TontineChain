@@ -54,9 +54,3 @@ class Vote extends Model
         return $this->hasMany(VoteRecord::class);
     }
 }
-
-class VoteRecord extends Model
-{
-    protected $table = 'vote_records';
-    protected $fillable = ['vote_id', 'user_id', 'choice'];
-}

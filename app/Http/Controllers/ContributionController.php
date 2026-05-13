@@ -6,6 +6,7 @@ use App\Models\Contribution;
 use App\Models\Group;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
 class ContributionController extends Controller
@@ -28,7 +29,7 @@ class ContributionController extends Controller
     {
         $user = $request->user();
         $contributions = Contribution::where('user_id', $user->id)
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'late'])
             ->with('group')
             ->get();
 
@@ -69,7 +70,7 @@ class ContributionController extends Controller
             return response()->json(['error' => 'Non autorisé'], 403);
         }
 
-        if ($contribution->status !== 'pending') {
+        if (! in_array($contribution->status, ['pending', 'late'], true)) {
             return response()->json(['error' => 'Cette cotisation est déjà en cours ou terminée.'], 400);
         }
 
@@ -81,7 +82,11 @@ class ContributionController extends Controller
             ];
             return response()->json($paymentData);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            Log::error('Contribution initiate payment failed', ['exception' => $e->getMessage()]);
+
+            $message = config('app.debug') ? $e->getMessage() : 'Erreur lors de l\'initiation du paiement.';
+
+            return response()->json(['error' => $message], 500);
         }
     }
 }

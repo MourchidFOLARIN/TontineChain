@@ -34,6 +34,12 @@ class Group extends Model
         'insurance_percent',
     ];
 
+    protected $casts = [
+        'insurance_percent' => 'float',
+        'insurance_fund' => 'float',
+        'contribution_amount' => 'float',
+    ];
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -57,5 +63,10 @@ class Group extends Model
     public function bids()
     {
         return $this->hasMany(Bid::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
     }
 }

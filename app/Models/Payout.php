@@ -18,6 +18,7 @@ class Payout extends Model
         'cycle_number',
         'total_amount_fcfa',
         'total_amount_token',
+        'amount_fcfa',
         'blockchain_tx_hash',
         'status',
         'triggered_at',

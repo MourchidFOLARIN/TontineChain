@@ -12,6 +12,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SwaggerController;
+use App\Http\Controllers\BiddingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,17 +22,18 @@ Route::prefix('v1')->group(function () {
         return response()->json(['status' => 'ok', 'message' => 'Service is healthy'], 200);
     });
 
-    // Dummy login route to prevent 500 errors on unauthenticated API calls
+    // Réponse JSON pour les appels API non authentifiés (Sanctum)
     Route::get('/login', function () {
         return response()->json(['error' => 'Unauthenticated'], 401);
     })->name('login');
 
-    // Debug & Connection Tests
-    Route::get('/debug/fedapay', [\App\Http\Controllers\DebugController::class, 'testFedapay']);
-    Route::get('/debug/infobip', [\App\Http\Controllers\DebugController::class, 'testInfobip']);
-    Route::get('/debug/blockchain', [\App\Http\Controllers\DebugController::class, 'testBlockchain']);
-    Route::get('/debug/telegram', [\App\Http\Controllers\DebugController::class, 'testTelegram']);
-    Route::get('/debug/email', [\App\Http\Controllers\DebugController::class, 'testEmail']);
+    if (app()->environment('local')) {
+        Route::get('/debug/fedapay', [\App\Http\Controllers\DebugController::class, 'testFedapay']);
+        Route::get('/debug/infobip', [\App\Http\Controllers\DebugController::class, 'testInfobip']);
+        Route::get('/debug/blockchain', [\App\Http\Controllers\DebugController::class, 'testBlockchain']);
+        Route::get('/debug/telegram', [\App\Http\Controllers\DebugController::class, 'testTelegram']);
+        Route::get('/debug/email', [\App\Http\Controllers\DebugController::class, 'testEmail']);
+    }
 
     // Auth Routes
     Route::post('/auth/request-otp', [OtpController::class, 'requestOtp']);
@@ -65,6 +67,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/groups/{group}/messages', [MessageController::class, 'store']);
         Route::get('/groups/{group}/contract', [GroupController::class, 'downloadContract']);
         Route::post('/groups/{group}/propose-swap', [VoteController::class, 'proposeSwap']);
+        Route::get('/groups/{group}/bids', [BiddingController::class, 'index']);
+        Route::post('/groups/{group}/bid', [BiddingController::class, 'submitBid']);
 
         // Contribution Routes
         Route::get('/contributions/pending', [ContributionController::class, 'pending']);

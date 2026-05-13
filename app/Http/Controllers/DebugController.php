@@ -137,10 +137,11 @@ class DebugController extends Controller
                 ], 500);
             }
         } catch (\Exception $e) {
+            Log::error('Debug testEmail failed', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
             return response()->json([
-                'status' => 'error', 
-                'message' => 'Erreur technique : ' . $e->getMessage(),
-                'trace' => substr($e->getTraceAsString(), 0, 500) // Pour plus de détails
+                'status' => 'error',
+                'message' => 'Erreur technique : '.$e->getMessage(),
             ], 500);
         }
     }

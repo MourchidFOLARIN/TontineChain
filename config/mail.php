@@ -39,7 +39,19 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME'),
+            // Laravel 11+ : préférez MAIL_SCHEME (smtp | smtps). MAIL_ENCRYPTION est ignoré par Symfony si non mappé ici.
+            'scheme' => env('MAIL_SCHEME') ?: (static function (): ?string {
+                $port = (int) env('MAIL_PORT', 0);
+                $enc = strtolower((string) env('MAIL_ENCRYPTION', ''));
+                if ($port === 465 || $enc === 'ssl') {
+                    return 'smtps';
+                }
+                if ($enc === 'tls') {
+                    return 'smtp';
+                }
+
+                return null;
+            })(),
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
