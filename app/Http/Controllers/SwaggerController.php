@@ -6,6 +6,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Info(title: "TontineChain API", version: "1.0.0", description: "Documentation de l'API TontineChain pour le Hackathon MIABE 2026.")]
 #[OA\Server(url: "http://localhost:8000", description: "Serveur Local")]
+#[OA\Server(url: "https://tonnine-benin-backend.onrender.com", description: "Serveur de Production")]
 #[OA\SecurityScheme(
     securityScheme: "BearerAuth",
     type: "http",
