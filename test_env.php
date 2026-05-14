@@ -1,6 +1,0 @@
-<?php
-require 'vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-echo 'DB_CONNECTION: ' . getenv('DB_CONNECTION') . PHP_EOL;
-echo 'DB_DATABASE: ' . getenv('DB_DATABASE') . PHP_EOL;
