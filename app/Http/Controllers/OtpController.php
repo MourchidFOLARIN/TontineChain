@@ -114,8 +114,25 @@ class OtpController extends Controller
             ]
         )
     )]
-    #[OA\Response(response: 200, description: "Connexion réussie, retourne le token")]
+    #[OA\Response(
+        response: 200,
+        description: "Connexion réussie, retourne le token",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "access_token", type: "string", example: "1|abcdef1234567890"),
+                new OA\Property(property: "token_type", type: "string", example: "Bearer"),
+                new OA\Property(property: "user", type: "object", description: "Utilisateur connecté", properties: [
+                    new OA\Property(property: "id", type: "integer", example: 1),
+                    new OA\Property(property: "email", type: "string", example: "user@example.com"),
+                    new OA\Property(property: "full_name", type: "string", example: "Membre"),
+                    new OA\Property(property: "phone", type: "string", nullable: true, example: null),
+                ]),
+                new OA\Property(property: "needs_profile_completion", type: "boolean", example: true),
+            ]
+        )
+    )]
     #[OA\Response(response: 401, description: "OTP invalide ou expiré")]
+    #[OA\Response(response: 500, description: "Erreur technique")]
     public function verifyOtp(Request $request)
     {
         $request->validate([
