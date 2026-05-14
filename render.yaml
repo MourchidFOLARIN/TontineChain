@@ -46,6 +46,24 @@ services:
       - key: APP_URL
         value: https://tonnine-benin-backend.onrender.com
       
+      # === Email SMTP (pour envoyer les OTP) ===
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        value: your-smtp-username
+      - key: MAIL_PASSWORD
+        value: your-smtp-password
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        value: no-reply@tonnine-benin.com
+      - key: MAIL_FROM_NAME
+        value: "TontineChain"
+
       # === FEDAPAY ===
       - key: FEDAPAY_API_KEY
         value: sk_sandbox_wyJZtZjU5uyd9KbFqjyPbksj
