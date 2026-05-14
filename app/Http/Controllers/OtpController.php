@@ -197,8 +197,10 @@ class OtpController extends Controller
             ]);
         } catch (Throwable $e) {
             Log::error('Error in verifyOtp: '.$e->getMessage(), ['exception' => $e]);
+            
+            $errorMessage = config('app.debug') ? $e->getMessage() : 'Erreur technique';
 
-            return response()->json(['error' => 'Erreur technique'], 500);
+            return response()->json(['error' => $errorMessage], 500);
         }
     }
 }
