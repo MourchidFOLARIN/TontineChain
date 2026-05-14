@@ -53,10 +53,6 @@ services:
         value: smtp.gmail.com
       - key: MAIL_PORT
         value: "587"
-      - key: MAIL_USERNAME
-        value: your-smtp-username
-      - key: MAIL_PASSWORD
-        value: your-smtp-password
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
