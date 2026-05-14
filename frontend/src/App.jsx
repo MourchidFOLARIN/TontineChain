@@ -100,11 +100,11 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       
-      {/* Top Header TontiGo Style */}
+      {/* Top Header TontineChain Style */}
       {view !== 'assistant_yao' && (
         <header className="fixed top-0 left-0 right-0 h-[70px] bg-white border-b border-slate-100 z-40 px-6 flex justify-between items-center shadow-sm">
           <div className="flex items-center gap-3">
-            <img src={logoOfficial} alt="Logo" className="w-10 h-10 rounded-full border-2 border-tontigo-orange shadow-md" />
+            <img src={logoOfficial} alt="Logo" className="w-10 h-10 rounded-full border-2 border-TontineChain-orange shadow-md" />
             <div>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">Bonjour,</p>
               <h2 className="text-sm font-bold text-slate-800">{user?.first_name || 'Utilisateur'}</h2>
@@ -112,12 +112,12 @@ function App() {
           </div>
           
           <div className="flex items-center gap-4">
-            <button className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-tontigo-orange transition-colors">
+            <button className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-TontineChain-orange transition-colors">
               <Search size={20} />
             </button>
-            <button onClick={() => setView('notifications')} className="relative w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-tontigo-orange transition-colors">
+            <button onClick={() => setView('notifications')} className="relative w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 hover:text-TontineChain-orange transition-colors">
               <Bell size={20} />
-              {notifications.length > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-tontigo-orange rounded-full border-2 border-white" />}
+              {notifications.length > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-TontineChain-orange rounded-full border-2 border-white" />}
             </button>
           </div>
         </header>
@@ -128,7 +128,7 @@ function App() {
         {content}
       </main>
 
-      {/* TontiGo Navigation */}
+      {/* TontineChain Navigation */}
       {view !== 'assistant_yao' && (
         <BottomNav activeTab={view} onTabChange={setView} />
       )}

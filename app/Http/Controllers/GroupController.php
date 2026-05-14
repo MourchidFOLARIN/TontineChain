@@ -349,7 +349,7 @@ class GroupController extends Controller
         // --- ENVOI EMAIL RÉEL À L'INVITÉ ---
         $recipientEmail = $request->email ?? $user->email;
         if ($recipientEmail) {
-            $invitationLink = env('APP_URL', 'https://tontigo.app') . "/join/" . $group->code;
+            $invitationLink = env('APP_URL', 'https://TontineChain.app') . "/join/" . $group->code;
             
             Mail::to($recipientEmail)
                 ->locale($user->preferred_language ?? 'fr')

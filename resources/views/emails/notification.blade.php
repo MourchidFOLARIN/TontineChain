@@ -47,10 +47,10 @@
                     <tr>
                         <td align="center" style="padding: 0 40px 40px 40px;">
                             <p style="font-size: 12px; color: #94A3B8; font-weight: 500;">
-                                &copy; {{ date('Y') }} TontiGo • Excellence & Inclusion
+                                &copy; {{ date('Y') }} TontineChain • Excellence & Inclusion
                             </p>
                             <p style="font-size: 11px; color: #CBD5E1; margin-top: 10px;">
-                                Vous recevez cet email car vous êtes membre de la communauté TontiGo.
+                                Vous recevez cet email car vous êtes membre de la communauté TontineChain.
                             </p>
                         </td>
                     </tr>

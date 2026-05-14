@@ -20,7 +20,7 @@ const BottomNav = ({ activeTab, onTabChange }) => {
           className="relative flex flex-col items-center justify-center min-w-[50px] transition-all"
         >
           {tab.special ? (
-            <div className="absolute -top-12 bg-tontigo-orange text-white p-4 rounded-full shadow-lg shadow-orange-500/30 border-4 border-white active:scale-95 transition-transform">
+            <div className="absolute -top-12 bg-TontineChain-orange text-white p-4 rounded-full shadow-lg shadow-orange-500/30 border-4 border-white active:scale-95 transition-transform">
               {tab.icon}
             </div>
           ) : (
@@ -32,7 +32,7 @@ const BottomNav = ({ activeTab, onTabChange }) => {
               className="flex flex-col items-center gap-1"
             >
               {tab.icon}
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === tab.id ? 'text-tontigo-orange' : 'text-slate-400'}`}>
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === tab.id ? 'text-TontineChain-orange' : 'text-slate-400'}`}>
                 {tab.label}
               </span>
             </motion.div>
@@ -41,7 +41,7 @@ const BottomNav = ({ activeTab, onTabChange }) => {
           {activeTab === tab.id && !tab.special && (
             <motion.div 
               layoutId="activeTab"
-              className="absolute -top-2 w-1 h-1 bg-tontigo-orange rounded-full" 
+              className="absolute -top-2 w-1 h-1 bg-TontineChain-orange rounded-full" 
             />
           )}
         </button>

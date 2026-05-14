@@ -20,9 +20,9 @@ const LandingPage = ({ onNavigateLogin }) => {
   const [openFaq, setOpenFaq] = useState(null);
 
   const faqs = [
-    { q: "Comment TontiGo sécurise mon argent ?", a: "Chaque groupe possède son propre contrat intelligent (Smart Contract) sur la blockchain Polygon. L'argent est bloqué techniquement et ne peut être libéré que selon les règles du groupe. Aucun humain ne peut détourner les fonds." },
-    { q: "Quels sont les frais d'utilisation ?", a: "TontiGo est totalement gratuit pour les utilisateurs. Nous prenons en charge les frais de transaction blockchain (Gasless) pour vous offrir une expérience fluide." },
-    { q: "Est-ce compatible avec mon téléphone ?", a: "Oui ! TontiGo est une application mobile-first optimisée pour fonctionner parfaitement sur tous les navigateurs smartphones au Bénin." },
+    { q: "Comment TontineChain sécurise mon argent ?", a: "Chaque groupe possède son propre contrat intelligent (Smart Contract) sur la blockchain Polygon. L'argent est bloqué techniquement et ne peut être libéré que selon les règles du groupe. Aucun humain ne peut détourner les fonds." },
+    { q: "Quels sont les frais d'utilisation ?", a: "TontineChain est totalement gratuit pour les utilisateurs. Nous prenons en charge les frais de transaction blockchain (Gasless) pour vous offrir une expérience fluide." },
+    { q: "Est-ce compatible avec mon téléphone ?", a: "Oui ! TontineChain est une application mobile-first optimisée pour fonctionner parfaitement sur tous les navigateurs smartphones au Bénin." },
   ];
 
   return (
@@ -31,12 +31,12 @@ const LandingPage = ({ onNavigateLogin }) => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoOfficial} alt="Logo" className="w-10 h-10 rounded-full border-2 border-tontigo-orange shadow-md" />
-            <span className="font-black text-xl tracking-tight text-slate-800 uppercase">TontiGo</span>
+            <img src={logoOfficial} alt="Logo" className="w-10 h-10 rounded-full border-2 border-TontineChain-orange shadow-md" />
+            <span className="font-black text-xl tracking-tight text-slate-800 uppercase">TontineChain</span>
           </div>
           <button 
             onClick={onNavigateLogin}
-            className="text-sm font-bold text-tontigo-orange hover:bg-orange-50 px-5 py-2.5 rounded-full transition-all"
+            className="text-sm font-bold text-TontineChain-orange hover:bg-orange-50 px-5 py-2.5 rounded-full transition-all"
           >
             Se connecter
           </button>
@@ -51,11 +51,11 @@ const LandingPage = ({ onNavigateLogin }) => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 bg-orange-100 text-tontigo-orange px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-6">
+            <div className="inline-flex items-center gap-2 bg-orange-100 text-TontineChain-orange px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-6">
               <Zap size={14} /> Tontine 2.0 • Blockchain 🇧🇯
             </div>
             <h1 className="text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-8">
-              Épargnez ensemble, <span className="text-tontigo-orange">en toute sécurité.</span>
+              Épargnez ensemble, <span className="text-TontineChain-orange">en toute sécurité.</span>
             </h1>
             <p className="text-lg text-slate-500 mb-10 leading-relaxed max-w-xl">
               La première plateforme de tontine au Bénin sécurisée par la blockchain. Protégez votre épargne collective contre les détournements grâce à la technologie Polygon.
@@ -63,7 +63,7 @@ const LandingPage = ({ onNavigateLogin }) => {
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={onNavigateLogin}
-                className="btn-tontigo text-lg px-10 py-5"
+                className="btn-TontineChain text-lg px-10 py-5"
               >
                 Créer ma tontine <ArrowRight />
               </button>
@@ -87,9 +87,9 @@ const LandingPage = ({ onNavigateLogin }) => {
                   <div className="w-20 h-4 bg-slate-800 rounded-full mt-2" />
                </div>
                <div className="p-4 pt-10 h-full bg-slate-50">
-                  <div className="w-full h-32 bg-tontigo-blue rounded-3xl mb-4 p-4">
+                  <div className="w-full h-32 bg-TontineChain-blue rounded-3xl mb-4 p-4">
                     <div className="w-10 h-1 bg-white/20 rounded-full mb-4" />
-                    <div className="w-20 h-4 bg-tontigo-orange rounded-full" />
+                    <div className="w-20 h-4 bg-TontineChain-orange rounded-full" />
                   </div>
                   <div className="space-y-4">
                     {[1,2,3].map(i => (
@@ -128,7 +128,7 @@ const LandingPage = ({ onNavigateLogin }) => {
             { label: "Vitesse", val: "< 2s" },
           ].map((s, i) => (
             <div key={i}>
-              <h3 className="text-3xl font-black text-tontigo-orange mb-2">{s.val}</h3>
+              <h3 className="text-3xl font-black text-TontineChain-orange mb-2">{s.val}</h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{s.label}</p>
             </div>
           ))}
@@ -139,7 +139,7 @@ const LandingPage = ({ onNavigateLogin }) => {
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-4xl font-black text-slate-900 mb-4">Pourquoi TontiGo ?</h2>
+            <h2 className="text-4xl font-black text-slate-900 mb-4">Pourquoi TontineChain ?</h2>
             <p className="text-slate-500 max-w-2xl mx-auto">Plus qu'une application, un écosystème de confiance pour votre argent.</p>
           </div>
 
@@ -152,8 +152,8 @@ const LandingPage = ({ onNavigateLogin }) => {
               { icon: <Globe />, title: "Zéro Frais", desc: "Nous payons les frais de transaction pour vous. Totalement Gasless." },
               { icon: <PieChart />, title: "Score Elite", desc: "Améliorez votre réputation financière et débloquez des avantages." },
             ].map((f, i) => (
-              <div key={i} className="bg-white p-10 rounded-[32px] border border-slate-100 hover:border-tontigo-orange/30 transition-all group shadow-sm hover:shadow-xl">
-                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-tontigo-orange group-hover:bg-orange-50 transition-all mb-8">
+              <div key={i} className="bg-white p-10 rounded-[32px] border border-slate-100 hover:border-TontineChain-orange/30 transition-all group shadow-sm hover:shadow-xl">
+                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-TontineChain-orange group-hover:bg-orange-50 transition-all mb-8">
                   {f.icon}
                 </div>
                 <h4 className="text-xl font-bold text-slate-800 mb-4">{f.title}</h4>
@@ -197,7 +197,7 @@ const LandingPage = ({ onNavigateLogin }) => {
         <h2 className="text-4xl font-black text-slate-900 mb-8">Prêt à moderniser vos tontines ?</h2>
         <button 
           onClick={onNavigateLogin}
-          className="btn-tontigo text-xl px-12 py-6"
+          className="btn-TontineChain text-xl px-12 py-6"
         >
           Ouvrir mon compte gratuit
         </button>
@@ -209,9 +209,9 @@ const LandingPage = ({ onNavigateLogin }) => {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3">
              <img src={logoOfficial} alt="Logo" className="w-8 h-8 rounded-full" />
-             <span className="font-black text-slate-800 uppercase">TontiGo</span>
+             <span className="font-black text-slate-800 uppercase">TontineChain</span>
           </div>
-          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">© 2026 TontiGo • Hackathon MIABE 2026 🇧🇯</p>
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">© 2026 TontineChain • Hackathon MIABE 2026 🇧🇯</p>
         </div>
       </footer>
     </div>

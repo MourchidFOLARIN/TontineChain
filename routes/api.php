@@ -22,24 +22,6 @@ Route::prefix('v1')->group(function () {
         return response()->json(['status' => 'ok', 'message' => 'Service is healthy'], 200);
     });
 
-    Route::get('/debug/ports', function () {
-        $results = [];
-        $hosts = [
-            'in-v3.mailjet.com' => [587, 2525], 
-            'smtp.sendgrid.net' => [587, 2525], 
-            'smtp.gmail.com' => [587, 465],
-            'smtp.mailtrap.io' => [2525]
-        ];
-        foreach ($hosts as $host => $ports) {
-            foreach ($ports as $port) {
-                $fp = @fsockopen($host, $port, $errno, $errstr, 3);
-                $results["$host:$port"] = $fp ? 'OPEN' : "CLOSED ($errstr)";
-                if ($fp) fclose($fp);
-            }
-        }
-        return response()->json($results);
-    });
-
     // Réponse JSON pour les appels API non authentifiés (Sanctum)
     Route::get('/login', function () {
         return response()->json(['error' => 'Unauthenticated'], 401);

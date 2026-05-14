@@ -18,7 +18,7 @@ const MesTontines = ({ groups, onSelectGroup, onNewGroup, onBack }) => {
             </p>
           </div>
         </div>
-        <button onClick={onNewGroup} className="w-10 h-10 bg-orange-50 text-tontigo-orange rounded-full flex items-center justify-center shadow-sm">
+        <button onClick={onNewGroup} className="w-10 h-10 bg-orange-50 text-TontineChain-orange rounded-full flex items-center justify-center shadow-sm">
           <Plus size={20} strokeWidth={3} />
         </button>
       </div>
@@ -32,7 +32,7 @@ const MesTontines = ({ groups, onSelectGroup, onNewGroup, onBack }) => {
           <input 
             type="text" 
             placeholder="Rechercher une tontine..." 
-            className="tontigo-input pl-12"
+            className="TontineChain-input pl-12"
           />
         </div>
 
@@ -45,7 +45,7 @@ const MesTontines = ({ groups, onSelectGroup, onNewGroup, onBack }) => {
             <p className="text-sm text-slate-400 mb-8 max-w-[200px] mx-auto leading-relaxed">
               Vous n'avez pas encore rejoint de tontine pour le moment.
             </p>
-            <button onClick={onNewGroup} className="btn-tontigo w-full justify-center">
+            <button onClick={onNewGroup} className="btn-TontineChain w-full justify-center">
               Démarrer Maintenant
             </button>
           </div>
@@ -61,7 +61,7 @@ const MesTontines = ({ groups, onSelectGroup, onNewGroup, onBack }) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                   onClick={() => onSelectGroup(group)}
-                  className="tontigo-card p-5 cursor-pointer flex items-center gap-4"
+                  className="TontineChain-card p-5 cursor-pointer flex items-center gap-4"
                 >
                   <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 flex-shrink-0 font-bold text-xl">
                     {group.name[0]}
@@ -72,14 +72,14 @@ const MesTontines = ({ groups, onSelectGroup, onNewGroup, onBack }) => {
                        <span className="text-[11px] font-black text-slate-800">{group.amount.toLocaleString()} F</span>
                     </div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-[9px] font-bold text-tontigo-orange bg-orange-50 px-2 py-0.5 rounded uppercase">{group.cycle}</span>
+                      <span className="text-[9px] font-bold text-TontineChain-orange bg-orange-50 px-2 py-0.5 rounded uppercase">{group.cycle}</span>
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{group.members} Membres</span>
                     </div>
                     
                     {/* Progress */}
                     <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-tontigo-orange" 
+                        className="h-full bg-TontineChain-orange" 
                         style={{ width: `${pct || 10}%` }}
                       />
                     </div>

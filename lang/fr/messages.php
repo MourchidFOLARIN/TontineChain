@@ -2,11 +2,11 @@
 
 return [
     // --- ACCUEIL & OTP ---
-    'welcome' => 'Bienvenue sur TontiGo, là où la solidarité rencontre la technologie.',
+    'welcome' => 'Bienvenue sur TontineChain, là où la solidarité rencontre la technologie.',
     'welcome_hero' => 'Bâtissons ensemble votre futur financier.',
     'otp_confirmation' => 'Votre voyage vers l\'autonomie commence ici. Voici votre clé d\'accès sécurisée.',
-    'otp_message' => 'Confirmation d\'accès TontiGo',
-    'otp_expiry' => 'IMPORTANT : Ce code est strictement confidentiel. Aucun agent de TontiGo ne vous demandera jamais ce code. Ne le partagez avec personne, pas même vos proches.',
+    'otp_message' => 'Confirmation d\'accès TontineChain',
+    'otp_expiry' => 'IMPORTANT : Ce code est strictement confidentiel. Aucun agent de TontineChain ne vous demandera jamais ce code. Ne le partagez avec personne, pas même vos proches.',
 
     // --- TONTINE & CONTRAT ---
     'contract_subject' => 'Votre contrat de confiance est prêt ! 📜',

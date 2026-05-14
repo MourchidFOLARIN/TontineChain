@@ -26,7 +26,7 @@
                             <h2 style="font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Votre Contrat est Prêt</h2>
                             
                             <p style="font-size: 15px; color: #475569; line-height: 1.8; margin-bottom: 30px; text-align: justify;">
-                                Félicitations ! Vous faites désormais partie intégrante du cercle <strong>{{ $groupName }}</strong> sur <strong>TontiGo</strong>. 
+                                Félicitations ! Vous faites désormais partie intégrante du cercle <strong>{{ $groupName }}</strong> sur <strong>TontineChain</strong>. 
                                 <br><br>
                                 Votre engagement a été scellé en toute transparence. Vous trouverez ci-joint votre contrat de confiance au format PDF, détaillant vos droits, vos obligations et le calendrier de vos ramassages.
                             </p>
@@ -43,7 +43,7 @@
                     <tr>
                         <td align="center" style="padding: 0 40px 40px 40px;">
                             <p style="font-size: 12px; color: #94A3B8; font-weight: 500;">
-                                &copy; {{ date('Y') }} TontiGo • Excellence & Inclusion
+                                &copy; {{ date('Y') }} TontineChain • Excellence & Inclusion
                             </p>
                         </td>
                     </tr>

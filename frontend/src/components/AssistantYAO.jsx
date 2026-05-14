@@ -7,7 +7,7 @@ const AssistantYAO = ({ onBack, user }) => {
   const [messages, setMessages] = useState([
     {
       role: 'ai',
-      text: `👋 Bonjour ${user?.first_name || ''} ! Je suis **YAO**, votre assistant IA personnel spécialisé en tontines.\n\nJe suis là pour vous accompagner dans votre réussite financière sur TontiGo.\n\nComment puis-je vous aider aujourd'hui ?`,
+      text: `👋 Bonjour ${user?.first_name || ''} ! Je suis **YAO**, votre assistant IA personnel spécialisé en tontines.\n\nJe suis là pour vous accompagner dans votre réussite financière sur TontineChain.\n\nComment puis-je vous aider aujourd'hui ?`,
       time: 'Maintenant'
     }
   ]);
@@ -69,7 +69,7 @@ const AssistantYAO = ({ onBack, user }) => {
             <ArrowLeft size={22} />
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-tontigo-orange flex items-center justify-center shadow-lg shadow-orange-500/20 text-white">
+            <div className="w-10 h-10 rounded-xl bg-TontineChain-orange flex items-center justify-center shadow-lg shadow-orange-500/20 text-white">
               <Bot size={22} />
             </div>
             <div>
@@ -98,12 +98,12 @@ const AssistantYAO = ({ onBack, user }) => {
                 <div className="space-y-1">
                   <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user' 
-                    ? 'bg-tontigo-blue text-white rounded-tr-none' 
+                    ? 'bg-TontineChain-blue text-white rounded-tr-none' 
                     : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
                   }`}>
                     {renderText(msg.text)}
                     {msg.analysis && (
-                      <div className="mt-3 pt-2 border-t border-slate-100 italic text-[10px] text-tontigo-orange font-bold">
+                      <div className="mt-3 pt-2 border-t border-slate-100 italic text-[10px] text-TontineChain-orange font-bold">
                         ✨ {msg.analysis}
                       </div>
                     )}
@@ -119,7 +119,7 @@ const AssistantYAO = ({ onBack, user }) => {
           {isTyping && (
             <div className="flex justify-start">
               <div className="bg-white border border-slate-100 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-3">
-                <Loader2 size={14} className="text-tontigo-orange animate-spin" />
+                <Loader2 size={14} className="text-TontineChain-orange animate-spin" />
                 <span className="text-xs text-slate-400 font-medium">YAO réfléchit...</span>
               </div>
             </div>
@@ -136,7 +136,7 @@ const AssistantYAO = ({ onBack, user }) => {
             <button 
               key={i} 
               onClick={() => handleSend(s.query)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 border border-slate-100 text-[11px] font-bold text-slate-500 whitespace-nowrap hover:bg-orange-50 hover:text-tontigo-orange hover:border-orange-100 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 border border-slate-100 text-[11px] font-bold text-slate-500 whitespace-nowrap hover:bg-orange-50 hover:text-TontineChain-orange hover:border-orange-100 transition-all"
             >
               {s.icon} {s.label}
             </button>
@@ -151,12 +151,12 @@ const AssistantYAO = ({ onBack, user }) => {
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Posez votre question..."
-            className="tontigo-input flex-1"
+            className="TontineChain-input flex-1"
           />
           <button 
             type="submit" 
             disabled={!input.trim() || isTyping}
-            className="w-14 h-14 bg-tontigo-orange text-white rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20 active:scale-95 disabled:opacity-50 transition-all"
+            className="w-14 h-14 bg-TontineChain-orange text-white rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20 active:scale-95 disabled:opacity-50 transition-all"
           >
             <Send size={22} />
           </button>

@@ -95,8 +95,8 @@ const Login = ({ onLoginSuccess }) => {
         
         {/* Header Logo */}
         <div className="text-center mb-10">
-          <img src={logoOfficial} alt="Logo" className="w-20 h-20 mx-auto mb-6 rounded-full border-2 border-tontigo-orange shadow-lg" />
-          <h1 className="text-2xl font-bold text-slate-800 mb-2 tracking-tight">TontiGo</h1>
+          <img src={logoOfficial} alt="Logo" className="w-20 h-20 mx-auto mb-6 rounded-full border-2 border-TontineChain-orange shadow-lg" />
+          <h1 className="text-2xl font-bold text-slate-800 mb-2 tracking-tight">TontineChain</h1>
           <p className="text-slate-400 text-sm mb-8 font-medium">L'épargne solidaire nouvelle génération</p>
           
           <div className="flex justify-center gap-2 mb-2">
@@ -104,7 +104,7 @@ const Login = ({ onLoginSuccess }) => {
               <button 
                 key={l}
                 onClick={() => setLocale(l)}
-                className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all ${locale === l ? 'bg-tontigo-orange text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all ${locale === l ? 'bg-TontineChain-orange text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
               >
                 {l === 'yor' ? 'Yoruba' : l === 'fon' ? 'Fongbe' : 'Français'}
               </button>
@@ -130,7 +130,7 @@ const Login = ({ onLoginSuccess }) => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="tontigo-input pl-12"
+                    className="TontineChain-input pl-12"
                     placeholder="nom@exemple.com"
                     required
                   />
@@ -142,7 +142,7 @@ const Login = ({ onLoginSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-tontigo w-full justify-center py-4"
+                className="btn-TontineChain w-full justify-center py-4"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                   <>
@@ -173,7 +173,7 @@ const Login = ({ onLoginSuccess }) => {
                     value={data}
                     onChange={e => handleOtpChange(e.target, index)}
                     onFocus={e => e.target.select()}
-                    className="w-12 h-14 text-center text-xl font-bold bg-slate-100 border-2 border-transparent rounded-xl text-slate-800 focus:bg-white focus:border-tontigo-orange outline-none transition-all"
+                    className="w-12 h-14 text-center text-xl font-bold bg-slate-100 border-2 border-transparent rounded-xl text-slate-800 focus:bg-white focus:border-TontineChain-orange outline-none transition-all"
                   />
                 ))}
               </div>
@@ -183,7 +183,7 @@ const Login = ({ onLoginSuccess }) => {
               <button
                 type="submit"
                 disabled={loading || otp.join('').length < 6}
-                className="btn-tontigo w-full justify-center py-4"
+                className="btn-TontineChain w-full justify-center py-4"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                   <>
@@ -221,7 +221,7 @@ const Login = ({ onLoginSuccess }) => {
                     placeholder="Prénom"
                     value={profileData.first_name}
                     onChange={(e) => setProfileData({...profileData, first_name: e.target.value})}
-                    className="tontigo-input pl-12"
+                    className="TontineChain-input pl-12"
                     required
                   />
                 </div>
@@ -232,7 +232,7 @@ const Login = ({ onLoginSuccess }) => {
                     placeholder="Nom"
                     value={profileData.last_name}
                     onChange={(e) => setProfileData({...profileData, last_name: e.target.value})}
-                    className="tontigo-input pl-12"
+                    className="TontineChain-input pl-12"
                     required
                   />
                 </div>
@@ -243,7 +243,7 @@ const Login = ({ onLoginSuccess }) => {
                     placeholder="Téléphone"
                     value={profileData.phone}
                     onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                    className="tontigo-input pl-12"
+                    className="TontineChain-input pl-12"
                     required
                   />
                 </div>
@@ -252,7 +252,7 @@ const Login = ({ onLoginSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-tontigo w-full justify-center py-4 mt-4"
+                className="btn-TontineChain w-full justify-center py-4 mt-4"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Accéder à mon espace"}
               </button>

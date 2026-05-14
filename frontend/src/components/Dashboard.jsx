@@ -69,7 +69,7 @@ const Dashboard = ({ user, onSelectGroup, onNewGroup, onNavigate }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-12 h-12 text-tontigo-orange animate-spin" />
+        <Loader2 className="w-12 h-12 text-TontineChain-orange animate-spin" />
       </div>
     );
   }
@@ -77,8 +77,8 @@ const Dashboard = ({ user, onSelectGroup, onNewGroup, onNavigate }) => {
   return (
     <div className="px-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-      {/* WALLET SECTION - TONTIGO STYLE */}
-      <div className="bg-tontigo-blue rounded-[32px] p-8 mb-8 text-white shadow-2xl shadow-slate-900/20 relative overflow-hidden">
+      {/* WALLET SECTION - TontineChain STYLE */}
+      <div className="bg-TontineChain-blue rounded-[32px] p-8 mb-8 text-white shadow-2xl shadow-slate-900/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10">
           <PieChart size={120} />
         </div>
@@ -89,14 +89,14 @@ const Dashboard = ({ user, onSelectGroup, onNewGroup, onNavigate }) => {
             <h1 className="text-3xl font-black">{balance.total_paid.toLocaleString()} <span className="text-sm font-normal text-slate-400">FCFA</span></h1>
           </div>
           <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md">
-            <Wallet size={24} className="text-tontigo-orange" />
+            <Wallet size={24} className="text-TontineChain-orange" />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-white/5 relative z-10">
           <div>
             <p className="text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1">Gain Espéré</p>
-            <p className="text-lg font-bold text-tontigo-orange">{balance.total_expected.toLocaleString()} F</p>
+            <p className="text-lg font-bold text-TontineChain-orange">{balance.total_expected.toLocaleString()} F</p>
           </div>
           <div className="text-right">
             <p className="text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1">Score Confiance</p>
@@ -109,18 +109,18 @@ const Dashboard = ({ user, onSelectGroup, onNewGroup, onNavigate }) => {
       <div className="grid grid-cols-2 gap-4 mb-10">
         <button 
           onClick={onNewGroup}
-          className="tontigo-card p-5 flex flex-col items-center gap-3 border-none bg-white shadow-sm hover:shadow-md transition-all active:scale-95"
+          className="TontineChain-card p-5 flex flex-col items-center gap-3 border-none bg-white shadow-sm hover:shadow-md transition-all active:scale-95"
         >
-          <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-tontigo-orange">
+          <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-TontineChain-orange">
             <Plus size={24} strokeWidth={3} />
           </div>
           <span className="text-xs font-bold text-slate-700">Créer Tontine</span>
         </button>
         <button 
           onClick={() => setShowJoinModal(true)}
-          className="tontigo-card p-5 flex flex-col items-center gap-3 border-none bg-white shadow-sm hover:shadow-md transition-all active:scale-95"
+          className="TontineChain-card p-5 flex flex-col items-center gap-3 border-none bg-white shadow-sm hover:shadow-md transition-all active:scale-95"
         >
-          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-tontigo-blue">
+          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-TontineChain-blue">
             <Users size={24} strokeWidth={2.5} />
           </div>
           <span className="text-xs font-bold text-slate-700">Rejoindre</span>
@@ -131,23 +131,23 @@ const Dashboard = ({ user, onSelectGroup, onNewGroup, onNavigate }) => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-slate-800">Mes Tontines</h2>
-          <button onClick={() => onNavigate('tontines')} className="text-xs font-bold text-tontigo-orange flex items-center gap-1">
+          <button onClick={() => onNavigate('tontines')} className="text-xs font-bold text-TontineChain-orange flex items-center gap-1">
             Voir tout <ArrowUpRight size={14} />
           </button>
         </div>
 
         <div className="space-y-4">
           {groups.length === 0 ? (
-            <div className="tontigo-card p-10 text-center border-dashed border-2 border-slate-200 bg-transparent">
+            <div className="TontineChain-card p-10 text-center border-dashed border-2 border-slate-200 bg-transparent">
               <p className="text-slate-400 text-sm mb-4">Vous n'avez pas encore de tontine active.</p>
-              <button onClick={onNewGroup} className="btn-tontigo py-3 text-sm">Commencer maintenant</button>
+              <button onClick={onNewGroup} className="btn-TontineChain py-3 text-sm">Commencer maintenant</button>
             </div>
           ) : (
             groups.slice(0, 3).map((group) => (
               <div 
                 key={group.id}
                 onClick={() => onSelectGroup(group)}
-                className="tontigo-card p-5 flex items-center gap-4 cursor-pointer"
+                className="TontineChain-card p-5 flex items-center gap-4 cursor-pointer"
               >
                 <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 flex-shrink-0 font-bold text-xl">
                   {group.name[0]}
@@ -155,14 +155,14 @@ const Dashboard = ({ user, onSelectGroup, onNewGroup, onNavigate }) => {
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-slate-800 truncate mb-1">{group.name}</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-tontigo-orange bg-orange-50 px-2 py-0.5 rounded uppercase">{group.cycle}</span>
+                    <span className="text-[10px] font-bold text-TontineChain-orange bg-orange-50 px-2 py-0.5 rounded uppercase">{group.cycle}</span>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{group.amount.toLocaleString()} F</span>
                   </div>
                   
                   {/* Progress Bar */}
                   <div className="mt-3 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-tontigo-orange" 
+                      className="h-full bg-TontineChain-orange" 
                       style={{ width: `${(group.current_cycle / group.members) * 100 || 10}%` }}
                     />
                   </div>
@@ -177,9 +177,9 @@ const Dashboard = ({ user, onSelectGroup, onNewGroup, onNavigate }) => {
       {/* YAO INSIGHT CARD */}
       <div 
         onClick={() => onNavigate('assistant_yao')}
-        className="bg-white border-2 border-slate-100 rounded-[28px] p-6 mb-10 flex items-center gap-5 cursor-pointer hover:border-tontigo-orange/30 transition-all group shadow-sm"
+        className="bg-white border-2 border-slate-100 rounded-[28px] p-6 mb-10 flex items-center gap-5 cursor-pointer hover:border-TontineChain-orange/30 transition-all group shadow-sm"
       >
-        <div className="w-14 h-14 bg-gradient-to-br from-tontigo-orange to-orange-300 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform">
+        <div className="w-14 h-14 bg-gradient-to-br from-TontineChain-orange to-orange-300 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform">
           <Activity size={28} />
         </div>
         <div className="flex-1">
@@ -217,11 +217,11 @@ const Dashboard = ({ user, onSelectGroup, onNewGroup, onNavigate }) => {
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                   placeholder="EX: TONTINE-2026"
-                  className="tontigo-input text-center text-lg font-bold tracking-widest placeholder:font-normal placeholder:tracking-normal"
+                  className="TontineChain-input text-center text-lg font-bold tracking-widest placeholder:font-normal placeholder:tracking-normal"
                 />
                 <button 
                   disabled={!inviteCode || joining}
-                  className="btn-tontigo w-full justify-center py-4 shadow-xl"
+                  className="btn-TontineChain w-full justify-center py-4 shadow-xl"
                   onClick={() => {/* Appel API Join Group */}}
                 >
                   {joining ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirmer'}
