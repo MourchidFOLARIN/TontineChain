@@ -19,6 +19,30 @@ class AiController extends Controller
         tags: ["IA"],
         security: [["sanctum" => []]]
     )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "message", type: "string", example: "Quel est mon solde ?"),
+                new OA\Property(property: "locale", type: "string", example: "fr")
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: "Réponse de l'assistant AI",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "assistant", type: "string", example: "YAO"),
+                new OA\Property(property: "message", type: "string", example: "Ton solde est de 50 000 FCFA"),
+                new OA\Property(property: "audio_url", type: "string", nullable: true, example: null),
+                new OA\Property(property: "demo_notice", type: "object", properties: [
+                    new OA\Property(property: "is_simulation", type: "boolean", example: true),
+                    new OA\Property(property: "message", type: "string", example: "MULTILINGUAL AI message")
+                ])
+            ]
+        )
+    )]
     public function chat(Request $request)
     {
         $user = $request->user();

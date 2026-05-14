@@ -15,6 +15,25 @@ class MessageController extends Controller
         tags: ["Messagerie"],
         security: [["sanctum" => []]]
     )]
+    #[OA\Response(
+        response: 200,
+        description: "Liste des messages du groupe",
+        content: new OA\JsonContent(
+            type: "array",
+            items: new OA\Items(
+                type: "object",
+                properties: [
+                    new OA\Property(property: "id", type: "integer", example: 1),
+                    new OA\Property(property: "content", type: "string", example: "Bonjour à tous"),
+                    new OA\Property(property: "user", type: "object", properties: [
+                        new OA\Property(property: "id", type: "integer", example: 1),
+                        new OA\Property(property: "full_name", type: "string", example: "Jean Dupont")
+                    ])
+                ]
+            )
+        )
+    )]
+    #[OA\Response(response: 403, description: "Non autorisé")]
     public function index(Request $request, Group $group)
     {
         if (! $this->userCanMessageGroup($request, $group)) {
@@ -35,6 +54,29 @@ class MessageController extends Controller
         tags: ["Messagerie"],
         security: [["sanctum" => []]]
     )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "content", type: "string", example: "Bonjour à tous"),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 201,
+        description: "Message créé",
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: "id", type: "integer", example: 1),
+                new OA\Property(property: "content", type: "string", example: "Bonjour à tous"),
+                new OA\Property(property: "user", type: "object", properties: [
+                    new OA\Property(property: "id", type: "integer", example: 1),
+                    new OA\Property(property: "full_name", type: "string", example: "Jean Dupont")
+                ])
+            ]
+        )
+    )]
+    #[OA\Response(response: 403, description: "Non autorisé")]
     public function store(Request $request, Group $group)
     {
         if (! $this->userCanMessageGroup($request, $group)) {

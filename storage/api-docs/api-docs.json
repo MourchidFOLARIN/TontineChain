@@ -12,6 +12,80 @@
         }
     ],
     "paths": {
+        "/api/v1/ai/chat": {
+            "post": {
+                "tags": [
+                    "IA"
+                ],
+                "summary": "Converser avec YAO (Assistant Intelligent)",
+                "operationId": "0db37d50f93bd2808dd6e4c4dbbbfa04",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Quel est mon solde ?"
+                                    },
+                                    "locale": {
+                                        "type": "string",
+                                        "example": "fr"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Réponse de l'assistant AI",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "assistant": {
+                                            "type": "string",
+                                            "example": "YAO"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ton solde est de 50 000 FCFA"
+                                        },
+                                        "audio_url": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "MULTILINGUAL AI message"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/groups/{group}/bid": {
             "post": {
                 "tags": [
@@ -115,7 +189,36 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lien de paiement généré"
+                        "description": "Lien de paiement généré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "reference": {
+                                            "type": "string"
+                                        },
+                                        "url": {
+                                            "type": "string"
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -257,7 +360,36 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Tontine démarrée"
+                        "description": "Tontine démarrée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "contract_address": {
+                                            "type": "string"
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "blockchain_tx": {
+                                                    "type": "string"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -276,7 +408,33 @@
                 "operationId": "5a69ca01630f7b36a7e1f59f01f9694c",
                 "responses": {
                     "200": {
-                        "description": "Invitation envoyée"
+                        "description": "Invitation envoyée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "member_analysis": {
+                                            "type": "object"
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -329,6 +487,38 @@
                 ]
             }
         },
+        "/api/v1/groups/{group}/contract": {
+            "get": {
+                "tags": [
+                    "Groupes"
+                ],
+                "summary": "Télécharger le contrat PDF de la tontine",
+                "operationId": "903230a31f2478c27c456d8db122ff16",
+                "parameters": [
+                    {
+                        "name": "group",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier PDF du contrat"
+                    },
+                    "404": {
+                        "description": "Contrat non disponible (tontine non démarrée)"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/incidents": {
             "get": {
                 "tags": [
@@ -338,7 +528,33 @@
                 "operationId": "8efda3ca532d5c4cd81590f2fb61ef24",
                 "responses": {
                     "200": {
-                        "description": "Liste des incidents de l'utilisateur"
+                        "description": "Liste des incidents",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "incidents": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -381,6 +597,127 @@
                 ]
             }
         },
+        "/api/v1/groups/{group}/messages": {
+            "get": {
+                "tags": [
+                    "Messagerie"
+                ],
+                "summary": "Liste des messages du groupe",
+                "operationId": "0422780e6232111ee8898a1fe6fd5a33",
+                "responses": {
+                    "200": {
+                        "description": "Liste des messages du groupe",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "content": {
+                                                "type": "string",
+                                                "example": "Bonjour à tous"
+                                            },
+                                            "user": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "full_name": {
+                                                        "type": "string",
+                                                        "example": "Jean Dupont"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Messagerie"
+                ],
+                "summary": "Envoyer un message dans le groupe",
+                "operationId": "901d5159fe051ddda2a93ff17bc86a27",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Bonjour à tous"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Message créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "content": {
+                                            "type": "string",
+                                            "example": "Bonjour à tous"
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Jean Dupont"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/request-otp": {
             "post": {
                 "tags": [
@@ -397,6 +734,15 @@
                                     "phone": {
                                         "type": "string",
                                         "example": "+22997000000"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "locale": {
+                                        "description": "Langue préférée (fr, yor, fon)",
+                                        "type": "string",
+                                        "example": "yor"
                                     }
                                 },
                                 "type": "object"
@@ -406,7 +752,25 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OTP envoyé"
+                        "description": "OTP envoyé (le code est uniquement dans l’email, sauf mode local debug)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
                         "description": "Erreur de validation"
@@ -427,9 +791,9 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "phone": {
+                                    "email": {
                                         "type": "string",
-                                        "example": "+22997000000"
+                                        "example": "user@example.com"
                                     },
                                     "code": {
                                         "type": "string",
@@ -443,10 +807,57 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Connexion réussie, retourne le token"
+                        "description": "Connexion réussie, retourne le token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|abcdef1234567890"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "user": {
+                                            "description": "Utilisateur connecté",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@example.com"
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Membre"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "needs_profile_completion": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "OTP invalide ou expiré"
+                    },
+                    "500": {
+                        "description": "Erreur technique"
                     }
                 }
             }
@@ -512,7 +923,33 @@
                 "operationId": "dc19df1fda64be7f7b1af5e50facf3b4",
                 "responses": {
                     "200": {
-                        "description": "Liste des notifications de l'utilisateur"
+                        "description": "Liste des notifications",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "notifications": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -593,6 +1030,10 @@
                                         "type": "string",
                                         "example": "Houenou"
                                     },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "jean@example.com"
+                                    },
                                     "profession": {
                                         "type": "string",
                                         "example": "Commerçant"
@@ -613,7 +1054,33 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Profil mis à jour"
+                        "description": "Profil mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -675,6 +1142,54 @@
                 }
             }
         },
+        "/api/v1/users/me/certificate": {
+            "get": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Générer mon Certificat de Fiabilité Financière",
+                "operationId": "33f970821832795617a325ca090cb5de",
+                "responses": {
+                    "200": {
+                        "description": "Données du certificat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        },
+                                        "performance": {
+                                            "type": "object"
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/users/me/balance": {
             "get": {
                 "tags": [
@@ -729,7 +1244,33 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Proposition créée"
+                        "description": "Proposition créée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -774,7 +1315,33 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Vote enregistré"
+                        "description": "Vote enregistré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "current_status": {
+                                            "type": "string"
+                                        },
+                                        "demo_notice": {
+                                            "properties": {
+                                                "is_simulation": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -872,7 +1439,21 @@
             }
         }
     },
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "description": "Utiliser le token Bearer retourné par /api/v1/auth/verify-otp",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
     "tags": [
+        {
+            "name": "IA",
+            "description": "IA"
+        },
         {
             "name": "Enchères",
             "description": "Enchères"
@@ -888,6 +1469,10 @@
         {
             "name": "Incidents",
             "description": "Incidents"
+        },
+        {
+            "name": "Messagerie",
+            "description": "Messagerie"
         },
         {
             "name": "Authentification",
