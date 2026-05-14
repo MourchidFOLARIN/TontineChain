@@ -56,7 +56,7 @@ services:
       - key: MAIL_ENCRYPTION
         value: tls
       - key: MAIL_FROM_ADDRESS
-        value: no-reply@tonnine-benin.com
+        value: mourchidolawale@gmail.com
       - key: MAIL_FROM_NAME
         value: "TontineChain"
 
