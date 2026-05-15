@@ -66,13 +66,17 @@ class WebhookController extends Controller
 
         if (! empty($webhookSecret)) {
             if ($providedSecret !== $webhookSecret) {
-                Log::warning("Webhook Signature Mismatch", [
+                $details = [
                     'provided_length' => strlen($providedSecret),
                     'expected_length' => strlen($webhookSecret),
                     'provided_start' => substr($providedSecret, 0, 5),
                     'expected_start' => substr($webhookSecret, 0, 5)
-                ]);
-                return response()->json(['error' => 'Unauthorized Signature'], 401);
+                ];
+                Log::warning("Webhook Signature Mismatch", $details);
+                return response()->json([
+                    'error' => 'Unauthorized Signature',
+                    'debug' => config('app.debug') ? $details : null
+                ], 401);
             }
         }
 
