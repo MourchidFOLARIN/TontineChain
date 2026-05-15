@@ -81,7 +81,7 @@ foreach ($allContributions as $c) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
         'Accept: application/json',
-        'X-Fedapay-Signature: test_secret_123'
+        'X-Fedapay-Signature: wh_sandbox_STo2s4w_sl_SN1sDtoibvjhk'
     ]);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     $response = curl_exec($ch);

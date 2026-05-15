@@ -56,7 +56,7 @@ class WebhookController extends Controller
     {
         // === SÉCURITÉ WEBHOOK (POINT 2) ===
         // On vérifie le secret FedaPay pour s'assurer que l'appel est authentique
-        $webhookSecret = env('FEDAPAY_WEBHOOK_SECRET');
+        $webhookSecret = config('services.fedapay.webhook_secret');
         $providedSecret = $request->header('X-Fedapay-Signature');
 
         if (app()->isProduction() && empty($webhookSecret)) {
