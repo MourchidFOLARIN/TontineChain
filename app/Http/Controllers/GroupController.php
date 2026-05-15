@@ -232,6 +232,13 @@ class GroupController extends Controller
                 }
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error("Erreur génération/envoi PDF à tous les membres: " . $e->getMessage());
+                if (config('app.debug')) {
+                    return response()->json([
+                        'error' => 'Erreur PDF',
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ], 500);
+                }
             }
 
             return response()->json([
