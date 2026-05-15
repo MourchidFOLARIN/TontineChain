@@ -227,7 +227,7 @@ class GroupController extends Controller
                     if ($member->user && $member->user->email) {
                         Mail::to($member->user->email)
                             ->locale($member->user->preferred_language ?? 'fr')
-                            ->queue(new TontineContractMail($group, $pdfContent));
+                            ->send(new TontineContractMail($group, $pdfContent));
                     }
                 }
             } catch (\Exception $e) {
