@@ -66,7 +66,12 @@ class WebhookController extends Controller
 
         if (! empty($webhookSecret)) {
             if ($providedSecret !== $webhookSecret) {
-                Log::warning("Tentative de Webhook frauduleuse détectée de l'IP: " . $request->ip());
+                Log::warning("Webhook Signature Mismatch", [
+                    'provided_length' => strlen($providedSecret),
+                    'expected_length' => strlen($webhookSecret),
+                    'provided_start' => substr($providedSecret, 0, 5),
+                    'expected_start' => substr($webhookSecret, 0, 5)
+                ]);
                 return response()->json(['error' => 'Unauthorized Signature'], 401);
             }
         }
