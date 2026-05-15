@@ -29,7 +29,7 @@ class ContributionController extends Controller
     {
         $user = $request->user();
         $contributions = Contribution::where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'late'])
+            ->whereIn('status', ['pending', 'late', 'processing'])
             ->with('group')
             ->get();
 
