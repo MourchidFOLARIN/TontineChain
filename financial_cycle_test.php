@@ -88,7 +88,11 @@ foreach ($allContributions as $c) {
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
+    $resWebhook = json_decode($response, true);
     echo "   - Webhook envoyé : " . ($httpcode === 200 ? "SUCCESS" : "ERREUR ($httpcode)") . "\n";
+    if ($httpcode === 401 && isset($resWebhook['debug'])) {
+        echo "     DEBUG: " . json_encode($resWebhook['debug']) . "\n";
+    }
 }
 
 echo "\n3. Vérification des Payouts (Ramassages)...\n";

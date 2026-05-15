@@ -33,6 +33,14 @@ Route::prefix('v1')->group(function () {
         Route::get('/debug/blockchain', [\App\Http\Controllers\DebugController::class, 'testBlockchain']);
         Route::get('/debug/telegram', [\App\Http\Controllers\DebugController::class, 'testTelegram']);
         Route::get('/debug/email', [\App\Http\Controllers\DebugController::class, 'testEmail']);
+        Route::get('/debug/force-late/{contribution}', function(\App\Models\Contribution $contribution) {
+            $contribution->update(['due_date' => now()->subDays(2)]);
+            return response()->json(['status' => 'forced_late', 'new_due_date' => $contribution->due_date]);
+        });
+        Route::get('/debug/run-deadlines', function() {
+            \Illuminate\Support\Facades\Artisan::call('tontine:check-deadlines');
+            return response()->json(['status' => 'command_executed', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+        });
     }
 
     // Auth Routes
