@@ -66,6 +66,8 @@ services:
       # === FEDAPAY ===
       - key: FEDAPAY_API_KEY
         value: sk_sandbox_wyJZtZjU5uyd9KbFqjyPbksj
+      - key: FEDAPAY_PUBLIC_KEY
+        value: pk_sandbox_QSs3-34T7hDjsAVcnYBViUhz
       - key: FEDAPAY_WEBHOOK_SECRET
         value: test_secret_123
       - key: FEDAPAY_ENV
