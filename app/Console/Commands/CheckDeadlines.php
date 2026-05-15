@@ -101,17 +101,28 @@ class CheckDeadlines extends Command
                 "⚠️ Rappel : La cotisation de " . $user->full_name . " est attendue. Le cycle est actuellement bloqué."
             );
 
-            // 6. Notification "In-App" pour TOUS les membres du groupe
+            // 6. Notification "In-App" + EMAIL pour TOUS les membres du groupe
             $members = $contrib->group->members;
             foreach ($members as $member) {
                 if ($member->user_id !== $contrib->user_id) {
+                    // Notif In-App
                     $this->notifications->notify(
                         $member->user_id,
                         'member_late',
-                        "⚠️ Alerte de groupe : {$user->full_name} est en retard pour sa cotisation. Le cycle est suspendu.",
+                        "⚠️ Alerte : {$user->full_name} est en retard pour sa cotisation. Le cycle est suspendu.",
                         ['group_id' => $contrib->group_id],
                         'app'
                     );
+
+                    // Notif EMAIL
+                    if ($member->user && $member->user->email) {
+                        Mail::to($member->user->email)
+                            ->locale($member->user->preferred_language ?? 'fr')
+                            ->queue(new TontineNotificationMail(
+                                "⚠️ Alerte Retard : " . $contrib->group->name,
+                                "Nous vous informons que " . $user->full_name . " est en retard de " . $lateDays . " jour(s) pour sa cotisation. Le cycle est actuellement bloqué jusqu'à régularisation."
+                            ));
+                    }
                 }
             }
 

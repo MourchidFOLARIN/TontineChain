@@ -38,9 +38,17 @@ if (!empty($resInc['body'])) {
     }
 }
 
-echo "\n--- DIAGNOSTIC DES SCORES ---\n";
+echo "\n--- DIAGNOSTIC DES SCORES & NOTIFICATIONS ---\n";
 foreach ($tokens as $email => $token) {
     $resScore = callApi("$baseUrl/users/me/score", 'GET', null, $token);
-    echo "   - $email : Score = " . ($resScore['body']['score'] ?? '100') . "\n";
+    $resNotif = callApi("$baseUrl/notifications", 'GET', null, $token);
+    $notifCount = count($resNotif['body'] ?? []);
+    echo "   - $email : Score = " . ($resScore['body']['score'] ?? '100') . " | Notifications: $notifCount\n";
+    if ($notifCount > 0) {
+        foreach (array_slice($resNotif['body'], 0, 1) as $n) {
+            echo "     📢 Dernière notif: " . $n['message'] . "\n";
+        }
+    }
 }
+
 

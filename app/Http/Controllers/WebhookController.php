@@ -124,14 +124,20 @@ class WebhookController extends Controller
             $group = $contribution->group;
             $user = $contribution->user;
 
-            // Envoi Email de confirmation réel
-            if ($user->email) {
-                Mail::to($user->email)
-                    ->locale($user->preferred_language ?? 'fr')
-                    ->send(new TontineNotificationMail(
-                        "Paiement Confirmé : " . $group->name,
-                        __('messages.trust_score') . " (" . number_format($contribution->amount_fcfa, 0, ',', ' ') . " FCFA)"
-                    ));
+            // Envoi Email de confirmation à TOUS les membres (Social Proof)
+            $members = $group->members;
+            foreach ($members as $member) {
+                if ($member->user && $member->user->email) {
+                    $isPayer = ($member->user_id === $user->id);
+                    $subject = $isPayer ? "Paiement Confirmé" : "Nouveau Versement dans " . $group->name;
+                    $msg = $isPayer 
+                        ? "Votre cotisation de " . number_format($contribution->amount_fcfa, 0, ',', ' ') . " FCFA a été bien reçue. Merci !"
+                        : "Bonne nouvelle ! " . $user->full_name . " vient de verser sa cotisation. La tontine avance !";
+
+                    Mail::to($member->user->email)
+                        ->locale($member->user->preferred_language ?? 'fr')
+                        ->queue(new TontineNotificationMail($subject, $msg));
+                }
             }
 
             // Message système dans le chat (Social Proof)
@@ -238,15 +244,20 @@ class WebhookController extends Controller
             $txHash = $this->blockchain->releasePayout($group->contract_address, $cycleNumber);
             $payout->update(['blockchain_tx_hash' => $txHash]);
             
-            // Notification au bénéficiaire par Email
-            $beneficiary = GroupMember::where('group_id', $group->id)->where('user_id', $payoutUserId)->first()->user;
-            if ($beneficiary->email) {
-                Mail::to($beneficiary->email)
-                    ->locale($beneficiary->preferred_language ?? 'fr')
-                    ->send(new TontineNotificationMail(
-                        __('messages.your_turn'),
-                        "Tontine: " . $group->name . " - " . number_format($payoutAmount, 0, ',', ' ') . " FCFA"
-                    ));
+            // Notification à TOUS les membres par Email (Célébration)
+            $beneficiary = $nextBeneficiary->user;
+            foreach ($group->members as $member) {
+                if ($member->user && $member->user->email) {
+                    $isBeneficiary = ($member->user_id === $payoutUserId);
+                    $subject = $isBeneficiary ? "🏆 C'est votre tour !" : "💰 Ramassage effectué dans " . $group->name;
+                    $msg = $isBeneficiary
+                        ? "Félicitations ! Vous venez de recevoir le pot total de " . number_format($payoutAmount, 0, ',', ' ') . " FCFA. Profitez-en bien !"
+                        : "Le pot de ce cycle vient d'être versé à " . $beneficiary->full_name . " (" . number_format($payoutAmount, 0, ',', ' ') . " FCFA). Prochain cycle en cours !";
+
+                    Mail::to($member->user->email)
+                        ->locale($member->user->preferred_language ?? 'fr')
+                        ->queue(new TontineNotificationMail($subject, $msg));
+                }
             }
 
             // Message système dans le chat (Célébration)
