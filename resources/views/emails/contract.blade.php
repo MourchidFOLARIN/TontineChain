@@ -36,6 +36,17 @@
                                     📎 Document officiel joint à cet email.
                                 </p>
                             </div>
+
+                            @if(isset($explorerUrl))
+                            <div style="background-color: #F1F5F9; border-radius: 12px; padding: 20px; margin-bottom: 10px; border: 1px solid #CBD5E1;">
+                                <p style="font-size: 13px; color: #475569; font-weight: 600; margin-bottom: 8px;">
+                                    ⛓️ Preuve de Transparence Blockchain :
+                                </p>
+                                <a href="{{ $explorerUrl }}" target="_blank" style="font-size: 12px; color: #3B82F6; text-decoration: underline; word-break: break-all;">
+                                    {{ $explorerUrl }}
+                                </a>
+                            </div>
+                            @endif
                         </td>
                     </tr>
 
