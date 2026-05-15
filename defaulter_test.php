@@ -62,11 +62,32 @@ foreach ([$m1, $m3] as $m) {
     echo "   - " . $m['email'] . " a payé sa part du Cycle 2. ✅\n";
 }
 
-echo "\n3. Simulation : Le Membre 2 ne paie pas (On met sa date limite dans le passé)...\n";
+echo "\n3. Simulation : Le Membre 2 ne paie pas (On force le retard)...\n";
 $m2 = $cycle2Contributions[1];
 echo "   - Membre fautif : " . $m2['email'] . " (ID Cotisation: " . $m2['id'] . ")\n";
 
-// NOTE: Pour changer la date dans le passé sur Render, on ne peut pas le faire via API.
-// On va devoir utiliser un script PHP sur le serveur pour simuler le passage du temps.
-// Je vais créer un endpoint de debug temporaire ou utiliser une astuce.
+// A: On force la date dans le passé
+$resForce = callApi("$baseUrl/debug/force-late/" . $m2['id'], 'GET', null, $tokens['mourchidolawale@gmail.com']);
+echo "   - Statut : " . ($resForce['body']['status'] ?? 'Erreur') . "\n";
+
+echo "\n4. Déclenchement de la détection d'incident...\n";
+$resCommand = callApi("$baseUrl/debug/run-deadlines", 'GET', null, $tokens['mourchidolawale@gmail.com']);
+echo "   - Commande exécutée : " . ($resCommand['body']['status'] ?? 'Erreur') . "\n";
+
+echo "\n5. Vérification des conséquences...\n";
+// On vérifie le score du mauvais payeur
+$resUser = callApi("$baseUrl/users/me/score", 'GET', null, $tokens[$m2['email']]);
+echo "   - Nouveau Score de " . $m2['email'] . " : " . ($resUser['body']['score'] ?? 'Inconnu') . "\n";
+
+// On vérifie les incidents
+$resIncidents = callApi("$baseUrl/incidents", 'GET', null, $tokens['mourchidolawale@gmail.com']);
+echo "   - Nombre d'incidents détectés : " . count($resIncidents['body'] ?? []) . "\n";
+if (!empty($resIncidents['body'])) {
+    foreach ($resIncidents['body'] as $inc) {
+        if ($inc['user_id'] == $m2['user_id']) {
+            echo "   🚩 INCIDENT : " . $inc['description'] . " (Impact: " . $inc['score_impact'] . " points)\n";
+        }
+    }
+}
+
 ?>
