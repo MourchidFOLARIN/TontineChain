@@ -280,5 +280,52 @@ class UserController extends Controller
             'currency' => 'XOF',
             'trust_score' => $user->score_confiance
         ]);
+    #[OA\Post(
+        path: "/api/v1/users/me/kyc",
+        summary: "Uploader ma pièce d'identité pour vérification KYC",
+        tags: ["Utilisateurs"],
+        security: [["sanctum" => []]]
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: "multipart/form-data",
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(property: "document", type: "string", format: "binary", description: "Image de la carte d'identité ou passeport")
+                ]
+            )
+        )
+    )]
+    #[OA\Response(response: 200, description: "Document reçu et en cours d'analyse")]
+    public function uploadKyc(Request $request)
+    {
+        $user = $request->user();
+        
+        $request->validate([
+            'document' => 'required|image|mimes:jpg,jpeg,png|max:5120', // 5MB max
+        ]);
+
+        if ($request->hasFile('document')) {
+            $path = $request->file('document')->store('kyc_documents', 'public');
+            
+            $user->update([
+                'id_card_path' => $path,
+                'kyc_status' => 'pending'
+            ]);
+
+            // Simulation d'une analyse OCR intelligente
+            return response()->json([
+                'message' => 'Document reçu avec succès',
+                'status' => 'pending',
+                'document_url' => asset('storage/' . $path),
+                'demo_notice' => [
+                    'is_simulation' => true,
+                    'message' => "ANALYSE OCR : YAO analyse votre pièce d'identité... Validité confirmée. Votre statut passera à 'verified' après validation finale du réseau."
+                ]
+            ]);
+        }
+
+        return response()->json(['error' => 'Aucun document détecté'], 400);
     }
 }
