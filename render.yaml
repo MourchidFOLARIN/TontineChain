@@ -67,7 +67,7 @@ services:
       - key: FEDAPAY_API_KEY
         value: sk_sandbox_wyJZtZjU5uyd9KbFqjyPbksj
       - key: FEDAPAY_WEBHOOK_SECRET
-        value: your-fedapay-webhook-secret
+        value: test_secret_123
       - key: FEDAPAY_ENV
         value: sandbox
 
