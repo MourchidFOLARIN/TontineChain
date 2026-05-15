@@ -70,8 +70,8 @@ class ContributionController extends Controller
             return response()->json(['error' => 'Non autorisé'], 403);
         }
 
-        if (! in_array($contribution->status, ['pending', 'late'], true)) {
-            return response()->json(['error' => 'Cette cotisation est déjà en cours ou terminée.'], 400);
+        if (! in_array($contribution->status, ['pending', 'late', 'processing'], true)) {
+            return response()->json(['error' => 'Cette cotisation est déjà terminée.'], 400);
         }
 
         try {
