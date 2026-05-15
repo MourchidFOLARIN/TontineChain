@@ -15,15 +15,17 @@ class TontineContractMail extends Mailable
     use Queueable, SerializesModels;
 
     public $group;
+    public $explorerUrl;
     protected $pdfContent;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Group $group, $pdfContent)
+    public function __construct(Group $group, $pdfContent, $explorerUrl = null)
     {
         $this->group = $group;
         $this->pdfContent = $pdfContent;
+        $this->explorerUrl = $explorerUrl;
     }
 
     /**
@@ -32,7 +34,7 @@ class TontineContractMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('messages.contract_subject') . ' - ' . $this->group->name,
+            subject: "📜 Contrat & Preuve Blockchain - " . $this->group->name,
         );
     }
 
@@ -45,6 +47,7 @@ class TontineContractMail extends Mailable
             view: 'emails.contract',
             with: [
                 'groupName' => $this->group->name,
+                'explorerUrl' => $this->explorerUrl,
             ],
         );
     }

@@ -222,12 +222,14 @@ class GroupController extends Controller
                 $pdf = Pdf::loadView('pdf.tontine_contract', ['group' => $group]);
                 $pdfContent = $pdf->output();
 
-                // Envoyer le contrat PDF à TOUS les membres actifs
+                // 7. Envoi des contrats et notifications (Social Pressure + Blockchain Proof)
+                $explorerUrl = $this->blockchain->getExplorerUrl($group->contract_tx_hash);
+
                 foreach ($group->members as $member) {
                     if ($member->user && $member->user->email) {
                         Mail::to($member->user->email)
                             ->locale($member->user->preferred_language ?? 'fr')
-                            ->send(new TontineContractMail($group, $pdfContent));
+                            ->send(new TontineContractMail($group, $pdfContent, $explorerUrl));
                     }
                 }
             } catch (\Exception $e) {

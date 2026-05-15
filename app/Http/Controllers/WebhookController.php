@@ -244,15 +244,17 @@ class WebhookController extends Controller
             $txHash = $this->blockchain->releasePayout($group->contract_address, $cycleNumber);
             $payout->update(['blockchain_tx_hash' => $txHash]);
             
-            // Notification à TOUS les membres par Email (Célébration)
+            // Notification à TOUS les membres par Email (Célébration + Preuve Blockchain)
             $beneficiary = $nextBeneficiary->user;
+            $explorerUrl = $this->blockchain->getExplorerUrl($txHash);
+            
             foreach ($group->members as $member) {
                 if ($member->user && $member->user->email) {
                     $isBeneficiary = ($member->user_id === $payoutUserId);
                     $subject = $isBeneficiary ? "🏆 C'est votre tour !" : "💰 Ramassage effectué dans " . $group->name;
                     $msg = $isBeneficiary
-                        ? "Félicitations ! Vous venez de recevoir le pot total de " . number_format($payoutAmount, 0, ',', ' ') . " FCFA. Profitez-en bien !"
-                        : "Le pot de ce cycle vient d'être versé à " . $beneficiary->full_name . " (" . number_format($payoutAmount, 0, ',', ' ') . " FCFA). Prochain cycle en cours !";
+                        ? "Félicitations ! Vous venez de recevoir le pot total de " . number_format($payoutAmount, 0, ',', ' ') . " FCFA.\nPreuve Blockchain : " . $explorerUrl
+                        : "Le pot de ce cycle vient d'être versé à " . $beneficiary->full_name . " (" . number_format($payoutAmount, 0, ',', ' ') . " FCFA).\nSuivez la transaction ici : " . $explorerUrl;
 
                     Mail::to($member->user->email)
                         ->locale($member->user->preferred_language ?? 'fr')

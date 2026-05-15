@@ -77,4 +77,13 @@ class BlockchainService
         Log::info("Releasing payout on Polygon for $contractAddress");
         return '0x' . Str::random(64);
     }
+
+    /**
+     * Get the public URL for a transaction hash
+     */
+    public function getExplorerUrl(string $txHash): string
+    {
+        $baseUrl = 'https://amoy.polygonscan.com/tx/';
+        return $baseUrl . $txHash;
+    }
 }
