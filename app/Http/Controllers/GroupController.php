@@ -320,6 +320,14 @@ class GroupController extends Controller
 
         $group->increment('current_members');
 
+        // Notification In-App pour l'invité
+        TontineNotification::create([
+            'user_id' => $user->id,
+            'type' => 'invitation_received',
+            'message' => "Vous avez été invité par " . $request->user()->full_name . " à rejoindre le groupe '" . $group->name . "'. Code : " . $group->code,
+            'channel' => 'in_app',
+        ]);
+
         // --- VÉRIFICATION SI LE GROUPE EST AU COMPLET ---
         if ($group->current_members >= $group->max_members) {
             $creator = $group->creator;
