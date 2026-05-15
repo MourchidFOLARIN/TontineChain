@@ -285,7 +285,12 @@ class GroupController extends Controller
             return response()->json(['error' => 'Groupe déjà complet'], 400);
         }
         
-        $user = User::where('phone', $request->phone)->first();
+        $user = User::where('phone', $request->phone)
+            ->orWhere(function($query) use ($request) {
+                if ($request->email) {
+                    $query->where('email', strtolower(trim($request->email)));
+                }
+            })->first();
         
         if ($user && GroupMember::where('group_id', $group->id)->where('user_id', $user->id)->exists()) {
             return response()->json(['error' => 'Déjà membre ou invité'], 400);
