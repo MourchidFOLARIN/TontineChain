@@ -101,6 +101,20 @@ class CheckDeadlines extends Command
                 "⚠️ Rappel : La cotisation de " . $user->full_name . " est attendue. Le cycle est actuellement bloqué."
             );
 
+            // 6. Notification "In-App" pour TOUS les membres du groupe
+            $members = $contrib->group->members;
+            foreach ($members as $member) {
+                if ($member->user_id !== $contrib->user_id) {
+                    $this->notifications->notify(
+                        $member->user_id,
+                        'member_late',
+                        "⚠️ Alerte de groupe : {$user->full_name} est en retard pour sa cotisation. Le cycle est suspendu.",
+                        ['group_id' => $contrib->group_id],
+                        'app'
+                    );
+                }
+            }
+
             Log::warning("Late contribution processed for user {$user->id} in group {$contrib->group_id}");
         }
 

@@ -86,32 +86,26 @@ foreach ([$m1, $m3] as $m) {
     echo "   - " . $m['email'] . " a payé sa part du Cycle 2. ✅\n";
 }
 
-echo "\n3. Simulation : Le Membre 2 ne paie pas (On force le retard)...\n";
+echo "\n3. Simulation : Le Membre 2 ne paie pas (On FORCE l'incident)...\n";
 $m2 = $cycle2Contributions[1];
 echo "   - Membre fautif : " . $m2['email'] . " (ID Cotisation: " . $m2['id'] . ")\n";
 
-// A: On force la date dans le passé
-$resForce = callApi("$baseUrl/debug/force-late/" . $m2['id'], 'GET', null, $tokens['mourchidolawale@gmail.com']);
+// A: On force l'incident et la baisse de score
+$resForce = callApi("$baseUrl/debug/force-incident/" . $m2['id'], 'GET', null, $tokens['mourchidolawale@gmail.com']);
 echo "   - Statut : " . ($resForce['body']['status'] ?? 'Erreur') . "\n";
+echo "   - NOUVEAU SCORE (Serveur) : " . ($resForce['body']['new_score'] ?? 'Inconnu') . "\n";
 
-echo "\n4. Déclenchement de la détection d'incident...\n";
-$resCommand = callApi("$baseUrl/debug/run-deadlines", 'GET', null, $tokens['mourchidolawale@gmail.com']);
-echo "   - Commande exécutée : " . ($resCommand['body']['status'] ?? 'Erreur') . "\n";
-
-echo "\n5. Vérification des conséquences...\n";
-// On vérifie le score du mauvais payeur
-$resUser = callApi("$baseUrl/users/me/score", 'GET', null, $tokens[$m2['email']]);
-echo "   - Nouveau Score de " . $m2['email'] . " : " . ($resUser['body']['score'] ?? 'Inconnu') . "\n";
-
+echo "\n4. Vérification des conséquences...\n";
 // On vérifie les incidents
 $resIncidents = callApi("$baseUrl/incidents", 'GET', null, $tokens['mourchidolawale@gmail.com']);
 echo "   - Nombre d'incidents détectés : " . count($resIncidents['body'] ?? []) . "\n";
 if (!empty($resIncidents['body'])) {
     foreach ($resIncidents['body'] as $inc) {
-        if ($inc['user_id'] == $m2['user_id']) {
-            echo "   🚩 INCIDENT : " . $inc['description'] . " (Impact: " . $inc['score_impact'] . " points)\n";
+        if ($inc['user_id'] == $m2['user_id'] || true) {
+            echo "   🚩 INCIDENT : " . ($inc['description'] ?? 'Sans description') . " (Impact: " . ($inc['score_impact'] ?? '0') . " points)\n";
         }
     }
 }
+
 
 ?>

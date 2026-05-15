@@ -54,6 +54,21 @@ Route::prefix('v1')->group(function () {
             'cycle_number' => $contribution->cycle_number,
             'score_impact' => -20
         ]);
+
+        // Alerter les autres membres
+        $members = $contribution->group->members;
+        $notifier = app(\App\Services\NotificationService::class);
+        foreach ($members as $member) {
+            if ($member->user_id !== $contribution->user_id) {
+                $notifier->notify(
+                    $member->user_id,
+                    'member_late',
+                    "⚠️ Alerte : {$contribution->user->full_name} est en retard. Le cycle est suspendu.",
+                    ['group_id' => $contribution->group_id],
+                    'app'
+                );
+            }
+        }
         return response()->json(['status' => 'incident_forced', 'new_score' => $contribution->user->score_confiance]);
     });
 
