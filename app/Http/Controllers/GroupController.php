@@ -33,11 +33,18 @@ class GroupController extends Controller
 
     #[OA\Get(
         path: "/api/v1/groups",
-        summary: "Lister mes groupes",
+        summary: "Lister toutes mes tontines",
+        description: "Retourne la liste des groupes dont l'utilisateur est le créateur ou un membre actif. Inclut le statut, le montant et le prochain cycle.",
         tags: ["Groupes"],
-        security: [["sanctum" => []]]
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "Liste des groupes récupérée",
+                content: new OA\JsonContent(type: "array", items: new OA\Items(type: "object"))
+            )
+        ]
     )]
-    #[OA\Response(response: 200, description: "Liste des groupes")]
     public function index(Request $request)
     {
         $user = $request->user();
@@ -51,25 +58,29 @@ class GroupController extends Controller
 
     #[OA\Post(
         path: "/api/v1/groups",
-        summary: "Créer une nouvelle tontine",
+        summary: "Créer un nouveau groupe de tontine",
+        description: "Permet de configurer une tontine avec son montant, sa fréquence et sa méthode de ramassage (Ordre fixe ou Enchères).",
         tags: ["Groupes"],
-        security: [["sanctum" => []]]
+        security: [["sanctum" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "name", type: "string", example: "Tontine Commerçants Marché Dantokpa"),
+                    new OA\Property(property: "contribution_amount", type: "number", example: 10000),
+                    new OA\Property(property: "max_members", type: "integer", example: 5),
+                    new OA\Property(property: "frequency", type: "string", enum: ["weekly", "biweekly", "monthly"]),
+                    new OA\Property(property: "payout_method", type: "string", enum: ["sequential", "random", "bidding"]),
+                    new OA\Property(property: "insurance_opt_in", type: "boolean", example: true),
+                    new OA\Property(property: "start_date", type: "string", format: "date", example: "2026-06-01")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Tontine créée avec succès"),
+            new OA\Response(response: 422, description: "Données de configuration invalides")
+        ]
     )]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "name", type: "string", example: "Tontine Famille"),
-                new OA\Property(property: "contribution_amount", type: "number", example: 10000),
-                new OA\Property(property: "max_members", type: "integer", example: 5),
-                new OA\Property(property: "frequency", type: "string", enum: ["weekly", "biweekly", "monthly"]),
-                new OA\Property(property: "payout_method", type: "string", enum: ["sequential", "random", "bidding"]),
-                new OA\Property(property: "insurance_opt_in", type: "boolean", example: true),
-                new OA\Property(property: "start_date", type: "string", format: "date-time")
-            ]
-        )
-    )]
-    #[OA\Response(response: 201, description: "Groupe créé")]
     public function store(Request $request)
     {
         $request->validate([
@@ -113,12 +124,17 @@ class GroupController extends Controller
 
     #[OA\Get(
         path: "/api/v1/groups/{group}",
-        summary: "Détails d'un groupe",
+        summary: "Voir les détails d'une tontine et ses membres",
+        description: "Retourne les informations détaillées du groupe, incluant la liste des membres, leurs positions et le statut de leurs paiements.",
         tags: ["Groupes"],
-        security: [["sanctum" => []]]
+        security: [["sanctum" => []]],
+        parameters: [
+            new OA\Parameter(name: "group", in: "path", required: true, description: "ID de la tontine", schema: new OA\Schema(type: "string"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Détails complets du groupe")
+        ]
     )]
-    #[OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))]
-    #[OA\Response(response: 200, description: "Détails du groupe")]
     public function show(Request $request, Group $group)
     {
         if (! $this->userCanAccessGroup($request->user(), $group)) {
@@ -126,34 +142,42 @@ class GroupController extends Controller
         }
 
         $group->load(['creator', 'members.user']);
+        
+        // Ajouter les enchères du cycle actuel et les votes en cours
+        $group->active_bids = $group->bids()
+            ->where('cycle_number', $group->current_cycle)
+            ->with('user:id,full_name')
+            ->orderByDesc('discount_amount')
+            ->get();
+            
+        $group->pending_votes = $group->votes()
+            ->where('status', 'pending')
+            ->with('creator:id,full_name')
+            ->get();
+
         return response()->json($group);
     }
 
     #[OA\Post(
         path: "/api/v1/groups/{group}/start",
-        summary: "Démarrer la tontine",
+        summary: "Démarrer officiellement la tontine",
+        description: "Active le cycle financier, déploie le contrat sur la Blockchain Polygon, génère le contrat PDF et l'envoie à tous les membres par email.",
         tags: ["Groupes"],
-        security: [["sanctum" => []]]
-    )]
-    #[OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))]
-    #[OA\Response(
-        response: 200, 
-        description: "Tontine démarrée",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "message", type: "string"),
-                new OA\Property(property: "contract_address", type: "string"),
-                new OA\Property(
-                    property: "demo_notice", 
-                    type: "object",
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "Tontine activée sur la Blockchain",
+                content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "is_simulation", type: "boolean"),
-                        new OA\Property(property: "blockchain_tx", type: "string"),
-                        new OA\Property(property: "message", type: "string")
+                        new OA\Property(property: "message", type: "string", example: "Tontine démarrée"),
+                        new OA\Property(property: "contract_address", type: "string", example: "0x123..."),
+                        new OA\Property(property: "demo_notice", type: "object")
                     ]
                 )
-            ]
-        )
+            ),
+            new OA\Response(response: 400, description: "Le groupe est incomplet ou déjà démarré")
+        ]
     )]
     public function start(Request $request, Group $group)
     {
@@ -257,27 +281,31 @@ class GroupController extends Controller
 
     #[OA\Post(
         path: "/api/v1/groups/{group}/invite",
-        summary: "Inviter un membre",
+        summary: "Inviter un nouveau membre avec analyse de fiabilité",
+        description: "Permet d'ajouter un membre par email/téléphone. Le backend analyse immédiatement le score de confiance de l'invité pour conseiller le créateur.",
         tags: ["Groupes"],
-        security: [["sanctum" => []]]
-    )]
-    #[OA\Response(
-        response: 200, 
-        description: "Invitation envoyée",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "message", type: "string"),
-                new OA\Property(property: "member_analysis", type: "object"),
-                new OA\Property(
-                    property: "demo_notice", 
-                    type: "object",
+        security: [["sanctum" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "phone", type: "string", example: "+22990000000"),
+                    new OA\Property(property: "email", type: "string", example: "invit@example.com")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "Invitation envoyée",
+                content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "is_simulation", type: "boolean"),
-                        new OA\Property(property: "message", type: "string")
+                        new OA\Property(property: "message", type: "string", example: "Invitation envoyée"),
+                        new OA\Property(property: "member_analysis", type: "object")
                     ]
                 )
-            ]
-        )
+            )
+        ]
     )]
     public function invite(Request $request, Group $group)
     {
@@ -400,10 +428,14 @@ class GroupController extends Controller
 
     #[OA\Post(
         path: "/api/v1/groups/{group}/join",
-        summary: "Rejoindre un groupe",
-        tags: ["Groupes"]
+        summary: "Accepter l'invitation et rejoindre le cercle",
+        description: "Valide l'adhésion d'un membre invité. Déclenche un message système dans le chat pour informer les autres membres.",
+        tags: ["Groupes"],
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Membre ajouté au groupe")
+        ]
     )]
-    #[OA\Response(response: 200, description: "Rejoint avec succès")]
     public function join(Request $request, Group $group)
     {
         $user = $request->user();
@@ -422,14 +454,28 @@ class GroupController extends Controller
 
     #[OA\Get(
         path: "/api/v1/groups/{group}/stats",
-        summary: "Statistiques & Analyse de Risque IA",
+        summary: "Consulter les statistiques financières et l'analyse de risque IA",
+        description: "Fournit un bilan complet du groupe : fonds collectés, ramassages effectués, état du fonds d'assurance et une prédiction de risque de défaut basée sur l'IA.",
         tags: ["Groupes"],
         security: [["sanctum" => []]],
         parameters: [
-            new OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))
+            new OA\Parameter(name: "group", in: "path", required: true, description: "ID du groupe", schema: new OA\Schema(type: "string"))
         ],
         responses: [
-            new OA\Response(response: 200, description: "Stats et prédiction de risque")
+            new OA\Response(
+                response: 200, 
+                description: "Stats et Analyse IA récupérées",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "name", type: "string"),
+                        new OA\Property(property: "stats", type: "object"),
+                        new OA\Property(property: "ai_risk_prediction", type: "object", properties: [
+                            new OA\Property(property: "risk_level", type: "string", example: "low"),
+                            new OA\Property(property: "recommendation", type: "string", example: "Le groupe est stable.")
+                        ])
+                    ]
+                )
+            )
         ]
     )]
     public function stats(Request $request, Group $group)
@@ -465,14 +511,15 @@ class GroupController extends Controller
 
     #[OA\Get(
         path: "/api/v1/groups/{group}/contract",
-        summary: "Télécharger le contrat PDF de la tontine",
+        summary: "Télécharger le contrat PDF certifié",
+        description: "Génère et télécharge le contrat juridique incluant les termes de la tontine, l'ordre de passage et les preuves blockchain.",
         tags: ["Groupes"],
         security: [["sanctum" => []]],
         parameters: [
-            new OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))
+            new OA\Parameter(name: "group", in: "path", required: true, description: "ID du groupe", schema: new OA\Schema(type: "string"))
         ],
         responses: [
-            new OA\Response(response: 200, description: "Fichier PDF du contrat"),
+            new OA\Response(response: 200, description: "Téléchargement du PDF commencé"),
             new OA\Response(response: 404, description: "Contrat non disponible (tontine non démarrée)")
         ]
     )]

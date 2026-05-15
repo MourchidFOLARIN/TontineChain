@@ -10,11 +10,12 @@ class PayoutController extends Controller
 {
     #[OA\Get(
         path: "/api/v1/payouts",
-        summary: "Lister les paiements reçus (ramassages)",
+        summary: "Lister tous mes ramassages reçus",
+        description: "Affiche l'historique de tous les fonds que vous avez collectés dans vos différents groupes.",
+        tags: ["Finances & Cotisations"],
         security: [["sanctum" => []]],
-        tags: ["Payouts"],
         responses: [
-            new OA\Response(response: 200, description: "Liste des paiements du membre")
+            new OA\Response(response: 200, description: "Historique des ramassages récupéré")
         ]
     )]
     public function index(Request $request)
@@ -27,15 +28,15 @@ class PayoutController extends Controller
 
     #[OA\Get(
         path: "/api/v1/payouts/{payout}",
-        summary: "Détails d'un paiement spécifique",
+        summary: "Détails d'un ramassage spécifique (Preuve Blockchain)",
+        description: "Fournit les détails d'un ramassage, incluant le montant net et le lien vers la transaction sur le réseau Polygon.",
+        tags: ["Finances & Cotisations"],
         security: [["sanctum" => []]],
-        tags: ["Payouts"],
         parameters: [
-            new OA\PathParameter(name: "payout", required: true, description: "ID du paiement", schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: "payout", in: "path", required: true, description: "ID du ramassage", schema: new OA\Schema(type: "integer"))
         ],
         responses: [
-            new OA\Response(response: 200, description: "Détails du paiement"),
-            new OA\Response(response: 403, description: "Non autorisé")
+            new OA\Response(response: 200, description: "Détails du ramassage")
         ]
     )]
     public function show(Request $request, Payout $payout)

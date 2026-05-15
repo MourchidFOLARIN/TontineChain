@@ -11,29 +11,36 @@ class MessageController extends Controller
 {
     #[OA\Get(
         path: "/api/v1/groups/{group}/messages",
-        summary: "Liste des messages du groupe",
-        tags: ["Messagerie"],
-        security: [["sanctum" => []]]
+        summary: "Récupérer l'historique de discussion du groupe",
+        description: "Retourne tous les messages échangés dans la tontine. Inclut les messages envoyés par les membres et les alertes automatiques du système (ex: confirmation de paiement, incidents).",
+        tags: ["Messagerie Sociale"],
+        security: [["sanctum" => []]],
+        parameters: [
+            new OA\Parameter(name: "group", in: "path", required: true, description: "ID du groupe", schema: new OA\Schema(type: "string"))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Historique des messages récupéré",
+                content: new OA\JsonContent(
+                    type: "array",
+                    items: new OA\Items(
+                        type: "object",
+                        properties: [
+                            new OA\Property(property: "id", type: "integer", example: 1),
+                            new OA\Property(property: "content", type: "string", example: "Le contrat intelligent a été déployé !"),
+                            new OA\Property(property: "is_system", type: "boolean", example: true),
+                            new OA\Property(property: "user", type: "object", nullable: true, properties: [
+                                new OA\Property(property: "id", type: "integer", example: 1),
+                                new OA\Property(property: "full_name", type: "string", example: "Jean Dupont")
+                            ])
+                        ]
+                    )
+                )
+            ),
+            new OA\Response(response: 403, description: "Vous n'êtes pas membre actif de ce groupe")
+        ]
     )]
-    #[OA\Response(
-        response: 200,
-        description: "Liste des messages du groupe",
-        content: new OA\JsonContent(
-            type: "array",
-            items: new OA\Items(
-                type: "object",
-                properties: [
-                    new OA\Property(property: "id", type: "integer", example: 1),
-                    new OA\Property(property: "content", type: "string", example: "Bonjour à tous"),
-                    new OA\Property(property: "user", type: "object", properties: [
-                        new OA\Property(property: "id", type: "integer", example: 1),
-                        new OA\Property(property: "full_name", type: "string", example: "Jean Dupont")
-                    ])
-                ]
-            )
-        )
-    )]
-    #[OA\Response(response: 403, description: "Non autorisé")]
     public function index(Request $request, Group $group)
     {
         if (! $this->userCanMessageGroup($request, $group)) {
@@ -50,33 +57,26 @@ class MessageController extends Controller
 
     #[OA\Post(
         path: "/api/v1/groups/{group}/messages",
-        summary: "Envoyer un message dans le groupe",
-        tags: ["Messagerie"],
-        security: [["sanctum" => []]]
+        summary: "Envoyer un nouveau message au groupe",
+        description: "Permet aux membres actifs de discuter entre eux.",
+        tags: ["Messagerie Sociale"],
+        security: [["sanctum" => []]],
+        parameters: [
+            new OA\Parameter(name: "group", in: "path", required: true, description: "ID du groupe", schema: new OA\Schema(type: "string"))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "content", type: "string", example: "Est-ce que tout le monde a reçu son PDF de contrat ?"),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Message envoyé avec succès"),
+            new OA\Response(response: 403, description: "Action non autorisée")
+        ]
     )]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "content", type: "string", example: "Bonjour à tous"),
-            ]
-        )
-    )]
-    #[OA\Response(
-        response: 201,
-        description: "Message créé",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "id", type: "integer", example: 1),
-                new OA\Property(property: "content", type: "string", example: "Bonjour à tous"),
-                new OA\Property(property: "user", type: "object", properties: [
-                    new OA\Property(property: "id", type: "integer", example: 1),
-                    new OA\Property(property: "full_name", type: "string", example: "Jean Dupont")
-                ])
-            ]
-        )
-    )]
-    #[OA\Response(response: 403, description: "Non autorisé")]
     public function store(Request $request, Group $group)
     {
         if (! $this->userCanMessageGroup($request, $group)) {

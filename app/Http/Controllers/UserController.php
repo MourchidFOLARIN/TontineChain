@@ -10,11 +10,34 @@ class UserController extends Controller
 {
     #[OA\Get(
         path: "/api/v1/users/me",
-        summary: "Mon profil",
+        summary: "Récupérer le profil complet de l'utilisateur",
+        description: "Retourne toutes les informations personnelles, le score de confiance, le statut KYC et un message de bienvenue personnalisé (Audio + Texte) selon la langue choisie.",
         tags: ["Utilisateurs"],
-        security: [["sanctum" => []]]
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Détails du profil récupérés avec succès",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "id", type: "integer", example: 1),
+                        new OA\Property(property: "full_name", type: "string", example: "Mourchid Olawale"),
+                        new OA\Property(property: "email", type: "string", example: "user@example.com"),
+                        new OA\Property(property: "phone", type: "string", example: "+22990000000"),
+                        new OA\Property(property: "profession", type: "string", example: "Agriculteur"),
+                        new OA\Property(property: "score_confiance", type: "integer", example: 100),
+                        new OA\Property(property: "kyc_status", type: "string", example: "verified"),
+                        new OA\Property(property: "preferred_language", type: "string", example: "fon"),
+                        new OA\Property(property: "greetings", type: "object", properties: [
+                            new OA\Property(property: "text", type: "string", example: "Bienvenue sur TontineChain"),
+                            new OA\Property(property: "audio_url", type: "string", example: "https://.../welcome_fon.mp3")
+                        ])
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Non authentifié")
+        ]
     )]
-    #[OA\Response(response: 200, description: "Détails du profil")]
     public function me(Request $request)
     {
         $user = $request->user();
@@ -34,40 +57,24 @@ class UserController extends Controller
 
     #[OA\Patch(
         path: "/api/v1/users/me",
-        summary: "Mettre à jour mon profil (Nom, Prénom, Profession, NIP)",
+        summary: "Mettre à jour les informations du profil",
+        description: "Permet de modifier le nom, la profession, le NPI (Numéro d'Identification Personnel) et la langue préférée.",
         tags: ["Utilisateurs"],
-        security: [["sanctum" => []]]
-    )]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "first_name", type: "string", example: "Jean"),
-                new OA\Property(property: "last_name", type: "string", example: "Houenou"),
-                new OA\Property(property: "email", type: "string", example: "jean@example.com"),
-                new OA\Property(property: "profession", type: "string", example: "Commerçant"),
-                new OA\Property(property: "npi", type: "string", example: "1234567890123"),
-                new OA\Property(property: "preferred_language", type: "string", example: "fon")
-            ]
-        )
-    )]
-    #[OA\Response(
-        response: 200, 
-        description: "Profil mis à jour",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "message", type: "string"),
-                new OA\Property(property: "user", type: "object"),
-                new OA\Property(
-                    property: "demo_notice", 
-                    type: "object",
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "Profil mis à jour",
+                content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "is_simulation", type: "boolean"),
-                        new OA\Property(property: "message", type: "string")
+                        new OA\Property(property: "message", type: "string", example: "Profil mis à jour avec succès"),
+                        new OA\Property(property: "user", type: "object"),
+                        new OA\Property(property: "demo_notice", type: "object")
                     ]
                 )
-            ]
-        )
+            ),
+            new OA\Response(response: 422, description: "Données invalides (ex: NPI déjà utilisé)")
+        ]
     )]
     public function update(Request $request)
     {
@@ -141,11 +148,23 @@ class UserController extends Controller
 
     #[OA\Get(
         path: "/api/v1/users/me/score",
-        summary: "Mon score de confiance et incidents",
+        summary: "Récupérer le score de confiance détaillé",
+        description: "Retourne le score actuel (0-100) et la liste des incidents passés (retards, impayés) avec leur impact sur le score.",
         tags: ["Utilisateurs"],
-        security: [["sanctum" => []]]
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "Score et historique récupérés",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "score_confiance", type: "integer", example: 85),
+                        new OA\Property(property: "incidents", type: "array", items: new OA\Items(type: "object"))
+                    ]
+                )
+            )
+        ]
     )]
-    #[OA\Response(response: 200, description: "Score et historique")]
     public function score(Request $request)
     {
         $user = $request->user();
@@ -159,11 +178,12 @@ class UserController extends Controller
 
     #[OA\Get(
         path: "/api/v1/users/me/payouts",
-        summary: "Mon historique de gains (Payouts)",
+        summary: "Historique des gains reçus (Payouts)",
+        description: "Liste tous les ramassages que l'utilisateur a déjà encaissés, avec les liens de preuve blockchain.",
         tags: ["Utilisateurs"],
         security: [["sanctum" => []]],
         responses: [
-            new OA\Response(response: 200, description: "Liste des gains")
+            new OA\Response(response: 200, description: "Tableau des ramassages")
         ]
     )]
     public function payouts(Request $request)
@@ -176,10 +196,11 @@ class UserController extends Controller
 
     #[OA\Get(
         path: "/api/v1/users/leaderboard",
-        summary: "Top 10 des membres les plus fiables",
+        summary: "Classement des 10 membres les plus fiables",
+        description: "Retourne les utilisateurs ayant les meilleurs scores de confiance sur la plateforme. Public.",
         tags: ["Utilisateurs"],
         responses: [
-            new OA\Response(response: 200, description: "Classement")
+            new OA\Response(response: 200, description: "Top 10 récupéré")
         ]
     )]
     public function leaderboard()
@@ -194,29 +215,12 @@ class UserController extends Controller
 
     #[OA\Get(
         path: "/api/v1/users/me/certificate",
-        summary: "Générer mon Certificat de Fiabilité Financière",
+        summary: "Générer les données du Certificat de Fiabilité",
+        description: "Fournit les statistiques de performance pour générer un certificat de crédit (utile pour les partenaires financiers).",
         tags: ["Utilisateurs"],
         security: [["sanctum" => []]],
         responses: [
-            new OA\Response(
-                response: 200, 
-                description: "Données du certificat",
-                content: new OA\JsonContent(
-                    properties: [
-                        new OA\Property(property: "title", type: "string"),
-                        new OA\Property(property: "user", type: "object"),
-                        new OA\Property(property: "performance", type: "object"),
-                        new OA\Property(
-                            property: "demo_notice", 
-                            type: "object",
-                            properties: [
-                                new OA\Property(property: "is_simulation", type: "boolean"),
-                                new OA\Property(property: "message", type: "string")
-                            ]
-                        )
-                    ]
-                )
-            )
+            new OA\Response(response: 200, description: "Données du certificat")
         ]
     )]
     public function certificate(Request $request)
@@ -249,11 +253,23 @@ class UserController extends Controller
 
     #[OA\Get(
         path: "/api/v1/users/me/balance",
-        summary: "Solde et statistiques financières de l'utilisateur",
+        summary: "Consulter le solde et les flux financiers",
+        description: "Retourne le total cotisé, le total reçu et le montant attendu des tontines en cours.",
         tags: ["Utilisateurs"],
         security: [["sanctum" => []]],
         responses: [
-            new OA\Response(response: 200, description: "Détails financiers")
+            new OA\Response(
+                response: 200, 
+                description: "Bilan financier",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "total_cotise_fcfa", type: "integer", example: 50000),
+                        new OA\Property(property: "total_recu_fcfa", type: "integer", example: 150000),
+                        new OA\Property(property: "expected_payouts_fcfa", type: "integer", example: 300000),
+                        new OA\Property(property: "currency", type: "string", example: "XOF")
+                    ]
+                )
+            )
         ]
     )]
     public function balance(Request $request)
@@ -280,11 +296,27 @@ class UserController extends Controller
             'currency' => 'XOF',
             'trust_score' => $user->score_confiance
         ]);
+    }
+
     #[OA\Post(
         path: "/api/v1/users/me/kyc",
-        summary: "Uploader ma pièce d'identité pour vérification KYC",
+        summary: "Envoyer la pièce d'identité (Vérification KYC)",
+        description: "Permet d'uploader une image (JPG/PNG) de la pièce d'identité. Déclenche une analyse OCR simulée par YAO.",
         tags: ["Utilisateurs"],
-        security: [["sanctum" => []]]
+        security: [["sanctum" => []]],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "Document reçu",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "Document reçu avec succès"),
+                        new OA\Property(property: "status", type: "string", example: "pending"),
+                        new OA\Property(property: "document_url", type: "string")
+                    ]
+                )
+            )
+        ]
     )]
     #[OA\RequestBody(
         required: true,
@@ -297,7 +329,6 @@ class UserController extends Controller
             )
         )
     )]
-    #[OA\Response(response: 200, description: "Document reçu et en cours d'analyse")]
     public function uploadKyc(Request $request)
     {
         $user = $request->user();
@@ -321,7 +352,13 @@ class UserController extends Controller
                 'document_url' => asset('storage/' . $path),
                 'demo_notice' => [
                     'is_simulation' => true,
-                    'message' => "ANALYSE OCR : YAO analyse votre pièce d'identité... Validité confirmée. Votre statut passera à 'verified' après validation finale du réseau."
+                    'message' => "ANALYSE OCR : YAO analyse votre pièce d'identité... Validité confirmée.",
+                    'extracted_data' => [
+                        'first_name' => $user->first_name ?: 'Mourchid',
+                        'last_name' => $user->last_name ?: 'FOLARIN',
+                        'npi' => '1234567890123', // NPI simulé à 13 chiffres
+                        'confidence' => 0.998
+                    ]
                 ]
             ]);
         }

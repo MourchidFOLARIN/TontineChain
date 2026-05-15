@@ -15,31 +15,34 @@ class OtpController extends Controller
 {
     #[OA\Post(
         path: "/api/v1/auth/request-otp",
-        summary: "Demander un code OTP",
-        tags: ["Authentification"]
+        summary: "Initier l'authentification (E-mail + Langue)",
+        description: "Envoie un code de vérification à 6 chiffres par e-mail. Permet aussi de définir la langue de l'utilisateur dès le premier contact.",
+        tags: ["Authentification & Sécurité"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "email", type: "string", example: "user@example.com", description: "L'e-mail de l'utilisateur"),
+                    new OA\Property(property: "phone", type: "string", nullable: true, example: "+22997000000"),
+                    new OA\Property(property: "locale", type: "string", example: "fr", enum: ["fr", "fon", "yor"], description: "Langue du message OTP")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Code OTP envoyé avec succès",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "status", type: "string", example: "success"),
+                        new OA\Property(property: "message", type: "string", example: "Le code OTP a été envoyé..."),
+                        new OA\Property(property: "email", type: "string", example: "user@example.com")
+                    ]
+                )
+            ),
+            new OA\Response(response: 500, description: "Erreur lors de l'envoi de l'e-mail (vérifier SMTP)")
+        ]
     )]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "phone", type: "string", example: "+22997000000"),
-                new OA\Property(property: "email", type: "string", example: "user@example.com"),
-                new OA\Property(property: "locale", type: "string", example: "yor", description: "Langue préférée (fr, yor, fon)")
-            ]
-        )
-    )]
-    #[OA\Response(
-        response: 200,
-        description: "OTP envoyé (le code est uniquement dans l’email, sauf mode local debug)",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "status", type: "string"),
-                new OA\Property(property: "message", type: "string"),
-                new OA\Property(property: "email", type: "string"),
-            ]
-        )
-    )]
-    #[OA\Response(response: 422, description: "Erreur de validation")]
     public function requestOtp(Request $request)
     {
         $request->validate([
@@ -102,34 +105,34 @@ class OtpController extends Controller
 
     #[OA\Post(
         path: "/api/v1/auth/verify-otp",
-        summary: "Vérifier le code OTP et se connecter",
-        tags: ["Authentification"]
-    )]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "email", type: "string", example: "user@example.com"),
-                new OA\Property(property: "code", type: "string", example: "123456")
-            ]
-        )
-    )]
-    #[OA\Response(
-        response: 200,
-        description: "Connexion réussie, retourne le token",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "access_token", type: "string", example: "1|abcdef1234567890"),
-                new OA\Property(property: "token_type", type: "string", example: "Bearer"),
-                new OA\Property(property: "user", type: "object", description: "Utilisateur connecté", properties: [
-                    new OA\Property(property: "id", type: "integer", example: 1),
+        summary: "Vérifier le code et connecter l'utilisateur",
+        description: "Valide le code à 6 chiffres. Si l'utilisateur n'existe pas, il est créé automatiquement. Retourne le token d'accès Bearer.",
+        tags: ["Authentification & Sécurité"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
                     new OA\Property(property: "email", type: "string", example: "user@example.com"),
-                    new OA\Property(property: "full_name", type: "string", example: "Membre"),
-                    new OA\Property(property: "phone", type: "string", nullable: true, example: null),
-                ]),
-                new OA\Property(property: "needs_profile_completion", type: "boolean", example: true),
-            ]
-        )
+                    new OA\Property(property: "code", type: "string", example: "123456")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Authentification réussie",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "access_token", type: "string", example: "1|abcdef..."),
+                        new OA\Property(property: "token_type", type: "string", example: "Bearer"),
+                        new OA\Property(property: "user", type: "object"),
+                        new OA\Property(property: "needs_profile_completion", type: "boolean", example: true)
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: "Code invalide ou expiré"),
+            new OA\Response(response: 429, description: "Trop de tentatives échouées")
+        ]
     )]
     #[OA\Response(response: 401, description: "OTP invalide ou expiré")]
     #[OA\Response(response: 500, description: "Erreur technique")]

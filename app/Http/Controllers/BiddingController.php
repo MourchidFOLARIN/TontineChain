@@ -12,21 +12,34 @@ class BiddingController extends Controller
     #[OA\Post(
         path: "/api/v1/groups/{group}/bid",
         summary: "Soumettre une offre d'enchère pour le tour actuel",
-        tags: ["Enchères"],
+        description: "Permet aux membres de proposer une 'ristourne' (discount_amount) qu'ils laissent au groupe pour passer en priorité. Celui qui offre le plus gros rabais gagne le ramassage du cycle.",
+        tags: ["Système d'Enchères (Bidding)"],
         security: [["sanctum" => []]],
         parameters: [
-            new OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))
+            new OA\Parameter(name: "group", in: "path", required: true, description: "ID du groupe", schema: new OA\Schema(type: "string"))
         ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: "discount_amount", type: "number", example: 5000, description: "Montant que vous êtes prêt à laisser au groupe")
+                    new OA\Property(property: "discount_amount", type: "number", example: 5000, description: "Montant que vous laissez au fonds commun du groupe")
                 ]
             )
-        )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201, 
+                description: "Offre enregistrée",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "Offre enregistrée avec succès"),
+                        new OA\Property(property: "bid", type: "object")
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: "Mode enchère non activé ou vous avez déjà reçu votre ramassage")
+        ]
     )]
-    #[OA\Response(response: 201, description: "Offre enregistrée")]
     public function submitBid(Request $request, Group $group)
     {
         $user = $request->user();

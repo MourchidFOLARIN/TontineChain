@@ -16,38 +16,35 @@ class VoteController extends Controller
 {
     #[OA\Post(
         path: "/api/v1/groups/{group}/propose-swap",
-        summary: "Proposer un échange de position de ramassage",
-        tags: ["Gouvernance"],
+        summary: "Proposer un échange (Swap) de position de ramassage",
+        description: "Permet à deux membres de s'entendre pour échanger leur tour de ramassage. La proposition est soumise au vote du groupe pour garantir l'équité.",
+        tags: ["Gouvernance & Démocratie"],
         security: [["sanctum" => []]],
         parameters: [
-            new OA\Parameter(name: "group", in: "path", required: true, schema: new OA\Schema(type: "string"))
+            new OA\Parameter(name: "group", in: "path", required: true, description: "ID du groupe", schema: new OA\Schema(type: "string"))
         ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: "target_user_id", type: "string", description: "ID de l'utilisateur avec qui échanger")
+                    new OA\Property(property: "target_user_id", type: "integer", example: 12, description: "ID de l'utilisateur avec qui vous voulez échanger votre tour")
                 ]
             )
-        )
-    )]
-    #[OA\Response(
-        response: 201, 
-        description: "Proposition créée",
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: "id", type: "string"),
-                new OA\Property(property: "status", type: "string"),
-                new OA\Property(
-                    property: "demo_notice", 
-                    type: "object",
+        ),
+        responses: [
+            new OA\Response(
+                response: 201, 
+                description: "Proposition de swap créée",
+                content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "is_simulation", type: "boolean"),
-                        new OA\Property(property: "message", type: "string")
+                        new OA\Property(property: "id", type: "integer", example: 5),
+                        new OA\Property(property: "status", type: "string", example: "pending"),
+                        new OA\Property(property: "demo_notice", type: "object")
                     ]
                 )
-            ]
-        )
+            ),
+            new OA\Response(response: 422, description: "L'un des membres a déjà reçu son ramassage")
+        ]
     )]
     public function proposeSwap(Request $request, Group $group)
     {

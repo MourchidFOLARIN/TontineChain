@@ -55,6 +55,37 @@ Voici les champs importants que le Front recevra dans `GET /groups/{id}` :
 
 ---
 
+## 🤖 16. KYC Intelligence & OCR Simulation
+
+### `POST /users/me/kyc` (multipart/form-data)
+L'analyse est simulée par YAO mais renvoie des données structurées pour le Front.
+- **Réponse (200)** :
+  ```json
+  {
+    "status": "pending",
+    "demo_notice": {
+      "is_simulation": true,
+      "extracted_data": {
+        "first_name": "...",
+        "last_name": "...",
+        "npi": "...",
+        "confidence": 0.998
+      }
+    }
+  }
+  ```
+
+---
+
+## 🗳️ 17. Gouvernance & Enchères (Real-time)
+
+### `GET /groups/{id}` (Enrichi)
+Retourne désormais les activités dynamiques du cycle actuel.
+- `active_bids` : Liste des enchères (décotes) proposées par les membres pour ramasser le pot.
+- `pending_votes` : Liste des demandes de permutation (Swaps) en attente de quorum.
+
+---
+
 **CONSEIL FINAL POUR LE FRONT** : 
 Le backend renvoie toujours un objet `demo_notice` dans les réponses critiques. **Affichez-le dans une petite bannière ou un Toast** pendant la démo au jury pour souligner l'aspect technologique (Blockchain, IA, OCR).
 
