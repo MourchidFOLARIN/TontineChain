@@ -115,11 +115,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Profil mis à jour avec succès',
-            'user' => $user,
-            'demo_notice' => [
-                'is_simulation' => true,
-                'message' => "MODÈLE DE SIMULATION : Le NIP a été vérifié auprès des services de l'ANIP. Votre identité est maintenant certifiée sur la blockchain."
-            ]
+            'user' => $user
         ]);
     }
 
@@ -138,11 +134,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Profil complété avec succès',
-            'user' => $user,
-            'demo_notice' => [
-                'is_simulation' => true,
-                'message' => "INSCRIPTION TERMINÉE : Votre compte est maintenant actif. Votre numéro " . $validated['phone'] . " sera utilisé pour vos futurs retraits via FedaPay."
-            ]
+            'user' => $user
         ]);
     }
 
