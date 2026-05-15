@@ -80,7 +80,7 @@ Directives strictes pour ta réponse :
 - Utilise ses informations pour personnaliser la réponse. Ne dis jamais que tu es un modèle de langage.";
 
             try {
-                $geminiResponse = \Illuminate\Support\Facades\Http::timeout(15)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
+                $geminiResponse = \Illuminate\Support\Facades\Http::timeout(15)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$geminiApiKey}", [
                     'contents' => [
                         [
                             'role' => 'user',
