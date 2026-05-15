@@ -56,74 +56,79 @@ class AiController extends Controller
         $incidentsCount = Incident::where('user_id', $user->id)->count();
         $activeGroup = $memberships->where('group.status', 'active')->first();
         
-        // --- DÉTECTION DES MOTS-CLÉS (FR, YOR, FON) ---
-        
-        // Identité / Profil
-        $isIdentity = str_contains($message, 'qui suis-je') || str_contains($message, 'mon profil') || 
-                      str_contains($message, 'mè wi') || str_contains($message, 'tani emi');
+        // --- INTÉGRATION DE LA VÉRITABLE IA (GEMINI API) ---
+        $geminiApiKey = env('GEMINI_API_KEY');
 
-        // Argent / Bilan
-        $isMoney = str_contains($message, 'argent') || str_contains($message, 'payé') || 
-                   str_contains($message, 'bilan') || str_contains($message, 'akwé') || 
-                   str_contains($message, 'owo');
+        if ($geminiApiKey) {
+            $systemPrompt = "Tu es YAO, l'assistant IA officiel de la plateforme TontineChain (créée pour le Hackathon MIABE 2026 au Bénin). Tu es un conseiller financier expert, empathique et multilingue.
+Règles de TontineChain :
+- C'est une tontine numérique sécurisée par la blockchain Polygon pour la transparence.
+- L'utilisateur a un 'Score de Confiance' (sur 100). Au-dessus de 80, il est dans l'élite. S'il a des incidents de retard, son score baisse.
+- Les enchères (bidding) : un membre peut proposer une 'décote' pour ramasser le pot en avance. La décote est partagée avec les autres membres.
+- L'assurance : une petite partie des gains va dans une caisse de secours.
 
-        // Dates / Échéances
-        $isDate = str_contains($message, 'quand') || str_contains($message, 'date') || 
-                  str_contains($message, 'prochain') || str_contains($message, 'hwenu') || 
-                  str_contains($message, 'igba wo');
+Informations en temps réel sur l'utilisateur avec qui tu parles :
+- Nom : " . $user->full_name . "
+- Score de confiance : " . $user->score_confiance . "/100
+- Total cotisé : " . number_format($totalPaid, 0, ',', ' ') . " FCFA
+- Retards enregistrés : " . $incidentsCount . "
+- Prochaine échéance : " . ($activeGroup && $activeGroup->group->next_due_date ? Carbon::parse($activeGroup->group->next_due_date)->format('d/m/Y') : "Aucune tontine active") . "
 
-        // Confiance / Score
-        $isTrust = str_contains($message, 'score') || str_contains($message, 'confiance') || 
-                   str_contains($message, 'jiɖe') || str_contains($message, 'igbekele');
+Directives strictes pour ta réponse :
+- Tu dois impérativement répondre dans la langue demandée : " . strtoupper($locale) . " (fr = Français, fon = Fon du Bénin, yor = Yoruba).
+- Sois très chaleureux, concis (pas plus de 4 phrases) et utilise des emojis.
+- Utilise ses informations pour personnaliser la réponse. Ne dis jamais que tu es un modèle de langage.";
 
-        // Blockchain / Sécurité
-        $isTech = str_contains($message, 'blockchain') || str_contains($message, 'sécurité') || 
-                  str_contains($message, 'comment') || str_contains($message, 'tontine');
+            try {
+                $geminiResponse = \Illuminate\Support\Facades\Http::timeout(15)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
+                    'contents' => [
+                        [
+                            'role' => 'user',
+                            'parts' => [
+                                ['text' => $systemPrompt . "\n\nVoici la question de l'utilisateur : " . $request->input('message')]
+                            ]
+                        ]
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.7,
+                        'maxOutputTokens' => 300,
+                    ]
+                ]);
 
-        // --- GÉNÉRATION DE LA RÉPONSE ---
+                if ($geminiResponse->successful() && $geminiResponse->json('candidates.0.content.parts.0.text')) {
+                    $aiText = $geminiResponse->json('candidates.0.content.parts.0.text');
+                    return response()->json([
+                        'assistant' => 'YAO',
+                        'message' => $aiText,
+                        'audio_url' => null
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Gemini API Error: ' . $e->getMessage());
+                // Fallback en cas d'erreur réseau
+            }
+        }
+
+        // --- FALLBACK (Si API Key manquante ou erreur réseau) ---
+        $isMoney = str_contains($message, 'argent') || str_contains($message, 'bilan') || str_contains($message, 'akwé');
+        $isTrust = str_contains($message, 'score') || str_contains($message, 'confiance') || str_contains($message, 'jiɖe');
+        $isTech = str_contains($message, 'blockchain') || str_contains($message, 'sécurité');
+
         $response = "";
-
-        if ($isIdentity) {
-            $response = "Tu es " . $user->full_name . ". Je te connais bien ! Tu es avec nous depuis le " . $user->created_at->format('d/m/Y') . ".";
-        } 
-        elseif ($isMoney) {
-            $response = "Ton bilan financier est de " . number_format($totalPaid, 0, ',', ' ') . " FCFA versés. ";
-            if ($incidentsCount > 0) {
-                $response .= "Attention, j'ai remarqué " . $incidentsCount . " incident(s) de retard. Essaie d'être plus ponctuel pour ton score.";
-            } else {
-                $response .= "Ton historique est impeccable, aucune fausse note !";
-            }
-        }
-        elseif ($isDate) {
-            if ($activeGroup && $activeGroup->group->next_due_date) {
-                $response = "Ta prochaine cotisation pour '" . $activeGroup->group->name . "' est attendue le " . Carbon::parse($activeGroup->group->next_due_date)->format('d/m/Y') . ".";
-            } else {
-                $response = "Tu n'as aucune échéance de paiement pour le moment. C'est le calme plat !";
-            }
-        }
-        elseif ($isTrust) {
-            $response = "Ton score est de " . $user->score_confiance . "/100. ";
-            if ($user->score_confiance < 60) {
-                $response .= "Mon conseil : paie tes 3 prochaines cotisations avant la date limite pour gagner +15 points rapidement.";
-            } else {
-                $response .= "Tu es un pilier de la communauté. Continue comme ça !";
-            }
-        }
-        elseif ($isTech) {
-            $response = "TontineChain utilise la Blockchain Polygon pour garantir que personne ne peut voler l'argent du groupe. Chaque transaction est publique et vérifiable. C'est la transparence totale !";
-        }
-        else {
-            $response = "Je n'ai pas bien saisi, mais je peux t'aider sur : ton bilan financier (akwé/owo), tes prochaines dates (hwenu/igba), ton score de confiance (jiɖe) ou le fonctionnement de la blockchain.";
+        if ($isMoney) {
+            $response = "Ton bilan est de " . number_format($totalPaid, 0, ',', ' ') . " FCFA. Continue comme ça " . $user->first_name . " !";
+        } elseif ($isTrust) {
+            $response = "Ton score de confiance est de " . $user->score_confiance . "/100. Pense à payer à l'heure pour l'améliorer.";
+        } elseif ($isTech) {
+            $response = "TontineChain utilise la blockchain Polygon pour garantir une transparence totale.";
+        } else {
+            $response = "Bonjour " . $user->first_name . " ! Je suis YAO. Tu peux me poser des questions sur ton score, tes cotisations ou le fonctionnement du système.";
         }
 
         return response()->json([
             'assistant' => 'YAO',
             'message' => $response,
-            'audio_url' => null, 
-            'demo_notice' => [
-                'is_simulation' => true,
-                'message' => "MULTILINGUAL AI : YAO a détecté des mots-clés en " . ($locale === 'fr' ? 'Français' : 'Langue Locale') . " et a analysé l'historique des incidents et des paiements pour répondre."
-            ]
+            'audio_url' => null
         ]);
     }
 }
