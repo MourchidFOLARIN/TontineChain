@@ -57,7 +57,7 @@ class AiController extends Controller
         $activeGroup = $memberships->where('group.status', 'active')->first();
         
         // --- INTÉGRATION DE LA VÉRITABLE IA (GEMINI API) ---
-        $geminiApiKey = env('GEMINI_API_KEY');
+        $geminiApiKey = env('GEMINI_API_KEY') ?: getenv('GEMINI_API_KEY');
 
         if ($geminiApiKey) {
             $systemPrompt = "Tu es YAO, l'assistant IA officiel de la plateforme TontineChain (créée pour le Hackathon MIABE 2026 au Bénin). Tu es un conseiller financier expert, empathique et multilingue.
