@@ -33,6 +33,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/debug/blockchain', [\App\Http\Controllers\DebugController::class, 'testBlockchain']);
         Route::get('/debug/telegram', [\App\Http\Controllers\DebugController::class, 'testTelegram']);
         Route::get('/debug/email', [\App\Http\Controllers\DebugController::class, 'testEmail']);
+        Route::get('/debug/migrate', function() {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            return response()->json(['status' => 'migration_executed', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+        });
     }
 
     Route::get('/debug/force-late/{contribution}', function(\App\Models\Contribution $contribution) {
