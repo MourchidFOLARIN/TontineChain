@@ -43,6 +43,9 @@ class TontineContractMail extends Mailable
     {
         return new Content(
             view: 'emails.contract',
+            with: [
+                'groupName' => $this->group->name,
+            ],
         );
     }
 
