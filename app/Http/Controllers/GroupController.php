@@ -222,24 +222,16 @@ class GroupController extends Controller
                 $pdf = Pdf::loadView('pdf.tontine_contract', ['group' => $group]);
                 $pdfContent = $pdf->output();
 
-                $recipientEmail = $group->creator->email ?? 'mourchidolawale@gmail.com';
-                Mail::to($recipientEmail)->send(new TontineContractMail($group, $pdfContent));
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Erreur génération/envoi PDF: " . $e->getMessage());
-            }
-
-            // Notifier tous les membres par Email (Réel)
-            foreach ($group->members as $member) {
-                if ($member->user && $member->user->email) {
-                    $userLocale = $member->user->preferred_language ?? 'fr';
-                    
-                    Mail::to($member->user->email)
-                        ->locale($userLocale)
-                        ->queue(new TontineNotificationMail(
-                            __('messages.contract_subject'),
-                            __('messages.contract_body') . " (Tontine: " . $group->name . ")"
-                        ));
+                // Envoyer le contrat PDF à TOUS les membres actifs
+                foreach ($group->members as $member) {
+                    if ($member->user && $member->user->email) {
+                        Mail::to($member->user->email)
+                            ->locale($member->user->preferred_language ?? 'fr')
+                            ->queue(new TontineContractMail($group, $pdfContent));
+                    }
                 }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Erreur génération/envoi PDF à tous les membres: " . $e->getMessage());
             }
 
             return response()->json([
