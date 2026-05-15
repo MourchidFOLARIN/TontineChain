@@ -29,16 +29,18 @@ if (!empty($res['body'])) {
     }
 }
 
-echo "\n--- DIAGNOSTIC DES COTISATIONS (Chef) ---\n";
-// Modification pour inclure 'processing'
-$ch = curl_init("$baseUrl/contributions/pending");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$headers = ['Content-Type: application/json', 'Accept: application/json', 'Authorization: Bearer ' . $chefToken];
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-$response = curl_exec($ch);
-// On va faire un appel direct pour voir tout
-$res = json_decode($response, true);
+echo "\n--- DIAGNOSTIC DES INCIDENTS ---\n";
+$resInc = callApi("$baseUrl/incidents", 'GET', null, $chefToken);
+echo "Nombre d'incidents : " . count($resInc['body'] ?? []) . "\n";
+if (!empty($resInc['body'])) {
+    foreach ($resInc['body'] as $i) {
+        echo "   🚩 " . $i['type'] . " | Utilisateur: " . $i['user_id'] . " | Impact: " . $i['score_impact'] . " (ID: " . $i['id'] . ")\n";
+    }
+}
 
-// En fait, on va modifier le financial_cycle_test.php pour être plus large.
+echo "\n--- DIAGNOSTIC DES SCORES ---\n";
+foreach ($tokens as $email => $token) {
+    $resScore = callApi("$baseUrl/users/me/score", 'GET', null, $token);
+    echo "   - $email : Score = " . ($resScore['body']['score'] ?? '100') . "\n";
+}
 

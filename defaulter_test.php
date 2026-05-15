@@ -19,23 +19,47 @@ function callApi($url, $method, $data, $token = null) {
     return ['code' => $httpcode, 'body' => json_decode($response, true)];
 }
 
-echo "1. Récupération des cotisations du Cycle 2...\n";
+echo "1. Récupération des cotisations du Cycle 2 (Même groupe)...\n";
+$chefToken = $tokens['mourchidolawale@gmail.com'];
+$resPending = callApi("$baseUrl/contributions/pending", 'GET', null, $chefToken);
+
+$targetGroupId = null;
 $cycle2Contributions = [];
-foreach ($tokens as $email => $token) {
-    $res = callApi("$baseUrl/contributions/pending", 'GET', null, $token);
+
+if (!empty($resPending['body'])) {
+    foreach ($resPending['body'] as $c) {
+        if ($c['cycle_number'] == 2) {
+            $targetGroupId = $c['group_id'];
+            break;
+        }
+    }
+}
+
+if (!$targetGroupId) {
+    echo "ERREUR : Aucun cycle 2 trouvé pour le chef. Terminez un cycle 1 d'abord.\n";
+    exit;
+}
+
+echo "   - Groupe cible : $targetGroupId\n";
+
+// Récupérer les cotisations de ce groupe pour les 3 membres
+$emails = array_keys($tokens);
+foreach ($emails as $email) {
+    $res = callApi("$baseUrl/contributions/pending", 'GET', null, $tokens[$email]);
     if (!empty($res['body'])) {
         foreach ($res['body'] as $c) {
-            if ($c['cycle_number'] == 2) {
+            if ($c['group_id'] == $targetGroupId && $c['cycle_number'] == 2) {
                 $cycle2Contributions[] = [
                     'id' => $c['id'],
                     'email' => $email,
                     'user_id' => $c['user_id']
                 ];
-                echo "   - $email a une cotisation Cycle 2 (ID: " . $c['id'] . ")\n";
+                echo "   - $email ajouté (ID Cotisation: " . $c['id'] . ")\n";
             }
         }
     }
 }
+
 
 if (count($cycle2Contributions) < 3) {
     echo "ERREUR : Pas assez de cotisations Cycle 2 trouvées. Assurez-vous que le Cycle 1 est terminé.\n";

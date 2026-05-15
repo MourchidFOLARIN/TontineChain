@@ -43,6 +43,19 @@ Route::prefix('v1')->group(function () {
         \Illuminate\Support\Facades\Artisan::call('tontine:check-deadlines');
         return response()->json(['status' => 'command_executed', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
     });
+    Route::get('/debug/force-incident/{contribution}', function(\App\Models\Contribution $contribution) {
+        $contribution->update(['is_late' => true, 'late_days' => 5, 'status' => 'late']);
+        $contribution->user->increment('score_confiance', -20);
+        \App\Models\Incident::create([
+            'group_id' => $contribution->group_id,
+            'user_id' => $contribution->user_id,
+            'type' => 'late_payment',
+            'description' => "SIMULATION: Retard critique Cycle " . $contribution->cycle_number,
+            'cycle_number' => $contribution->cycle_number,
+            'score_impact' => -20
+        ]);
+        return response()->json(['status' => 'incident_forced', 'new_score' => $contribution->user->score_confiance]);
+    });
 
     // Auth Routes
     Route::post('/auth/request-otp', [OtpController::class, 'requestOtp']);
