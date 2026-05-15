@@ -69,7 +69,7 @@ services:
       - key: FEDAPAY_PUBLIC_KEY
         value: pk_sandbox_QSs3-34T7hDjsAVcnYBViUhz
       - key: FEDAPAY_WEBHOOK_SECRET
-        value: test_secret_123
+        value: wh_sandbox_STo2s4w_sl_SN1sDtoibvjhk
       - key: FEDAPAY_ENV
         value: sandbox
 
