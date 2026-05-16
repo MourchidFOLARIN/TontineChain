@@ -44,105 +44,31 @@ class AiController extends Controller
             new OA\Response(response: 401, description: "Non authentifié")
         ]
     )]
-    public function chat(Request $request)
+    public function chat(Request $request, \App\Services\YaoIntelligenceService $yaoService)
     {
         $user = $request->user();
-        $message = strtolower($request->input('message', ''));
+        $message = $request->input('message', '');
         $locale = $request->input('locale', 'fr');
         
-        // --- ANALYSE DE LA BASE DE DONNÉES ---
-        $memberships = $user->memberships()->with('group')->get();
-        $totalPaid = Contribution::where('user_id', $user->id)->where('status', 'confirmed')->sum('amount_fcfa');
-        $incidentsCount = Incident::where('user_id', $user->id)->count();
-        $activeGroupMembership = $memberships->filter(function($m) {
-            return $m->group && $m->group->status === 'active';
-        })->first();
-        $activeGroup = $activeGroupMembership ? $activeGroupMembership->group : null;
-        
-        // --- INTÉGRATION DE LA VÉRITABLE IA (GEMINI API) ---
-        $geminiApiKey = env('GEMINI_API_KEY') ?: getenv('GEMINI_API_KEY');
-
-        if ($geminiApiKey) {
-            $systemPrompt = "Tu es YAO, l'assistant IA officiel de la plateforme TontineChain (créée pour le Hackathon MIABE 2026 au Bénin). Tu es un conseiller financier expert, empathique et multilingue.
-Règles de TontineChain :
-- C'est une tontine numérique sécurisée par la blockchain Polygon pour la transparence.
-- L'utilisateur a un 'Score de Confiance' (sur 100). Au-dessus de 80, il est dans l'élite. S'il a des incidents de retard, son score baisse.
-- Les enchères (bidding) : un membre peut proposer une 'décote' pour ramasser le pot en avance. La décote est partagée avec les autres membres.
-- L'assurance : une petite partie des gains va dans une caisse de secours.
-
-Informations en temps réel sur l'utilisateur avec qui tu parles :
-- Nom : " . $user->full_name . "
-- Score de confiance : " . $user->score_confiance . "/100
-- Total cotisé : " . number_format($totalPaid, 0, ',', ' ') . " FCFA
-- Retards enregistrés : " . $incidentsCount . "
-- Prochaine échéance : " . ($activeGroup && $activeGroup->next_due_date ? Carbon::parse($activeGroup->next_due_date)->format('d/m/Y') : "Aucune tontine active") . "
-
-Directives strictes pour ta réponse :
-- Tu dois impérativement répondre dans la langue demandée : " . strtoupper($locale) . " (fr = Français, fon = Fon du Bénin, yor = Yoruba).
-- Sois chaleureux, pédagogue et expert. Si l'utilisateur pose une question technique (Blockchain, Polygon, Enchères), explique-lui simplement comme à un commerçant au marché.
-- Utilise ses informations personnelles pour lui donner des conseils financiers sur-mesure pour améliorer son score de confiance.
-- Utilise des emojis pour rendre la conversation vivante. Ne dis jamais que tu es un modèle de langage.";
-
-            try {
-                $geminiResponse = \Illuminate\Support\Facades\Http::timeout(15)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$geminiApiKey}", [
-                    'contents' => [
-                        [
-                            'role' => 'user',
-                            'parts' => [
-                                ['text' => $systemPrompt . "\n\nVoici la question de l'utilisateur : " . $request->input('message')]
-                            ]
-                        ]
-                    ],
-                    'generationConfig' => [
-                        'temperature' => 0.7,
-                        'maxOutputTokens' => 300,
-                    ]
-                ]);
-
-                if ($geminiResponse->successful() && $geminiResponse->json('candidates.0.content.parts.0.text')) {
-                    $aiText = $geminiResponse->json('candidates.0.content.parts.0.text');
-                    return response()->json([
-                        'assistant' => 'YAO',
-                        'message' => $aiText,
-                        'audio_url' => null
-                    ]);
-                }
-            } catch (\Exception $e) {
-                return response()->json([
-                    'assistant' => 'YAO-DEBUG',
-                    'message' => 'ERREUR GEMINI : ' . $e->getMessage()
-                ]);
-            }
-
-            // Si la réponse n'est pas réussie mais pas d'exception
-            if (isset($geminiResponse) && !$geminiResponse->successful()) {
-                 return response()->json([
-                    'assistant' => 'YAO-DEBUG',
-                    'message' => 'ERREUR HTTP ' . $geminiResponse->status() . ' : ' . $geminiResponse->body()
-                ]);
-            }
+        try {
+            $responseMessage = $yaoService->generateResponse($user, $message, $locale);
+            
+            return response()->json([
+                'assistant' => 'YAO',
+                'message' => $responseMessage,
+                'audio_url' => null,
+                'demo_notice' => [
+                    'mode' => 'local_intelligence',
+                    'status' => 'active',
+                    'engine' => 'YAO-Scraper-v1'
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'assistant' => 'YAO-ERROR',
+                'message' => 'Oups ! J\'ai eu un petit problème technique en consultant tes données. Réessaie dans un instant.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // --- FALLBACK (Si API Key manquante ou erreur réseau) ---
-        $isMoney = str_contains($message, 'argent') || str_contains($message, 'bilan') || str_contains($message, 'akwé');
-        $isTrust = str_contains($message, 'score') || str_contains($message, 'confiance') || str_contains($message, 'jiɖe');
-        $isTech = str_contains($message, 'blockchain') || str_contains($message, 'sécurité');
-
-        $response = "";
-        if ($isMoney) {
-            $response = "Ton bilan est de " . number_format($totalPaid, 0, ',', ' ') . " FCFA. Continue comme ça " . $user->first_name . " !";
-        } elseif ($isTrust) {
-            $response = "Ton score de confiance est de " . $user->score_confiance . "/100. Pense à payer à l'heure pour l'améliorer.";
-        } elseif ($isTech) {
-            $response = "TontineChain utilise la blockchain Polygon pour garantir une transparence totale.";
-        } else {
-            $response = "Bonjour " . $user->first_name . " ! Je suis YAO. Tu peux me poser des questions sur ton score, tes cotisations ou le fonctionnement du système.";
-        }
-
-        return response()->json([
-            'assistant' => 'YAO',
-            'message' => $response,
-            'audio_url' => null
-        ]);
     }
 }
