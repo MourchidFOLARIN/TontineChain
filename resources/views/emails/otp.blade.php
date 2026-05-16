@@ -14,7 +14,7 @@
                     <!-- LOGO / HEADER -->
                     <tr>
                         <td align="center" style="padding: 40px 40px 20px 40px;">
-                            <h1 style="color: #FF8C00; font-size: 28px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">Tonti<span style="color: #1E293B;">Go</span></h1>
+                            <h1 style="color: #FF8C00; font-size: 28px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">Tontine<span style="color: #1E293B;">Chain</span></h1>
                             <p style="color: #475569; font-size: 14px; margin-top: 5px; font-weight: 500;">Finance Inclusive & Blockchain</p>
                         </td>
                     </tr>
