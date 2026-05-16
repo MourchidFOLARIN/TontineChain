@@ -44,8 +44,9 @@ class AiController extends Controller
             new OA\Response(response: 401, description: "Non authentifié")
         ]
     )]
-    public function chat(Request $request, \App\Services\YaoIntelligenceService $yaoService)
+    public function chat(Request $request)
     {
+        $yaoService = app(\App\Services\YaoIntelligenceService::class);
         $user = $request->user();
         $message = $request->input('message', '');
         $locale = $request->input('locale', 'fr');
