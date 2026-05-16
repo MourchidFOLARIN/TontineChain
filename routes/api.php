@@ -129,15 +129,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/votes/{vote}', [VoteController::class, 'show']);
         Route::post('/votes/{vote}/cast', [VoteController::class, 'castVote']);
 
-    });
-    
-    // AI Assistant (YAO) - Moved outside auth for testing
-    Route::post('/ai/chat', function(Illuminate\Http\Request $request) {
-        return response()->json([
-            'assistant' => 'YAO-OPEN',
-            'message' => 'Test ouvert : Le service est accessible sans auth.',
-            'demo_notice' => ['mode' => 'open_test']
-        ]);
+        // AI Assistant (YAO)
+        Route::post('/ai/chat', [AiController::class, 'chat']);
     });
 
     // Webhooks
