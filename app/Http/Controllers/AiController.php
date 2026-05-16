@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\Contribution;
 use App\Models\Payout;
 use App\Models\Incident;
+use App\Services\YaoIntelligenceService;
 use Carbon\Carbon;
 use OpenApi\Attributes as OA;
 
@@ -44,34 +45,23 @@ class AiController extends Controller
             new OA\Response(response: 401, description: "Non authentifié")
         ]
     )]
-    public function chat(Request $request)
+    public function chat(Request $request, YaoIntelligenceService $yaoService)
     {
-        $yaoService = app(\App\Services\YaoIntelligenceService::class);
         $user = $request->user();
         $message = $request->input('message', '');
         $locale = $request->input('locale', 'fr');
         
-        try {
-            $responseMessage = $yaoService->generateResponse($user, $message, $locale);
-            
-            return response()->json([
-                'assistant' => 'YAO',
-                'message' => $responseMessage,
-                'audio_url' => null,
-                'demo_notice' => [
-                    'mode' => 'local_intelligence',
-                    'status' => 'active',
-                    'engine' => 'YAO-Scraper-v1'
-                ]
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'assistant' => 'YAO-ERROR',
-                'message' => 'Oups ! J\'ai eu un petit problème technique en consultant tes données. Réessaie dans un instant.',
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ], 500);
-        }
+        $responseMessage = $yaoService->generateResponse($user, $message, $locale);
+        
+        return response()->json([
+            'assistant' => 'YAO',
+            'message' => $responseMessage,
+            'audio_url' => null,
+            'demo_notice' => [
+                'mode' => 'local_intelligence',
+                'status' => 'active',
+                'engine' => 'YAO-Scraper-v1'
+            ]
+        ]);
     }
 }
