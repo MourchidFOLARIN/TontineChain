@@ -129,14 +129,15 @@ Route::prefix('v1')->group(function () {
         Route::get('/votes/{vote}', [VoteController::class, 'show']);
         Route::post('/votes/{vote}/cast', [VoteController::class, 'castVote']);
 
-        // AI Assistant (YAO)
-        Route::post('/ai/chat', function(Request $request) {
-            return response()->json([
-                'assistant' => 'YAO-CLOSURE',
-                'message' => 'Test par closure : Le service est actif.',
-                'demo_notice' => ['mode' => 'closure_test']
-            ]);
-        });
+    });
+    
+    // AI Assistant (YAO) - Moved outside auth for testing
+    Route::post('/ai/chat', function(Illuminate\Http\Request $request) {
+        return response()->json([
+            'assistant' => 'YAO-OPEN',
+            'message' => 'Test ouvert : Le service est accessible sans auth.',
+            'demo_notice' => ['mode' => 'open_test']
+        ]);
     });
 
     // Webhooks
