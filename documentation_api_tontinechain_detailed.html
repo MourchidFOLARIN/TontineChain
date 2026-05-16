@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation API TontineChain - ULTRA-DÉTAILLÉE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb; --primary-dark: #1e40af;
+            --bg: #f8fafc; --text: #1e293b;
+            --code-bg: #0f172a; --code-text: #f8fafc;
+            --border: #e2e8f0; --accent: #f59e0b;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; margin: 0; padding: 0; }
+        header { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; padding: 4rem 1rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .container { max-width: 1000px; margin: 3rem auto; padding: 0 1.5rem; }
+        .section { background: white; padding: 2.5rem; border-radius: 16px; margin-bottom: 3rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+        h1 { margin: 0; font-size: 3rem; letter-spacing: -1px; }
+        h2 { color: var(--primary); border-bottom: 3px solid var(--border); padding-bottom: 0.75rem; margin-top: 0; font-size: 1.8rem; }
+        h3 { color: #334155; margin-top: 2rem; border-left: 4px solid var(--accent); padding-left: 1rem; }
+        h4 { color: #64748b; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+        code { background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 6px; font-family: 'Fira+Code', monospace; font-size: 0.9rem; color: #ef4444; }
+        pre { background: var(--code-bg); color: var(--code-text); padding: 1.5rem; border-radius: 12px; overflow-x: auto; font-family: 'Fira+Code', monospace; font-size: 0.9rem; margin: 1.5rem 0; border: 1px solid #334155; }
+        .method { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 8px; font-weight: 800; font-size: 0.85rem; margin-right: 0.75rem; }
+        .get { background: #dcfce7; color: #166534; }
+        .post { background: #dbeafe; color: #1e40af; }
+        .patch { background: #fef9c3; color: #854d0e; }
+        .params { background: #fdf2f8; padding: 1rem; border-radius: 8px; margin: 1rem 0; list-style: none; }
+        .params li { margin-bottom: 0.5rem; font-size: 0.95rem; }
+        .params li strong { color: #be185d; }
+        .footer { text-align: center; color: #64748b; font-size: 1rem; padding: 4rem; border-top: 1px solid var(--border); background: white; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🏆 TontineChain API Docs</h1>
+    <p>Guide de Référence Intégral - Hackathon MIABE 2026</p>
+</header>
+
+<div class="container">
+
+    <!-- BATCH 1 -->
+    <div class="section">
+        <h2>🔐 1. Authentification & OTP</h2>
+        
+        <h3><span class="method post">POST</span> /auth/request-otp</h3>
+        <p>Demande l'envoi d'un code OTP (6 chiffres) par e-mail.</p>
+        <h4>Paramètres (JSON)</h4>
+        <ul class="params">
+            <li><strong>email</strong> (string, required) : Adresse e-mail de l'utilisateur.</li>
+        </ul>
+        <pre>Response 200: { "message": "OTP envoyé...", "debug_otp": "123456" }</pre>
+
+        <h3><span class="method post">POST</span> /auth/verify-otp</h3>
+        <p>Vérifie le code et génère le token de session.</p>
+        <h4>Paramètres (JSON)</h4>
+        <ul class="params">
+            <li><strong>email</strong> (string, required)</li>
+            <li><strong>otp</strong> (string, required)</li>
+        </ul>
+        <pre>Response 200: { "token": "1|abc...", "user": { "id": 1, ... } }</pre>
+    </div>
+
+    <!-- BATCH 2 -->
+    <div class="section">
+        <h2>👤 2. Profil Utilisateur & KYC</h2>
+        
+        <h3><span class="method get">GET</span> /users/me</h3>
+        <p>Récupère toutes les données de l'utilisateur (incluant <code>kyc_status</code>).</p>
+
+        <h3><span class="method patch">PATCH</span> /users/me</h3>
+        <p>Met à jour les infos du profil.</p>
+        <ul class="params">
+            <li><strong>first_name</strong>, <strong>last_name</strong>, <strong>profession</strong>, <strong>npi</strong>, <strong>preferred_language</strong>.</li>
+        </ul>
+
+        <h3><span class="method post">POST</span> /users/me/kyc</h3>
+        <p>Envoi de la pièce d'identité (Simulation OCR YAO).</p>
+        <h4>Paramètres (Form-Data)</h4>
+        <ul class="params">
+            <li><strong>document</strong> (file, required) : Image de la carte d'identité.</li>
+        </ul>
+        <pre>Response: { "status": "pending", "demo_notice": "YAO analyse..." }</pre>
+    </div>
+
+    <!-- BATCH 3 -->
+    <div class="section">
+        <h2>👥 3. Groupes & Tontines</h2>
+        
+        <h3><span class="method post">POST</span> /groups</h3>
+        <p>Création d'une tontine.</p>
+        <ul class="params">
+            <li><strong>name</strong>, <strong>contribution_amount</strong>, <strong>frequency</strong> (daily/weekly/monthly), <strong>max_members</strong>.</li>
+        </ul>
+
+        <h3><span class="method post">POST</span> /groups/{id}/start</h3>
+        <p>Active la tontine. <strong>Important</strong> : Cette action déploie le contrat sur la Blockchain et génère le PDF.</p>
+    </div>
+
+    <!-- BATCH 4 -->
+    <div class="section">
+        <h2>💰 4. Cotisations & Finances</h2>
+        
+        <h3><span class="method post">POST</span> /contributions/{id}/pay</h3>
+        <p>Initialise un paiement FedaPay.</p>
+        <pre>Response: { "url": "https://checkout.fedapay.com/...", "transaction_id": "..." }</pre>
+
+        <h3><span class="method get">GET</span> /payouts</h3>
+        <p>Liste des ramassages. Champ <code>blockchain_tx_hash</code> contient le lien vers Polygonscan.</p>
+    </div>
+
+    <!-- BATCH 5 -->
+    <div class="section">
+        <h2>🤖 5. IA (YAO) & Social</h2>
+        
+        <h3><span class="method post">POST</span> /ai/chat</h3>
+        <p>Assistant intelligent multilingue.</p>
+        <pre>Request: { "message": "Akwé nabi ?", "locale": "fon" }</pre>
+
+        <h3><span class="method get">GET</span> /groups/{id}/messages</h3>
+        <p>Chat de groupe (messages membres + alertes système).</p>
+    </div>
+
+    <!-- BATCH 6 -->
+    <div class="section">
+        <h2>⚙️ 6. Spécifications & Enums</h2>
+        <h4>🌍 Langues</h4>
+        <p><code>fr</code>, <code>fon</code>, <code>yor</code></p>
+        
+        <h4>🚩 Statuts KYC</h4>
+        <p><code>none</code>, <code>pending</code>, <code>verified</code>, <code>rejected</code></p>
+
+        <h4>📊 Score de Confiance</h4>
+        <p>Impact des incidents : <strong>-20 points</strong> par retard critique.</p>
+    </div>
+
+    <div class="footer">
+        🚀 TontineChain Backend - Fait avec ❤️ pour le Hackathon MIABE 2026 🇧🇯
+    </div>
+</div>
+
+</body>
+</html>
