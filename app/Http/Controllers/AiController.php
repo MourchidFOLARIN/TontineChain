@@ -108,8 +108,18 @@ Directives strictes pour ta réponse :
                     ]);
                 }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Gemini API Error: ' . $e->getMessage());
-                // Fallback en cas d'erreur réseau
+                return response()->json([
+                    'assistant' => 'YAO-DEBUG',
+                    'message' => 'ERREUR GEMINI : ' . $e->getMessage()
+                ]);
+            }
+
+            // Si la réponse n'est pas réussie mais pas d'exception
+            if (isset($geminiResponse) && !$geminiResponse->successful()) {
+                 return response()->json([
+                    'assistant' => 'YAO-DEBUG',
+                    'message' => 'ERREUR HTTP ' . $geminiResponse->status() . ' : ' . $geminiResponse->body()
+                ]);
             }
         }
 
