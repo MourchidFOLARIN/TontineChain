@@ -51,10 +51,13 @@ class AiController extends Controller
         $locale = $request->input('locale', 'fr');
         
         // --- ANALYSE DE LA BASE DE DONNÉES ---
-        $memberships = $user->memberships()->with('group.members.user')->get();
+        $memberships = $user->memberships()->with('group')->get();
         $totalPaid = Contribution::where('user_id', $user->id)->where('status', 'confirmed')->sum('amount_fcfa');
         $incidentsCount = Incident::where('user_id', $user->id)->count();
-        $activeGroup = $memberships->where('group.status', 'active')->first();
+        $activeGroupMembership = $memberships->filter(function($m) {
+            return $m->group && $m->group->status === 'active';
+        })->first();
+        $activeGroup = $activeGroupMembership ? $activeGroupMembership->group : null;
         
         // --- INTÉGRATION DE LA VÉRITABLE IA (GEMINI API) ---
         $geminiApiKey = env('GEMINI_API_KEY') ?: getenv('GEMINI_API_KEY');
@@ -72,7 +75,7 @@ Informations en temps réel sur l'utilisateur avec qui tu parles :
 - Score de confiance : " . $user->score_confiance . "/100
 - Total cotisé : " . number_format($totalPaid, 0, ',', ' ') . " FCFA
 - Retards enregistrés : " . $incidentsCount . "
-- Prochaine échéance : " . ($activeGroup && $activeGroup->group->next_due_date ? Carbon::parse($activeGroup->group->next_due_date)->format('d/m/Y') : "Aucune tontine active") . "
+- Prochaine échéance : " . ($activeGroup && $activeGroup->next_due_date ? Carbon::parse($activeGroup->next_due_date)->format('d/m/Y') : "Aucune tontine active") . "
 
 Directives strictes pour ta réponse :
 - Tu dois impérativement répondre dans la langue demandée : " . strtoupper($locale) . " (fr = Français, fon = Fon du Bénin, yor = Yoruba).
