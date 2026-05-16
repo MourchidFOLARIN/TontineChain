@@ -1,5 +1,5 @@
 <?php
-$geminiApiKey = 'AIzaSyBArrmstaOSc8zqQLeMmQYsgGczw1ehoW8';
+$geminiApiKey = 'AIzaSyCUfekYfZ7uy7SZqI6IfimrqI_pmPG_ccM';
 $systemPrompt = "Tu es YAO, l'assistant IA.";
 $message = "Test.";
 
@@ -18,7 +18,7 @@ $payload = [
     ]
 ];
 
-$ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key={$geminiApiKey}");
+$ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$geminiApiKey}");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
