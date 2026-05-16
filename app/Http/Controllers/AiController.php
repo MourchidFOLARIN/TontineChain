@@ -63,11 +63,13 @@ class AiController extends Controller
                     'engine' => 'YAO-Scraper-v1'
                 ]
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
                 'assistant' => 'YAO-ERROR',
                 'message' => 'Oups ! J\'ai eu un petit problème technique en consultant tes données. Réessaie dans un instant.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
             ], 500);
         }
     }
